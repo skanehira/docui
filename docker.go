@@ -32,8 +32,35 @@ func (d *Docker) Images() []docker.APIImages {
 	return imgs
 }
 
+func (d *Docker) ImagesWithOptions(options docker.ListImagesOptions) []docker.APIImages {
+	imgs, err := d.Client.ListImages(options)
+	if err != nil {
+		panic(err)
+	}
+
+	return imgs
+}
+
+func (d *Docker) InspectImage(name string) *docker.Image {
+	img, err := d.Client.InspectImage(name)
+	if err != nil {
+		panic(err)
+	}
+
+	return img
+}
+
 func (d *Docker) Containers() []docker.APIContainers {
 	cns, err := d.Client.ListContainers(docker.ListContainersOptions{All: true})
+
+	if err != nil {
+		panic(err)
+	}
+	return cns
+}
+
+func (d *Docker) ContainersWithOptions(options docker.ListContainersOptions) []docker.APIContainers {
+	cns, err := d.Client.ListContainers(options)
 
 	if err != nil {
 		panic(err)
