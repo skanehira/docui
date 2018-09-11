@@ -13,7 +13,7 @@ func NewCreateContainerItems() Items {
 		},
 		Item{
 			Label: map[string]Position{"HostPort": {x0, 6, w0, 8}},
-			Input: map[string]Position{"HostInput": {x1, 6, w1, 8}},
+			Input: map[string]Position{"HostPortInput": {x1, 6, w1, 8}},
 		},
 		Item{
 			Label: map[string]Position{"Port": {x0, 10, w0, 12}},

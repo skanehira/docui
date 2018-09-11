@@ -106,6 +106,8 @@ func (i Input) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 }
 
 func (i Input) Init(g *Gui) {
+	v, _ := i.View(i.Name())
+	i.ClosePanel(g.Gui, v)
 	_, err := i.SetView(g.Gui)
 
 	if err != nil {
@@ -126,24 +128,24 @@ func (i Input) SetKeyBindWithItem(name string) {
 	if err := i.SetKeybinding(name, gocui.KeyCtrlQ, gocui.ModNone, i.quit); err != nil {
 		panic(err)
 	}
+	if err := i.SetKeybinding(name, gocui.KeyEnter, gocui.ModNone, i.CreateContainer); err != nil {
+		panic(err)
+	}
+
 }
 
 func (i Input) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 	// パネルの位置とindexをリセットしないと、再度パネルを呼び出す時にinputの移動が変になる
 	// 理由不明なので時間ある時調査
-	for name, _ := range i.Items[0].Input {
-		activeInput = 0
-		SetCurrentPanel(g, name)
-	}
+	activeInput = 0
+	SetCurrentPanel(g, GetKeyFromMap(i.Items[0].Input))
 
 	for _, item := range i.Items {
-		for name, _ := range item.Label {
-			i.DeleteView(name)
-		}
-		for name, _ := range item.Input {
-			i.DeleteView(name)
-			i.DeleteKeybindings(name)
-		}
+		i.DeleteView(GetKeyFromMap(item.Label))
+		name := GetKeyFromMap(item.Input)
+		i.DeleteView(name)
+		i.DeleteKeybindings(name)
+
 	}
 	i.DeleteView(i.Name())
 	SetCurrentPanel(g, ImageListPanel)
@@ -155,10 +157,8 @@ func (i Input) NextItem(g *gocui.Gui, v *gocui.View) error {
 
 	nextIndex := (activeInput + 1) % len(i.Items)
 	item := i.Items[nextIndex]
-	var name string
-	for n, _ := range item.Input {
-		name = n
-	}
+
+	name := GetKeyFromMap(item.Input)
 
 	if _, err := SetCurrentPanel(g, name); err != nil {
 		return err
@@ -178,15 +178,55 @@ func (i Input) PreItem(g *gocui.Gui, v *gocui.View) error {
 
 	item := i.Items[nextIndex]
 
-	var name string
-	for n, _ := range item.Input {
-		name = n
-	}
+	name := GetKeyFromMap(item.Input)
 
 	if _, err := SetCurrentPanel(g, name); err != nil {
 		return err
 	}
 
 	activeInput = nextIndex
+	return nil
+}
+
+func (i Input) CreateContainer(g *gocui.Gui, v *gocui.View) error {
+	config := make(map[string]string)
+	for _, item := range i.Items {
+		name := GetKeyFromMap(item.Label)
+
+		v, err := i.View(GetKeyFromMap(item.Input))
+
+		if err != nil {
+			return err
+		}
+
+		config[name] = ReadLine(v, nil)
+	}
+
+	if err := i.Docker.CreateContainerWithOptions(config); err != nil {
+		i.DispMessage(err.Error(), i)
+		return nil
+	}
+
+	panel := i.Panels[ContainerListPanel]
+	if err := panel.RefreshPanel(g, nil); err != nil {
+		return err
+	}
+
+	i.ClosePanel(g, v)
+	return nil
+}
+
+func GetKeyFromMap(m map[string]Position) string {
+	var key string
+	for k, _ := range m {
+		key = k
+	}
+
+	return key
+}
+
+func (i Input) RefreshPanel(g *gocui.Gui, v *gocui.View) error {
+	i.ClosePanel(g, v)
+	i.Init(i.Gui)
 	return nil
 }

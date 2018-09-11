@@ -1,6 +1,7 @@
 package panel
 
 import (
+	"fmt"
 	"log"
 
 	"docui/docker"
@@ -15,6 +16,7 @@ const (
 	ContainerListPanel   = "container list"
 	DetailPanel          = "detail"
 	CreateContainerPanel = "create container"
+	MessagePanel         = "message"
 )
 
 type Gui struct {
@@ -28,6 +30,7 @@ type Panel interface {
 	Init(*Gui)
 	SetView(*gocui.Gui) (*gocui.View, error)
 	Name() string
+	RefreshPanel(*gocui.Gui, *gocui.View) error
 }
 
 type Position struct {
@@ -151,4 +154,35 @@ func (g *Gui) StorePanels(panel Panel) {
 	g.Panels[panel.Name()] = panel
 	panel.Init(g)
 	g.AddPanels(panel)
+}
+
+func (gui *Gui) DispMessage(message string, nextPanel Panel) {
+	maxX, maxY := gui.Size()
+	x := maxX / 5
+	y := maxY / 3
+	v, err := gui.SetView(MessagePanel, x, y, maxX-x, y+4)
+	if err != nil {
+		if err != gocui.ErrUnknownView {
+			panic(err)
+		}
+		v.Wrap = true
+		v.Title = MessagePanel
+		fmt.Fprint(v, message)
+		SetCurrentPanel(gui.Gui, v.Name())
+	}
+
+	close := func(g *gocui.Gui, v *gocui.View) error {
+		if err := g.DeleteView(v.Name()); err != nil {
+			panic(err)
+		}
+
+		g.DeleteKeybindings(v.Name())
+		nextPanel.RefreshPanel(g, nil)
+		return nil
+	}
+
+	if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, close); err != nil {
+		panic(err)
+	}
+
 }

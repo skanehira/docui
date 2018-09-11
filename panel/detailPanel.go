@@ -53,3 +53,9 @@ func (i Detail) Init(g *Gui) {
 		log.Panicln(err)
 	}
 }
+
+func (i Detail) RefreshPanel(g *gocui.Gui, v *gocui.View) error {
+	v.Clear()
+	SetCurrentPanel(g, v.Name())
+	return nil
+}

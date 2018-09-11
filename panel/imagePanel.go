@@ -51,9 +51,8 @@ func (i ImageList) Init(g *Gui) {
 		panic(err)
 	}
 
-	for _, i := range g.Docker.Images() {
-		fmt.Fprintf(v, "%+v\n", i.RepoTags)
-	}
+	i.LoadImages(v)
+	v.SetCursor(0, 1)
 
 	// keybinds
 	g.SetKeybinds(i.Name())
@@ -68,21 +67,22 @@ func (i ImageList) Init(g *Gui) {
 	if err := g.SetKeybinding(i.Name(), gocui.KeyEnter, gocui.ModNone, i.DetailImage); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlC, gocui.ModNone, i.CreateContainer); err != nil {
+	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlC, gocui.ModNone, i.CreateContainerPanel); err != nil {
 		log.Panicln(err)
 	}
 
 }
 
-func (i ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
+func (i ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	maxX, maxY := i.Size()
-	imgName := ReadLine(v, nil)
-	if imgName == "" {
+
+	id := i.GetImageID(v)
+	if id == "" {
 		return nil
 	}
 
 	data := map[string]interface{}{
-		"Image": imgName,
+		"Image": id,
 	}
 
 	input := NewInput(i.Gui, CreateContainerPanel, maxX/8, maxY/8, maxX-maxX/4-2, maxY-maxY/4-2, 40, NewCreateContainerItems(), data)
@@ -92,14 +92,12 @@ func (i ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 
 func (i ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 
-	imgName := ReadLine(v, nil)
-	if imgName == "" {
+	id := i.GetImageID(v)
+	if id == "" {
 		return nil
 	}
 
-	imgName = imgName[1 : len(imgName)-1]
-
-	img := i.Docker.InspectImage(imgName)
+	img := i.Docker.InspectImage(id)
 
 	nv, err := g.View(DetailPanel)
 	if err != nil {
@@ -165,4 +163,35 @@ func (i ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	return nil
+}
+
+func (i ImageList) RefreshPanel(g *gocui.Gui, v *gocui.View) error {
+	if v == nil {
+		nv, err := g.View(ImageListPanel)
+		if err != nil {
+			return err
+		}
+
+		v = nv
+	}
+	v.Clear()
+	i.LoadImages(v)
+	SetCurrentPanel(g, v.Name())
+	return nil
+}
+
+func (i ImageList) LoadImages(v *gocui.View) {
+	fmt.Fprintf(v, "%-15s %-20s\n", "ID", "NAME")
+	for _, i := range i.Docker.Images() {
+		fmt.Fprintf(v, "%-15s %-20s\n", i.ID[7:19], i.RepoTags)
+	}
+}
+
+func (i ImageList) GetImageID(v *gocui.View) string {
+	id := ReadLine(v, nil)
+	if id == "" || id[:2] == "ID" {
+		return ""
+	}
+
+	return id[:12]
 }

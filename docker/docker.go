@@ -133,3 +133,27 @@ func NewContainerOptions(config map[string]string) docker.CreateContainerOptions
 
 	return options
 }
+
+func (d *Docker) RemoveContainerWithOptions(options docker.RemoveContainerOptions) error {
+	if err := d.RemoveContainer(options); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *Docker) StartContainerWithID(id string) error {
+	if err := d.StartContainer(id, nil); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *Docker) StopContainerWithID(id string) error {
+	if err := d.StopContainer(id, 30); err != nil {
+		return err
+	}
+
+	return nil
+}
