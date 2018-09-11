@@ -1,4 +1,4 @@
-package main
+package docker
 
 import (
 	docker "github.com/fsouza/go-dockerclient"
@@ -9,24 +9,20 @@ const (
 )
 
 type Docker struct {
-	Endpoint string
-	Client   *docker.Client
+	*docker.Client
 }
 
-func NewDocker(endpoint string) *Docker {
+func NewDocker() *Docker {
 	client, err := docker.NewClient(endpoint)
 	if err != nil {
 		panic(err)
 	}
 
-	return &Docker{
-		Endpoint: endpoint,
-		Client:   client,
-	}
+	return &Docker{client}
 }
 
 func (d *Docker) Images() []docker.APIImages {
-	imgs, err := d.Client.ListImages(docker.ListImagesOptions{All: true})
+	imgs, err := d.ListImages(docker.ListImagesOptions{All: true})
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +31,7 @@ func (d *Docker) Images() []docker.APIImages {
 }
 
 func (d *Docker) ImagesWithOptions(options docker.ListImagesOptions) []docker.APIImages {
-	imgs, err := d.Client.ListImages(options)
+	imgs, err := d.ListImages(options)
 	if err != nil {
 		panic(err)
 	}
@@ -53,7 +49,7 @@ func (d *Docker) InspectImage(name string) *docker.Image {
 }
 
 func (d *Docker) Containers() []docker.APIContainers {
-	cns, err := d.Client.ListContainers(docker.ListContainersOptions{All: true})
+	cns, err := d.ListContainers(docker.ListContainersOptions{All: true})
 
 	if err != nil {
 		panic(err)
@@ -61,8 +57,17 @@ func (d *Docker) Containers() []docker.APIContainers {
 	return cns
 }
 
+func (d *Docker) InspectContainer(name string) *docker.Container {
+	con, err := d.Client.InspectContainer(name)
+	if err != nil {
+		panic(err)
+	}
+
+	return con
+}
+
 func (d *Docker) ContainersWithOptions(options docker.ListContainersOptions) []docker.APIContainers {
-	cns, err := d.Client.ListContainers(options)
+	cns, err := d.ListContainers(options)
 
 	if err != nil {
 		panic(err)
@@ -71,7 +76,7 @@ func (d *Docker) ContainersWithOptions(options docker.ListContainersOptions) []d
 }
 
 func (d *Docker) CreateContainerWithOptions(config map[string]string) error {
-	_, err := d.Client.CreateContainer(NewContainerOptions(config))
+	_, err := d.CreateContainer(NewContainerOptions(config))
 	if err != nil {
 		return err
 	}
@@ -95,11 +100,10 @@ func NewContainerOptions(config map[string]string) docker.CreateContainerOptions
 	}
 
 	if port := config["Port"]; port != "" {
-		options.Config.ExposedPorts = map[docker.Port]struct{}{
-			docker.Port(port): struct{}{},
-		}
-
 		if hostPort := config["HostPort"]; hostPort != "" {
+			options.Config.ExposedPorts = map[docker.Port]struct{}{
+				docker.Port(port): struct{}{},
+			}
 			options.HostConfig.PortBindings = map[docker.Port][]docker.PortBinding{
 				docker.Port(port): []docker.PortBinding{
 					docker.PortBinding{
