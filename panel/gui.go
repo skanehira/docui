@@ -13,6 +13,7 @@ var active = 0
 
 const (
 	ImageListPanel       = "image list"
+	PullImagePanel       = "pull image"
 	ContainerListPanel   = "container list"
 	DetailPanel          = "detail"
 	CreateContainerPanel = "create container"
@@ -24,6 +25,7 @@ type Gui struct {
 	Docker     *docker.Docker
 	Panels     map[string]Panel
 	PanelNames []string
+	PrePanel   string
 }
 
 type Panel interface {
@@ -36,13 +38,6 @@ type Panel interface {
 type Position struct {
 	x, y int
 	w, h int
-}
-
-func SetCurrentPanel(g *gocui.Gui, name string) (*gocui.View, error) {
-	if _, err := g.SetCurrentView(name); err != nil {
-		return nil, err
-	}
-	return g.SetViewOnTop(name)
 }
 
 func New(mode gocui.OutputMode) *Gui {
@@ -62,6 +57,7 @@ func New(mode gocui.OutputMode) *Gui {
 		d,
 		make(map[string]Panel),
 		[]string{},
+		"",
 	}
 
 	gui.init()
@@ -69,8 +65,19 @@ func New(mode gocui.OutputMode) *Gui {
 	return gui
 }
 
+func SetCurrentPanel(g *gocui.Gui, name string) (*gocui.View, error) {
+	if _, err := g.SetCurrentView(name); err != nil {
+		return nil, err
+	}
+	return g.SetViewOnTop(name)
+}
+
 func (g *Gui) AddPanels(panel Panel) {
-	g.PanelNames = append(g.PanelNames, panel.Name())
+	name := panel.Name()
+	if name == DetailPanel {
+		return
+	}
+	g.PanelNames = append(g.PanelNames, name)
 }
 
 func (g *Gui) SetKeybinds(panel string) {
@@ -156,7 +163,8 @@ func (g *Gui) StorePanels(panel Panel) {
 	g.AddPanels(panel)
 }
 
-func (gui *Gui) DispMessage(message string, nextPanel Panel) {
+func (gui *Gui) DispMessage(message string, prePanel string) {
+	gui.PrePanel = prePanel
 	maxX, maxY := gui.Size()
 	x := maxX / 5
 	y := maxY / 3
@@ -171,18 +179,25 @@ func (gui *Gui) DispMessage(message string, nextPanel Panel) {
 		SetCurrentPanel(gui.Gui, v.Name())
 	}
 
-	close := func(g *gocui.Gui, v *gocui.View) error {
-		if err := g.DeleteView(v.Name()); err != nil {
-			panic(err)
-		}
-
-		g.DeleteKeybindings(v.Name())
-		nextPanel.RefreshPanel(g, nil)
-		return nil
+	if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, gui.CloseMessage); err != nil {
+		panic(err)
 	}
+}
 
-	if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, close); err != nil {
+func (gui *Gui) CloseMessage(g *gocui.Gui, v *gocui.View) error {
+	if err := g.DeleteView(v.Name()); err != nil {
 		panic(err)
 	}
 
+	g.DeleteKeybindings(v.Name())
+	gui.RefreshAllPanel()
+	return nil
+}
+
+func (gui *Gui) RefreshAllPanel() {
+	for _, panel := range gui.Panels {
+		panel.RefreshPanel(gui.Gui, nil)
+	}
+
+	SetCurrentPanel(gui.Gui, gui.PrePanel)
 }

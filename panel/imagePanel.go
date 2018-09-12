@@ -70,7 +70,12 @@ func (i ImageList) Init(g *Gui) {
 	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlC, gocui.ModNone, i.CreateContainerPanel); err != nil {
 		log.Panicln(err)
 	}
-
+	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlP, gocui.ModNone, i.PullImagePanel); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlD, gocui.ModNone, i.RemoveImage); err != nil {
+		log.Panicln(err)
+	}
 }
 
 func (i ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
@@ -85,9 +90,17 @@ func (i ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 		"Image": id,
 	}
 
-	input := NewInput(i.Gui, CreateContainerPanel, maxX/8, maxY/8, maxX-maxX/4-2, maxY-maxY/4-2, 40, NewCreateContainerItems(), data)
+	input := NewInput(i.Gui, CreateContainerPanel, maxX/8, maxY/8, maxX-maxX/4-2, maxY-maxY/4-2, NewCreateContainerItems(), data)
 	input.Init(i.Gui)
 	return nil
+}
+
+func (i ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
+	maxX, maxY := i.Size()
+	input := NewInput(i.Gui, PullImagePanel, maxX/8, maxY/4, maxX-maxX/4-2, 8, NewPullImageItems(), make(map[string]interface{}))
+	input.Init(i.Gui)
+	return nil
+
 }
 
 func (i ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
@@ -194,4 +207,22 @@ func (i ImageList) GetImageID(v *gocui.View) string {
 	}
 
 	return id[:12]
+}
+
+func (i ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
+	name := i.GetImageID(v)
+	if name == "" {
+		return nil
+	}
+
+	if err := i.Docker.RemoveImageWithName(name); err != nil {
+		i.DispMessage(err.Error(), ImageListPanel)
+		return nil
+	}
+
+	if err := i.RefreshPanel(g, v); err != nil {
+		return err
+	}
+
+	return nil
 }

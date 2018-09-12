@@ -157,7 +157,7 @@ func (i ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 
 	options := docker.RemoveContainerOptions{ID: id}
 	if err := i.Docker.RemoveContainer(options); err != nil {
-		i.DispMessage(err.Error(), i)
+		i.DispMessage(err.Error(), ContainerListPanel)
 		return nil
 	}
 
@@ -175,7 +175,7 @@ func (i ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	if err := i.Docker.StartContainerWithID(id); err != nil {
-		i.DispMessage(err.Error(), i)
+		i.DispMessage(err.Error(), ContainerListPanel)
 		return nil
 	}
 
@@ -193,7 +193,7 @@ func (i ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	if err := i.Docker.StopContainerWithID(id); err != nil {
-		i.DispMessage(err.Error(), i)
+		i.DispMessage(err.Error(), ContainerListPanel)
 		return nil
 	}
 

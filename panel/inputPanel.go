@@ -2,7 +2,9 @@ package panel
 
 import (
 	"fmt"
+	"strings"
 
+	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
 )
 
@@ -12,7 +14,6 @@ type Input struct {
 	*Gui
 	name string
 	Position
-	MaxLength int
 	Items
 	Data map[string]interface{}
 }
@@ -24,14 +25,13 @@ type Item struct {
 	Input map[string]Position
 }
 
-func NewInput(gui *Gui, name string, x, y, w, h, maxLength int, items Items, data map[string]interface{}) Input {
+func NewInput(gui *Gui, name string, x, y, w, h int, items Items, data map[string]interface{}) Input {
 	return Input{
-		Gui:       gui,
-		name:      name,
-		Position:  Position{x, y, x + w, y + h},
-		MaxLength: maxLength,
-		Items:     items,
-		Data:      data,
+		Gui:      gui,
+		name:     name,
+		Position: Position{x, y, x + w, y + h},
+		Items:    items,
+		Data:     data,
 	}
 }
 
@@ -92,13 +92,11 @@ func (i Input) SetView(g *gocui.Gui) (*gocui.View, error) {
 }
 
 func (i Input) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
-	cx, _ := v.Cursor()
-	ox, _ := v.Origin()
-	limit := ox+cx+1 > i.MaxLength
+
 	switch {
-	case ch != 0 && mod == 0 && !limit:
+	case ch != 0 && mod == 0:
 		v.EditWrite(ch)
-	case key == gocui.KeySpace && !limit:
+	case key == gocui.KeySpace:
 		v.EditWrite(' ')
 	case key == gocui.KeyBackspace || key == gocui.KeyBackspace2:
 		v.EditDelete(true)
@@ -122,16 +120,23 @@ func (i Input) SetKeyBindWithItem(name string) {
 	if err := i.SetKeybinding(name, gocui.KeyCtrlK, gocui.ModNone, i.PreItem); err != nil {
 		panic(err)
 	}
-	if err := i.SetKeybinding(name, gocui.KeyCtrlC, gocui.ModNone, i.ClosePanel); err != nil {
+	if err := i.SetKeybinding(name, gocui.KeyCtrlW, gocui.ModNone, i.ClosePanel); err != nil {
 		panic(err)
 	}
 	if err := i.SetKeybinding(name, gocui.KeyCtrlQ, gocui.ModNone, i.quit); err != nil {
 		panic(err)
 	}
-	if err := i.SetKeybinding(name, gocui.KeyEnter, gocui.ModNone, i.CreateContainer); err != nil {
-		panic(err)
-	}
 
+	switch i.Name() {
+	case CreateContainerPanel:
+		if err := i.SetKeybinding(name, gocui.KeyEnter, gocui.ModNone, i.CreateContainer); err != nil {
+			panic(err)
+		}
+	case PullImagePanel:
+		if err := i.SetKeybinding(name, gocui.KeyEnter, gocui.ModNone, i.PullImage); err != nil {
+			panic(err)
+		}
+	}
 }
 
 func (i Input) ClosePanel(g *gocui.Gui, v *gocui.View) error {
@@ -202,17 +207,48 @@ func (i Input) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 		config[name] = ReadLine(v, nil)
 	}
 
+	i.ClosePanel(g, v)
 	if err := i.Docker.CreateContainerWithOptions(config); err != nil {
-		i.DispMessage(err.Error(), i)
+		i.DispMessage(err.Error(), ImageListPanel)
 		return nil
 	}
 
-	panel := i.Panels[ContainerListPanel]
-	if err := panel.RefreshPanel(g, nil); err != nil {
-		return err
+	i.PrePanel = ImageListPanel
+	defer i.RefreshAllPanel()
+
+	return nil
+}
+
+func (i Input) PullImage(g *gocui.Gui, v *gocui.View) error {
+	item := strings.SplitN(ReadLine(v, nil), ":", 2)
+
+	if len(item) == 0 {
+		return nil
+	}
+
+	name := item[0]
+	var tag string
+
+	if len(item) == 1 {
+		tag = "latest"
+	} else {
+		tag = item[1]
+	}
+
+	options := docker.PullImageOptions{
+		Repository: name,
+		Tag:        tag,
 	}
 
 	i.ClosePanel(g, v)
+
+	if err := i.Docker.PullImageWithOptions(options); err != nil {
+		i.DispMessage(err.Error(), ImageListPanel)
+		return nil
+	}
+
+	defer i.RefreshAllPanel()
+
 	return nil
 }
 
@@ -226,7 +262,6 @@ func GetKeyFromMap(m map[string]Position) string {
 }
 
 func (i Input) RefreshPanel(g *gocui.Gui, v *gocui.View) error {
-	i.ClosePanel(g, v)
 	i.Init(i.Gui)
 	return nil
 }

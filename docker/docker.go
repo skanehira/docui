@@ -157,3 +157,18 @@ func (d *Docker) StopContainerWithID(id string) error {
 
 	return nil
 }
+
+func (d *Docker) PullImageWithOptions(options docker.PullImageOptions) error {
+	if err := d.PullImage(options, docker.AuthConfiguration{}); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (d *Docker) RemoveImageWithName(name string) error {
+	if err := d.RemoveImage(name); err != nil {
+		return err
+	}
+
+	return nil
+}

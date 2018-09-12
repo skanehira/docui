@@ -55,7 +55,7 @@ func (i Detail) Init(g *Gui) {
 }
 
 func (i Detail) RefreshPanel(g *gocui.Gui, v *gocui.View) error {
-	v.Clear()
-	SetCurrentPanel(g, v.Name())
+	//	v.Clear()
+	//	SetCurrentPanel(g, v.Name())
 	return nil
 }
