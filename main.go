@@ -1,7 +1,7 @@
 package main
 
 import (
-	"docui/panel"
+	"github.com/skanehira/docui/panel"
 
 	"github.com/jroimartin/gocui"
 )

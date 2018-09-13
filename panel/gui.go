@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 
-	"docui/docker"
+	"github.com/skanehira/docui/docker"
 
 	"github.com/jroimartin/gocui"
 )
