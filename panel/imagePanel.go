@@ -76,8 +76,6 @@ func (i ImageList) Init(g *Gui) {
 }
 
 func (i ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
-	maxX, maxY := i.Size()
-
 	id := i.GetImageID(v)
 	if id == "" {
 		return nil
@@ -87,14 +85,24 @@ func (i ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 		"Image": id,
 	}
 
-	input := NewInput(i.Gui, CreateContainerPanel, maxX/8, maxY/8, maxX-maxX/4-2, maxY-maxY/4-2, NewCreateContainerItems(), data)
+	maxX, maxY := i.Size()
+	x := maxX / 8
+	y := maxY / 8
+	w := maxX - x
+	h := maxY - y
+	input := NewInput(i.Gui, CreateContainerPanel, x, y, w, h, NewCreateContainerItems(x, y, w, h), data)
 	input.Init(i.Gui)
 	return nil
 }
 
 func (i ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
 	maxX, maxY := i.Size()
-	input := NewInput(i.Gui, PullImagePanel, maxX/8, maxY/4, maxX-maxX/4-2, 8, NewPullImageItems(), make(map[string]interface{}))
+	x := maxX / 3
+	y := maxY / 3
+	w := maxX - x
+	h := y + 4
+
+	input := NewInput(i.Gui, PullImagePanel, x, y, w, h, NewPullImageItems(x, y, w, h), make(map[string]interface{}))
 	input.Init(i.Gui)
 	return nil
 

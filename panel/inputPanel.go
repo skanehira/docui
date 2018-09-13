@@ -29,7 +29,7 @@ func NewInput(gui *Gui, name string, x, y, w, h int, items Items, data map[strin
 	return Input{
 		Gui:      gui,
 		name:     name,
-		Position: Position{x, y, x + w, y + h},
+		Position: Position{x, y, w, h},
 		Items:    items,
 		Data:     data,
 	}
@@ -55,7 +55,7 @@ func (i Input) SetView(g *gocui.Gui) (*gocui.View, error) {
 	// create input panels
 	for index, item := range i.Items {
 		for name, p := range item.Label {
-			if v, err := g.SetView(name, i.x*2+p.x, i.y+p.y, i.x*2+p.w, i.y+p.h); err != nil {
+			if v, err := g.SetView(name, i.x+p.x, i.y+p.y, i.x+p.w, i.y+p.h); err != nil {
 				if err != gocui.ErrUnknownView {
 					return nil, err
 				}
@@ -66,7 +66,7 @@ func (i Input) SetView(g *gocui.Gui) (*gocui.View, error) {
 		}
 
 		for name, p := range item.Input {
-			if v, err := g.SetView(name, i.x*2+p.x, i.y+p.y, i.x*2+p.w, i.y+p.h); err != nil {
+			if v, err := g.SetView(name, i.x+p.x, i.y+p.y, i.x+p.w, i.y+p.h); err != nil {
 				if err != gocui.ErrUnknownView {
 					return nil, err
 				}
