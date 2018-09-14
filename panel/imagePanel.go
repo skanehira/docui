@@ -29,7 +29,6 @@ func (i ImageList) SetView(g *gocui.Gui) (*gocui.View, error) {
 		}
 
 		v.Title = v.Name()
-		v.Autoscroll = true
 		v.Wrap = true
 
 		if _, err = SetCurrentPanel(g, i.Name()); err != nil {

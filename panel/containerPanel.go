@@ -3,6 +3,7 @@ package panel
 import (
 	"fmt"
 	"log"
+	"time"
 
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
@@ -30,8 +31,8 @@ func (i ContainerList) SetView(g *gocui.Gui) (*gocui.View, error) {
 		}
 
 		v.Title = v.Name()
-		v.Autoscroll = true
 		v.Wrap = true
+		v.SetCursor(0, 1)
 
 		return v, nil
 	}
@@ -45,10 +46,6 @@ func (i ContainerList) Init(g *Gui) {
 	if err != nil {
 		panic(err)
 	}
-
-	i.LoadContainer(v)
-	v.SetCursor(0, 1)
-
 	// keybinds
 	g.SetKeybinds(i.Name())
 
@@ -70,6 +67,16 @@ func (i ContainerList) Init(g *Gui) {
 	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlS, gocui.ModNone, i.StopContainer); err != nil {
 		log.Panicln(err)
 	}
+
+	i.LoadContainer(v)
+
+	go func() {
+		for {
+			time.Sleep(5 * time.Second)
+			i.LoadContainer(v)
+		}
+	}()
+
 }
 
 func (i ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
@@ -158,7 +165,6 @@ func (i ContainerList) RefreshPanel(g *gocui.Gui, v *gocui.View) error {
 
 		v = nv
 	}
-	v.Clear()
 	i.LoadContainer(v)
 	SetCurrentPanel(g, v.Name())
 
@@ -166,6 +172,7 @@ func (i ContainerList) RefreshPanel(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i ContainerList) LoadContainer(v *gocui.View) {
+	v.Clear()
 	fmt.Fprintf(v, "%-15s %-20s %-15s\n", "ID", "NAME", "STATUS")
 	for _, c := range i.Docker.Containers() {
 		fmt.Fprintf(v, "%-15s %-20s %-15s\n", c.ID[:12], c.Names[0][1:], c.Status)
