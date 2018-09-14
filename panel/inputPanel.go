@@ -247,6 +247,7 @@ func (i Input) PullImage(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
+	i.PrePanel = ImageListPanel
 	defer i.RefreshAllPanel()
 
 	return nil

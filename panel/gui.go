@@ -67,6 +67,10 @@ func New(mode gocui.OutputMode) *Gui {
 	return gui
 }
 
+func Key(key string) rune {
+	return []rune(key)[0]
+}
+
 func SetCurrentPanel(g *gocui.Gui, name string) (*gocui.View, error) {
 	if _, err := g.SetCurrentView(name); err != nil {
 		return nil, err
@@ -86,7 +90,15 @@ func (g *Gui) SetKeybinds(panel string) {
 	if err := g.SetKeybinding(panel, gocui.KeyCtrlQ, gocui.ModNone, g.quit); err != nil {
 		log.Panicln(err)
 	}
-
+	if err := g.SetKeybinding(panel, Key("q"), gocui.ModNone, g.quit); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding(panel, Key("h"), gocui.ModNone, g.prePanel); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding(panel, Key("l"), gocui.ModNone, g.nextPanel); err != nil {
+		log.Panicln(err)
+	}
 	if err := g.SetKeybinding(panel, gocui.KeyTab, gocui.ModNone, g.nextPanel); err != nil {
 		log.Panicln(err)
 	}
@@ -94,6 +106,23 @@ func (g *Gui) SetKeybinds(panel string) {
 
 func (gui *Gui) nextPanel(g *gocui.Gui, v *gocui.View) error {
 	nextIndex := (active + 1) % len(gui.PanelNames)
+	name := gui.PanelNames[nextIndex]
+
+	if _, err := SetCurrentPanel(g, name); err != nil {
+		return err
+	}
+
+	active = nextIndex
+	return nil
+}
+
+func (gui *Gui) prePanel(g *gocui.Gui, v *gocui.View) error {
+	nextIndex := active - 1
+	if nextIndex < 0 {
+		nextIndex = len(gui.PanelNames) - 1
+	} else {
+		nextIndex = (active - 1) % len(gui.PanelNames)
+	}
 	name := gui.PanelNames[nextIndex]
 
 	if _, err := SetCurrentPanel(g, name); err != nil {

@@ -45,16 +45,16 @@ func (i Detail) Init(g *Gui) {
 	// keybinds
 	g.SetKeybinds(i.Name())
 
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlJ, gocui.ModNone, CursorDown); err != nil {
+	if err := g.SetKeybinding(i.Name(), Key("j"), gocui.ModNone, CursorDown); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlK, gocui.ModNone, CursorUp); err != nil {
+	if err := g.SetKeybinding(i.Name(), Key("k"), gocui.ModNone, CursorUp); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlD, gocui.ModNone, PageDown); err != nil {
+	if err := g.SetKeybinding(i.Name(), Key("d"), gocui.ModNone, PageDown); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlU, gocui.ModNone, PageUp); err != nil {
+	if err := g.SetKeybinding(i.Name(), Key("u"), gocui.ModNone, PageUp); err != nil {
 		log.Panicln(err)
 	}
 }

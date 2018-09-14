@@ -54,22 +54,22 @@ func (i ImageList) Init(g *Gui) {
 	// keybinds
 	g.SetKeybinds(i.Name())
 
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlJ, gocui.ModNone, CursorDown); err != nil {
+	if err := g.SetKeybinding(i.Name(), Key("j"), gocui.ModNone, CursorDown); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlK, gocui.ModNone, CursorUp); err != nil {
+	if err := g.SetKeybinding(i.Name(), Key("k"), gocui.ModNone, CursorUp); err != nil {
 		log.Panicln(err)
 	}
 	if err := g.SetKeybinding(i.Name(), gocui.KeyEnter, gocui.ModNone, i.DetailImage); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlC, gocui.ModNone, i.CreateContainerPanel); err != nil {
+	if err := g.SetKeybinding(i.Name(), Key("c"), gocui.ModNone, i.CreateContainerPanel); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlP, gocui.ModNone, i.PullImagePanel); err != nil {
+	if err := g.SetKeybinding(i.Name(), Key("p"), gocui.ModNone, i.PullImagePanel); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlD, gocui.ModNone, i.RemoveImage); err != nil {
+	if err := g.SetKeybinding(i.Name(), Key("d"), gocui.ModNone, i.RemoveImage); err != nil {
 		log.Panicln(err)
 	}
 }

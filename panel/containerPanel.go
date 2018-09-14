@@ -49,22 +49,22 @@ func (i ContainerList) Init(g *Gui) {
 	// keybinds
 	g.SetKeybinds(i.Name())
 
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlJ, gocui.ModNone, CursorDown); err != nil {
+	if err := g.SetKeybinding(i.Name(), Key("j"), gocui.ModNone, CursorDown); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlK, gocui.ModNone, CursorUp); err != nil {
+	if err := g.SetKeybinding(i.Name(), Key("k"), gocui.ModNone, CursorUp); err != nil {
 		log.Panicln(err)
 	}
 	if err := g.SetKeybinding(i.Name(), gocui.KeyEnter, gocui.ModNone, i.DetailContainer); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlD, gocui.ModNone, i.RemoveContainer); err != nil {
+	if err := g.SetKeybinding(i.Name(), Key("d"), gocui.ModNone, i.RemoveContainer); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlU, gocui.ModNone, i.StartContainer); err != nil {
+	if err := g.SetKeybinding(i.Name(), Key("u"), gocui.ModNone, i.StartContainer); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlS, gocui.ModNone, i.StopContainer); err != nil {
+	if err := g.SetKeybinding(i.Name(), Key("s"), gocui.ModNone, i.StopContainer); err != nil {
 		log.Panicln(err)
 	}
 
