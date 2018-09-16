@@ -27,6 +27,9 @@ $ docui
 | image list       | remove image        | <kbd>d</kbd>                   |
 | image list       | create container    | <kbd>c</kbd>                   |
 | image list       | display detail      | <kbd>Enter</kbd>               |
+| image list       | export image        | <kbd>e</kbd>                   |
+| image list       | import image        | <kbd>i</kbd>                   |
+| image list       | load image          | <kbd>Ctrl</kbd> + <kbd>l</kbd> |
 | image list       | next image          | <kbd>j</kbd>                   |
 | image list       | previous image      | <kbd>k</kbd>                   |
 | container list   | display detail      | <kbd>Enter</kbd>               |
@@ -35,6 +38,7 @@ $ docui
 | container list   | previous container  | <kbd>k</kbd>                   |
 | container list   | start container     | <kbd>u</kbd>                   |
 | container list   | stop container      | <kbd>s</kbd>                   |
+| container list   | export container    | <kbd>e</kbd>                   |
 | pull image       | do pull image       | <kbd>Enter</kbd>               |
 | pull image       | close panel         | <kbd>Ctrl</kbd> + <kbd>w</kbd> |
 | create container | next input box      | <kbd>Ctrl</kbd> + <kbd>j</kbd> |

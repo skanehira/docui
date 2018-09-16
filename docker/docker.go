@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"os"
 	"strings"
 
 	docker "github.com/fsouza/go-dockerclient"
@@ -32,24 +33,6 @@ func (d *Docker) Images() []docker.APIImages {
 	return imgs
 }
 
-func (d *Docker) ImagesWithOptions(options docker.ListImagesOptions) []docker.APIImages {
-	imgs, err := d.ListImages(options)
-	if err != nil {
-		panic(err)
-	}
-
-	return imgs
-}
-
-func (d *Docker) InspectImage(name string) *docker.Image {
-	img, err := d.Client.InspectImage(name)
-	if err != nil {
-		panic(err)
-	}
-
-	return img
-}
-
 func (d *Docker) Containers() []docker.APIContainers {
 	cns, err := d.ListContainers(docker.ListContainersOptions{All: true})
 
@@ -68,17 +51,8 @@ func (d *Docker) InspectContainer(name string) *docker.Container {
 	return con
 }
 
-func (d *Docker) ContainersWithOptions(options docker.ListContainersOptions) []docker.APIContainers {
-	cns, err := d.ListContainers(options)
-
-	if err != nil {
-		panic(err)
-	}
-	return cns
-}
-
-func (d *Docker) CreateContainerWithOptions(config map[string]string) error {
-	_, err := d.CreateContainer(NewContainerOptions(config))
+func (d *Docker) CreateContainerWithOptions(options docker.CreateContainerOptions) error {
+	_, err := d.CreateContainer(options)
 	if err != nil {
 		return err
 	}
@@ -152,6 +126,13 @@ func NewContainerOptions(config map[string]string) docker.CreateContainerOptions
 	return options
 }
 
+func (d *Docker) CommitContainerWithOptions(options docker.CommitContainerOptions) error {
+	if _, err := d.CommitContainer(options); err != nil {
+		return err
+	}
+	return nil
+}
+
 func (d *Docker) RemoveContainerWithOptions(options docker.RemoveContainerOptions) error {
 	if err := d.RemoveContainer(options); err != nil {
 		return err
@@ -185,6 +166,49 @@ func (d *Docker) PullImageWithOptions(options docker.PullImageOptions) error {
 
 func (d *Docker) RemoveImageWithName(name string) error {
 	if err := d.RemoveImage(name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *Docker) SaveImageWithOptions(options docker.ExportImageOptions) error {
+	if err := d.ExportImage(options); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *Docker) LoadImageWithPath(path string) error {
+	file, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	options := docker.LoadImageOptions{
+		InputStream: file,
+	}
+
+	if err := d.LoadImage(options); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *Docker) ImportImageWithOptions(options docker.ImportImageOptions) error {
+
+	if err := d.ImportImage(options); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *Docker) ExportContainerWithOptions(options docker.ExportContainerOptions) error {
+	if err := d.ExportContainer(options); err != nil {
 		return err
 	}
 

@@ -2,11 +2,18 @@ package panel
 
 import (
 	"fmt"
+	"os"
 	"strings"
 
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
+	cuidocker "github.com/skanehira/docui/docker"
 )
+
+type Position struct {
+	x, y int
+	w, h int
+}
 
 var activeInput = 0
 
@@ -18,12 +25,12 @@ type Input struct {
 	Data map[string]interface{}
 }
 
-type Items []Item
-
 type Item struct {
 	Label map[string]Position
 	Input map[string]Position
 }
+
+type Items []Item
 
 func NewInput(gui *Gui, name string, x, y, w, h int, items Items, data map[string]interface{}) Input {
 	return Input{
@@ -82,6 +89,10 @@ func (i Input) SetView(g *gocui.Gui) (*gocui.View, error) {
 					fmt.Fprint(v, i.Data["Image"])
 				}
 
+				if name == "ContainerInput" {
+					fmt.Fprint(v, i.Data["Container"])
+				}
+
 				i.SetKeyBindWithItem(name)
 			}
 		}
@@ -136,6 +147,26 @@ func (i Input) SetKeyBindWithItem(name string) {
 		if err := i.SetKeybinding(name, gocui.KeyEnter, gocui.ModNone, i.PullImage); err != nil {
 			panic(err)
 		}
+	case ExportImagePanel:
+		if err := i.SetKeybinding(name, gocui.KeyEnter, gocui.ModNone, i.ExportImage); err != nil {
+			panic(err)
+		}
+	case ImportImagePanel:
+		if err := i.SetKeybinding(name, gocui.KeyEnter, gocui.ModNone, i.ImportImage); err != nil {
+			panic(err)
+		}
+	case LoadImagePanel:
+		if err := i.SetKeybinding(name, gocui.KeyEnter, gocui.ModNone, i.LoadImage); err != nil {
+			panic(err)
+		}
+	case ExportContainerPanel:
+		if err := i.SetKeybinding(name, gocui.KeyEnter, gocui.ModNone, i.ExportContainer); err != nil {
+			panic(err)
+		}
+	case CommitContainerPanel:
+		if err := i.SetKeybinding(name, gocui.KeyEnter, gocui.ModNone, i.CommitContainer); err != nil {
+			panic(err)
+		}
 	}
 }
 
@@ -150,10 +181,14 @@ func (i Input) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 		name := GetKeyFromMap(item.Input)
 		i.DeleteView(name)
 		i.DeleteKeybindings(name)
-
 	}
+
 	i.DeleteView(i.Name())
-	SetCurrentPanel(g, ImageListPanel)
+
+	if i.PrePanel == "" {
+		i.PrePanel = ImageListPanel
+	}
+	SetCurrentPanel(g, i.PrePanel)
 
 	return nil
 }
@@ -194,6 +229,64 @@ func (i Input) PreItem(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i Input) CreateContainer(g *gocui.Gui, v *gocui.View) error {
+	defer i.ClosePanel(g, v)
+	defer i.RefreshAllPanel()
+	i.PrePanel = ImageListPanel
+
+	data := make(map[string]string)
+	for _, item := range i.Items {
+		name := GetKeyFromMap(item.Label)
+
+		v, err := i.View(GetKeyFromMap(item.Input))
+
+		if err != nil {
+			return err
+		}
+
+		data[name] = ReadLine(v, nil)
+	}
+
+	options := cuidocker.NewContainerOptions(data)
+
+	if err := i.Docker.CreateContainerWithOptions(options); err != nil {
+		i.DispMessage(err.Error(), ImageListPanel)
+		return nil
+	}
+
+	return nil
+}
+
+func (i Input) ExportContainer(g *gocui.Gui, v *gocui.View) error {
+	defer i.ClosePanel(g, v)
+	defer i.RefreshAllPanel()
+	i.PrePanel = ContainerListPanel
+
+	path := ReadLine(v, nil)
+
+	if path == "" {
+		return nil
+	}
+
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	options := docker.ExportContainerOptions{
+		ID:           i.Data["ID"].(string),
+		OutputStream: file,
+	}
+
+	if err := i.Docker.ExportContainerWithOptions(options); err != nil {
+		i.DispMessage(err.Error(), ContainerListPanel)
+		return nil
+	}
+
+	return nil
+}
+
+func (i Input) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 	config := make(map[string]string)
 	for _, item := range i.Items {
 		name := GetKeyFromMap(item.Label)
@@ -204,22 +297,37 @@ func (i Input) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 			return err
 		}
 
-		config[name] = ReadLine(v, nil)
+		value := ReadLine(v, nil)
+		if name == "Tag" && value == "" {
+			value = "latest"
+		}
+
+		config[name] = value
 	}
 
-	i.ClosePanel(g, v)
-	if err := i.Docker.CreateContainerWithOptions(config); err != nil {
+	defer i.ClosePanel(g, v)
+
+	options := docker.CommitContainerOptions{
+		Container:  i.Data["Container"].(string),
+		Repository: config["Repository"],
+		Tag:        config["Tag"],
+	}
+
+	if err := i.Docker.CommitContainerWithOptions(options); err != nil {
 		i.DispMessage(err.Error(), ImageListPanel)
 		return nil
 	}
 
-	i.PrePanel = ImageListPanel
+	i.PrePanel = ContainerListPanel
 	defer i.RefreshAllPanel()
 
 	return nil
 }
 
 func (i Input) PullImage(g *gocui.Gui, v *gocui.View) error {
+	defer i.ClosePanel(g, v)
+	defer i.RefreshAllPanel()
+
 	item := strings.SplitN(ReadLine(v, nil), ":", 2)
 
 	if len(item) == 0 {
@@ -240,9 +348,99 @@ func (i Input) PullImage(g *gocui.Gui, v *gocui.View) error {
 		Tag:        tag,
 	}
 
+	if err := i.Docker.PullImageWithOptions(options); err != nil {
+		i.DispMessage(err.Error(), ImageListPanel)
+		return nil
+	}
+
+	i.PrePanel = ImageListPanel
+
+	return nil
+}
+
+func (i Input) ExportImage(g *gocui.Gui, v *gocui.View) error {
+	defer i.ClosePanel(g, v)
+	defer i.RefreshAllPanel()
+
+	path := ReadLine(v, nil)
+	id := i.Data["ID"].(string)
+
+	if path == "" {
+		return nil
+	}
+
+	file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0666)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	options := docker.ExportImageOptions{
+		Name:         id,
+		OutputStream: file,
+	}
+
+	if err := i.Docker.SaveImageWithOptions(options); err != nil {
+		i.DispMessage(err.Error(), ImageListPanel)
+		return nil
+	}
+
+	i.PrePanel = ImageListPanel
+
+	return nil
+}
+
+func (i Input) ImportImage(g *gocui.Gui, v *gocui.View) error {
+	defer i.ClosePanel(g, v)
+	defer i.RefreshAllPanel()
+
+	data := make(map[string]string)
+	for _, item := range i.Items {
+		name := GetKeyFromMap(item.Label)
+
+		v, err := i.View(GetKeyFromMap(item.Input))
+
+		if err != nil {
+			return err
+		}
+
+		value := ReadLine(v, nil)
+
+		if value == "" {
+			if name == "tag" {
+				value = "latest"
+				continue
+			}
+			return nil
+		}
+		data[name] = value
+	}
+
+	options := docker.ImportImageOptions{
+		Repository: data["repository"],
+		Source:     data["path"],
+		Tag:        data["tag"],
+	}
+
+	if err := i.Docker.ImportImageWithOptions(options); err != nil {
+		i.DispMessage(err.Error(), ImageListPanel)
+		return nil
+	}
+
+	i.PrePanel = ImageListPanel
+
+	return nil
+}
+
+func (i Input) LoadImage(g *gocui.Gui, v *gocui.View) error {
+	path := ReadLine(v, nil)
+	if path == "" {
+		return nil
+	}
+
 	i.ClosePanel(g, v)
 
-	if err := i.Docker.PullImageWithOptions(options); err != nil {
+	if err := i.Docker.LoadImageWithPath(path); err != nil {
 		i.DispMessage(err.Error(), ImageListPanel)
 		return nil
 	}
@@ -253,6 +451,11 @@ func (i Input) PullImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+func (i Input) RefreshPanel(g *gocui.Gui, v *gocui.View) error {
+	i.Init(i.Gui)
+	return nil
+}
+
 func GetKeyFromMap(m map[string]Position) string {
 	var key string
 	for k, _ := range m {
@@ -260,9 +463,4 @@ func GetKeyFromMap(m map[string]Position) string {
 	}
 
 	return key
-}
-
-func (i Input) RefreshPanel(g *gocui.Gui, v *gocui.View) error {
-	i.Init(i.Gui)
-	return nil
 }
