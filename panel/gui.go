@@ -20,6 +20,11 @@ const (
 	DetailPanel          = "detail"
 	CreateContainerPanel = "create container"
 	MessagePanel         = "message"
+	ExportImagePanel     = "export image"
+	ImportImagePanel     = "import image"
+	LoadImagePanel       = "load image"
+	ExportContainerPanel = "export container"
+	CommitContainerPanel = "commit container"
 )
 
 type Gui struct {
@@ -35,11 +40,6 @@ type Panel interface {
 	SetView(*gocui.Gui) (*gocui.View, error)
 	Name() string
 	RefreshPanel(*gocui.Gui, *gocui.View) error
-}
-
-type Position struct {
-	x, y int
-	w, h int
 }
 
 func New(mode gocui.OutputMode) *Gui {
@@ -80,9 +80,6 @@ func SetCurrentPanel(g *gocui.Gui, name string) (*gocui.View, error) {
 
 func (g *Gui) AddPanels(panel Panel) {
 	name := panel.Name()
-	//if name == DetailPanel {
-	//	return
-	//}
 	g.PanelNames = append(g.PanelNames, name)
 }
 
@@ -213,9 +210,9 @@ func ReadLine(v *gocui.View, y *int) string {
 func (g *Gui) init() {
 	maxX, maxY := g.Size()
 
-	g.StorePanels(NewImageList(g, ImageListPanel, 0, 0, maxX/3, maxY/2))
-	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, maxY/2+1, maxX/3, maxY-(maxY/2)-2))
-	g.StorePanels(NewDetail(g, DetailPanel, maxX/3+2, 0, maxX-(maxX/3)-3, maxY-1))
+	g.StorePanels(NewImageList(g, ImageListPanel, 0, 0, maxX/2, maxY/2))
+	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, maxY/2+1, maxX/2, maxY-(maxY/2)-2))
+	g.StorePanels(NewDetail(g, DetailPanel, maxX/2+2, 0, maxX-(maxX/2)-3, maxY-1))
 }
 
 func (g *Gui) StorePanels(panel Panel) {

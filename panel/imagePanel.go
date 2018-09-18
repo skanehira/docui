@@ -3,9 +3,13 @@ package panel
 import (
 	"fmt"
 	"log"
+	"regexp"
+	"strings"
 
 	"github.com/jroimartin/gocui"
 )
+
+var imageNameRegexp = regexp.MustCompile("\\[.*\\]")
 
 type ImageList struct {
 	*Gui
@@ -63,6 +67,9 @@ func (i ImageList) Init(g *Gui) {
 	if err := g.SetKeybinding(i.Name(), gocui.KeyEnter, gocui.ModNone, i.DetailImage); err != nil {
 		log.Panicln(err)
 	}
+	if err := g.SetKeybinding(i.Name(), Key("o"), gocui.ModNone, i.DetailImage); err != nil {
+		log.Panicln(err)
+	}
 	if err := g.SetKeybinding(i.Name(), Key("c"), gocui.ModNone, i.CreateContainerPanel); err != nil {
 		log.Panicln(err)
 	}
@@ -70,6 +77,15 @@ func (i ImageList) Init(g *Gui) {
 		log.Panicln(err)
 	}
 	if err := g.SetKeybinding(i.Name(), Key("d"), gocui.ModNone, i.RemoveImage); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding(i.Name(), Key("e"), gocui.ModNone, i.ExportImage); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding(i.Name(), Key("i"), gocui.ModNone, i.ImportImage); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding(i.Name(), gocui.KeyCtrlL, gocui.ModNone, i.LoadImage); err != nil {
 		log.Panicln(err)
 	}
 }
@@ -114,7 +130,10 @@ func (i ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	img := i.Docker.InspectImage(id)
+	img, err := i.Docker.InspectImage(id)
+	if err != nil {
+		return err
+	}
 
 	nv, err := g.View(DetailPanel)
 	if err != nil {
@@ -123,7 +142,55 @@ func (i ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 
 	nv.Clear()
 	nv.SetOrigin(0, 0)
+	nv.SetCursor(0, 0)
 	fmt.Fprint(nv, StructToJson(img))
+
+	return nil
+}
+
+func (i ImageList) ExportImage(g *gocui.Gui, v *gocui.View) error {
+
+	id := i.GetImageName(v)
+	if id == "" {
+		return nil
+	}
+
+	maxX, maxY := i.Size()
+	x := maxX / 3
+	y := maxY / 3
+	w := maxX - x
+	h := y + 4
+
+	data := map[string]interface{}{
+		"ID": id,
+	}
+
+	input := NewInput(i.Gui, ExportImagePanel, x, y, w, h, NewExportImageItems(x, y, w, h), data)
+	input.Init(i.Gui)
+	return nil
+}
+
+func (i ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
+	maxX, maxY := i.Size()
+	x := maxX / 3
+	y := maxY / 3
+	w := maxX - x
+	h := maxY - y
+
+	input := NewInput(i.Gui, ImportImagePanel, x, y, w, h, NewImportImageItems(x, y, w, h), make(map[string]interface{}))
+	input.Init(i.Gui)
+	return nil
+}
+
+func (i ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
+	maxX, maxY := i.Size()
+	x := maxX / 3
+	y := maxY / 3
+	w := maxX - x
+	h := y + 4
+
+	input := NewInput(i.Gui, LoadImagePanel, x, y, w, h, NewLoadImageItems(x, y, w, h), make(map[string]interface{}))
+	input.Init(i.Gui)
 
 	return nil
 }
@@ -157,6 +224,16 @@ func (i ImageList) GetImageID(v *gocui.View) string {
 	}
 
 	return id[:12]
+}
+
+func (i ImageList) GetImageName(v *gocui.View) string {
+	line := ReadLine(v, nil)
+	if line == "" || line[:2] == "ID" {
+		return ""
+	}
+
+	name := imageNameRegexp.FindAllStringSubmatch(line, -1)[0][0]
+	return strings.TrimRight(name[1:len(name)-1], " ")
 }
 
 func (i ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
