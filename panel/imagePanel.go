@@ -237,19 +237,23 @@ func (i ImageList) GetImageName(v *gocui.View) string {
 }
 
 func (i ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
+	i.PrePanel = ImageListPanel
 	name := i.GetImageID(v)
 	if name == "" {
 		return nil
 	}
 
-	if err := i.Docker.RemoveImageWithName(name); err != nil {
-		i.DispMessage(err.Error(), ImageListPanel)
-		return nil
-	}
+	i.ConfirmMessage("Do you want delete this image? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
+		if err := i.Docker.RemoveImageWithName(name); err != nil {
+			i.CloseConfirmMessage(g, v)
+			i.DispMessage(err.Error(), ImageListPanel)
+			return nil
+		}
 
-	if err := i.RefreshPanel(g, v); err != nil {
-		return err
-	}
+		i.CloseMessage(g, v)
+
+		return nil
+	})
 
 	return nil
 }

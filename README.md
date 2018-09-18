@@ -15,8 +15,15 @@ This tool can do thises.
 ## Installation
 
 ```
-$ go get "github.com/skanehira/docui"
+$ go get github.com/skanehira/docui
 $ docui
+```
+
+## Update
+
+```
+$ rm -rf $GOBIN/docui
+$ go get github.com/skanehira/docui
 ```
 
 ## How to use
