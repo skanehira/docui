@@ -209,6 +209,7 @@ func (i ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 	h := maxY - y
 
 	input := NewInput(i.Gui, CommitContainerPanel, x, y, w, h, NewCommitContainerPanel(x, y, w, h), data)
+	input.PrePanel = ContainerListPanel
 	input.Init(i.Gui)
 
 	return nil

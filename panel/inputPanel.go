@@ -287,6 +287,10 @@ func (i Input) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i Input) CommitContainer(g *gocui.Gui, v *gocui.View) error {
+	i.PrePanel = ContainerListPanel
+	defer i.ClosePanel(g, v)
+	defer i.RefreshAllPanel()
+
 	config := make(map[string]string)
 	for _, item := range i.Items {
 		name := GetKeyFromMap(item.Label)
@@ -305,8 +309,6 @@ func (i Input) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 		config[name] = value
 	}
 
-	defer i.ClosePanel(g, v)
-
 	options := docker.CommitContainerOptions{
 		Container:  i.Data["Container"].(string),
 		Repository: config["Repository"],
@@ -317,9 +319,6 @@ func (i Input) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 		i.DispMessage(err.Error(), ImageListPanel)
 		return nil
 	}
-
-	i.PrePanel = ContainerListPanel
-	defer i.RefreshAllPanel()
 
 	return nil
 }
