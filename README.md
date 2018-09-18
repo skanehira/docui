@@ -5,8 +5,10 @@ docui is docker client cui tool.
 This tool can do thises.
 
 - pull/remove image  
+- export/import/load image  
 - display image detail
 - create/remove container
+- export container
 - start/stop container
 - display container detail
 
@@ -27,12 +29,14 @@ $ docui
 | image list       | remove image        | <kbd>d</kbd>                   |
 | image list       | create container    | <kbd>c</kbd>                   |
 | image list       | display detail      | <kbd>Enter</kbd>               |
+| image list       | display detail      | <kbd>o</kbd>                   |
 | image list       | export image        | <kbd>e</kbd>                   |
 | image list       | import image        | <kbd>i</kbd>                   |
 | image list       | load image          | <kbd>Ctrl</kbd> + <kbd>l</kbd> |
 | image list       | next image          | <kbd>j</kbd>                   |
 | image list       | previous image      | <kbd>k</kbd>                   |
 | container list   | display detail      | <kbd>Enter</kbd>               |
+| container list   | display detail      | <kbd>o</kbd>                   |
 | container list   | delete container    | <kbd>d</kbd>                   |
 | container list   | next container      | <kbd>j</kbd>                   |
 | container list   | previous container  | <kbd>k</kbd>                   |
