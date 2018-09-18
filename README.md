@@ -23,7 +23,7 @@ $ docui
 
 ```
 $ rm -rf $GOBIN/docui
-$ go get github.com/skanehira/docui
+$ go get -u github.com/skanehira/docui
 ```
 
 ## How to use
