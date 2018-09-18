@@ -111,21 +111,24 @@ func (i ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
+	i.PrePanel = ContainerListPanel
 	id := i.GetContainerID(v)
 
 	if id == "" {
 		return nil
 	}
 
-	options := docker.RemoveContainerOptions{ID: id}
-	if err := i.Docker.RemoveContainer(options); err != nil {
-		i.DispMessage(err.Error(), ContainerListPanel)
-		return nil
-	}
+	i.ConfirmMessage("Do you want delete this container? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
+		options := docker.RemoveContainerOptions{ID: id}
+		if err := i.Docker.RemoveContainer(options); err != nil {
+			i.CloseConfirmMessage(g, v)
+			i.DispMessage(err.Error(), ContainerListPanel)
+			return nil
+		}
+		i.CloseMessage(g, v)
 
-	if err := i.RefreshPanel(g, v); err != nil {
-		return err
-	}
+		return nil
+	})
 
 	return nil
 }

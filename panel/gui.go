@@ -25,6 +25,7 @@ const (
 	LoadImagePanel       = "load image"
 	ExportContainerPanel = "export container"
 	CommitContainerPanel = "commit container"
+	ConfirmMessage       = "confirm container"
 )
 
 type Gui struct {
@@ -240,6 +241,40 @@ func (gui *Gui) DispMessage(message string, prePanel string) {
 	if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, gui.CloseMessage); err != nil {
 		panic(err)
 	}
+}
+
+func (gui *Gui) ConfirmMessage(message string, f func(g *gocui.Gui, v *gocui.View) error) {
+	maxX, maxY := gui.Size()
+	x := maxX / 5
+	y := maxY / 3
+	v, err := gui.SetView(ConfirmMessage, x, y, maxX-x, y+2)
+	if err != nil {
+		if err != gocui.ErrUnknownView {
+			panic(err)
+		}
+		v.Wrap = true
+		v.Title = ConfirmMessage
+		fmt.Fprint(v, message)
+		SetCurrentPanel(gui.Gui, v.Name())
+	}
+
+	if err := gui.SetKeybinding(v.Name(), Key("y"), gocui.ModNone, f); err != nil {
+		panic(err)
+	}
+
+	if err := gui.SetKeybinding(v.Name(), Key("n"), gocui.ModNone, gui.CloseConfirmMessage); err != nil {
+		panic(err)
+	}
+}
+
+func (gui *Gui) CloseConfirmMessage(g *gocui.Gui, v *gocui.View) error {
+	if err := g.DeleteView(v.Name()); err != nil {
+		panic(err)
+	}
+
+	g.DeleteKeybindings(v.Name())
+	SetCurrentPanel(gui.Gui, gui.PrePanel)
+	return nil
 }
 
 func (gui *Gui) CloseMessage(g *gocui.Gui, v *gocui.View) error {

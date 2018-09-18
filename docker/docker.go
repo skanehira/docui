@@ -77,11 +77,8 @@ func NewContainerOptions(config map[string]string) docker.CreateContainerOptions
 
 	if port := config["Port"]; port != "" {
 		if hostPort := config["HostPort"]; hostPort != "" {
-			options.Config.ExposedPorts = map[docker.Port]struct{}{
-				docker.Port(port): struct{}{},
-			}
 			options.HostConfig.PortBindings = map[docker.Port][]docker.PortBinding{
-				docker.Port(port): []docker.PortBinding{
+				docker.Port(port + "/tcp"): []docker.PortBinding{
 					docker.PortBinding{
 						HostIP:   "0.0.0.0",
 						HostPort: hostPort,
