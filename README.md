@@ -55,7 +55,7 @@ $ go get -u github.com/skanehira/docui
 | container list   | start container     | <kbd>u</kbd>                   |
 | container list   | stop container      | <kbd>s</kbd>                   |
 | container list   | export container    | <kbd>e</kbd>                   |
-| container list   | commit container    | <kbd>Ctrl</kbd> + <kbd>c</kbd> |
+| container list   | commit container    | <kbd>c</kbd>                   |
 | pull image       | do pull image       | <kbd>Enter</kbd>               |
 | pull image       | close panel         | <kbd>Ctrl</kbd> + <kbd>w</kbd> |
 | create container | next input box      | <kbd>Ctrl</kbd> + <kbd>j</kbd> |
