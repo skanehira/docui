@@ -163,6 +163,7 @@ func (i Input) SetKeyBinding(name string) {
 }
 
 func (i Input) ClosePanel(g *gocui.Gui, v *gocui.View) error {
+	activeInput = 0
 	for _, item := range i.Items {
 		if err := i.DeleteView(GetKeyFromMap(item.Label)); err != nil {
 			return err
