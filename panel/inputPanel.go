@@ -139,8 +139,8 @@ func (i Input) SetKeyBinding(name string) {
 		if err := i.SetKeybinding(name, gocui.KeyEnter, gocui.ModNone, i.PullImage); err != nil {
 			panic(err)
 		}
-	case ExportImagePanel:
-		if err := i.SetKeybinding(name, gocui.KeyEnter, gocui.ModNone, i.ExportImage); err != nil {
+	case SaveImagePanel:
+		if err := i.SetKeybinding(name, gocui.KeyEnter, gocui.ModNone, i.SaveImage); err != nil {
 			panic(err)
 		}
 	case ImportImagePanel:
@@ -411,7 +411,7 @@ func (i Input) PullImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i Input) ExportImage(g *gocui.Gui, v *gocui.View) error {
+func (i Input) SaveImage(g *gocui.Gui, v *gocui.View) error {
 	path := ReadLine(v, nil)
 	id := i.Data["ID"].(string)
 
@@ -420,7 +420,7 @@ func (i Input) ExportImage(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	i.ClosePanel(g, v)
-	v = i.StateMessage("image exporting....")
+	v = i.StateMessage("image saving....")
 
 	g.Update(func(g *gocui.Gui) error {
 		func(g *gocui.Gui, v *gocui.View) error {

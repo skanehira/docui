@@ -1,18 +1,24 @@
-# docui - Docker Client Tool With Go
+# docui - GUI Docker Client With Go
 
 ## About docui
-docui is docker client cui tool.  
-This tool can do thises.
+docui is gui docker client.  
+docui can do thises.
 
-- pull/remove image  
-- export/import/load image  
-- display image detail
-- create/remove container
-- export container
-- start/stop container
-- display container detail
+- image
+    - pull/remove
+    - save/import/load
+    - inspect
 
-## Installation
+- container
+    - create/remove
+    - start/stop
+    - export/commit
+    - inspect
+
+## Installation  
+If yo not install go and set GOPATH/GOBIN,  
+you must install and set env before install docui.
+
 
 ```
 $ go get github.com/skanehira/docui
@@ -22,7 +28,6 @@ $ docui
 ## Update
 
 ```
-$ rm -rf $GOBIN/docui
 $ go get -u github.com/skanehira/docui
 ```
 
@@ -37,7 +42,7 @@ $ go get -u github.com/skanehira/docui
 | image list       | create container    | <kbd>c</kbd>                   |
 | image list       | display detail      | <kbd>Enter</kbd>               |
 | image list       | display detail      | <kbd>o</kbd>                   |
-| image list       | export image        | <kbd>e</kbd>                   |
+| image list       | save image          | <kbd>s</kbd>                   |
 | image list       | import image        | <kbd>i</kbd>                   |
 | image list       | load image          | <kbd>Ctrl</kbd> + <kbd>l</kbd> |
 | image list       | next image          | <kbd>j</kbd>                   |
@@ -50,6 +55,7 @@ $ go get -u github.com/skanehira/docui
 | container list   | start container     | <kbd>u</kbd>                   |
 | container list   | stop container      | <kbd>s</kbd>                   |
 | container list   | export container    | <kbd>e</kbd>                   |
+| container list   | commit container    | <kbd>Ctrl</kbd> + <kbd>c</kbd> |
 | pull image       | do pull image       | <kbd>Enter</kbd>               |
 | pull image       | close panel         | <kbd>Ctrl</kbd> + <kbd>w</kbd> |
 | create container | next input box      | <kbd>Ctrl</kbd> + <kbd>j</kbd> |
@@ -64,7 +70,7 @@ $ go get -u github.com/skanehira/docui
 
 ## Screenshots
 
-![](https://github.com/skanehira/docui/blob/images/images/image_pull.png)
-![](https://github.com/skanehira/docui/blob/images/images/image_detail.png)
-![](https://github.com/skanehira/docui/blob/images/images/container_detail.png)
-![](https://github.com/skanehira/docui/blob/images/images/container_create.png)
+![](https://github.com/skanehira/docui/blob/images/images/s1.png)
+![](https://github.com/skanehira/docui/blob/images/images/s2.png)
+![](https://github.com/skanehira/docui/blob/images/images/s3.png)
+![](https://github.com/skanehira/docui/blob/images/images/s4.png)

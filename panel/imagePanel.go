@@ -85,7 +85,7 @@ func (i ImageList) SetKeyBinding() {
 	if err := i.SetKeybinding(i.name, 'd', gocui.ModNone, i.RemoveImage); err != nil {
 		log.Panicln(err)
 	}
-	if err := i.SetKeybinding(i.name, 'e', gocui.ModNone, i.ExportImage); err != nil {
+	if err := i.SetKeybinding(i.name, 's', gocui.ModNone, i.SaveImage); err != nil {
 		log.Panicln(err)
 	}
 	if err := i.SetKeybinding(i.name, 'i', gocui.ModNone, i.ImportImage); err != nil {
@@ -155,7 +155,7 @@ func (i ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i ImageList) ExportImage(g *gocui.Gui, v *gocui.View) error {
+func (i ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 	i.NextPanel = ImageListPanel
 
 	id := i.GetImageName(v)
@@ -173,7 +173,7 @@ func (i ImageList) ExportImage(g *gocui.Gui, v *gocui.View) error {
 		"ID": id,
 	}
 
-	NewInput(i.Gui, ExportImagePanel, x, y, w, h, NewExportImageItems(x, y, w, h), data)
+	NewInput(i.Gui, SaveImagePanel, x, y, w, h, NewExportImageItems(x, y, w, h), data)
 	return nil
 }
 

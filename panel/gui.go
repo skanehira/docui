@@ -22,7 +22,7 @@ const (
 	DetailPanel          = "detail"
 	CreateContainerPanel = "create container"
 	ErrMessagePanel      = "error message"
-	ExportImagePanel     = "export image"
+	SaveImagePanel       = "save image"
 	ImportImagePanel     = "import image"
 	LoadImagePanel       = "load image"
 	ExportContainerPanel = "export container"
