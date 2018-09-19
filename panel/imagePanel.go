@@ -3,22 +3,27 @@ package panel
 import (
 	"fmt"
 	"log"
-	"regexp"
 	"strings"
 
 	"github.com/jroimartin/gocui"
 )
 
-var imageNameRegexp = regexp.MustCompile("\\[.*\\]")
-
 type ImageList struct {
 	*Gui
 	name string
 	Position
+	Images map[string]Image
+}
+
+type Image struct {
+	ID      string
+	Name    string
+	Created string
+	Size    string
 }
 
 func NewImageList(gui *Gui, name string, x, y, w, h int) ImageList {
-	return ImageList{gui, name, Position{x, y, x + w, y + h}}
+	return ImageList{gui, name, Position{x, y, x + w, y + h}, make(map[string]Image)}
 }
 
 func (i ImageList) Name() string {
@@ -38,7 +43,7 @@ func (i ImageList) SetView(g *gocui.Gui) error {
 	}
 
 	i.SetKeyBinding()
-	i.GetImageList(v)
+	i.GetImageList(g, v)
 
 	return nil
 }
@@ -93,6 +98,7 @@ func (i ImageList) SetKeyBinding() {
 }
 
 func (i ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
+	i.NextPanel = ImageListPanel
 	id := i.GetImageID(v)
 	if id == "" {
 		return nil
@@ -113,6 +119,7 @@ func (i ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
+	i.NextPanel = ImageListPanel
 	maxX, maxY := i.Size()
 	x := maxX / 3
 	y := maxY / 3
@@ -149,6 +156,7 @@ func (i ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i ImageList) ExportImage(g *gocui.Gui, v *gocui.View) error {
+	i.NextPanel = ImageListPanel
 
 	id := i.GetImageName(v)
 	if id == "" {
@@ -170,6 +178,8 @@ func (i ImageList) ExportImage(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
+	i.NextPanel = ImageListPanel
+
 	maxX, maxY := i.Size()
 	x := maxX / 3
 	y := maxY / 3
@@ -181,6 +191,8 @@ func (i ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
+	i.NextPanel = ImageListPanel
+
 	maxX, maxY := i.Size()
 	x := maxX / 3
 	y := maxY / 3
@@ -191,21 +203,35 @@ func (i ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i ImageList) GetImageList(v *gocui.View) {
+func (i ImageList) GetImageList(g *gocui.Gui, v *gocui.View) {
 	v.Clear()
-	fmt.Fprintf(v, "%-15s %-20s\n", "ID", "NAME")
-	for _, i := range i.Docker.Images() {
-		fmt.Fprintf(v, "%-15s %-20s\n", i.ID[7:19], i.RepoTags)
+
+	format := "%-15s %-40s %-25s %-15s\n"
+	fmt.Fprintf(v, format, "ID", "NAME", "CREATED", "SIZE")
+
+	for _, image := range i.Docker.Images() {
+		id := image.ID[7:19]
+		name := image.RepoTags[0]
+		created := ParseDateToString(image.Created)
+		size := ParseSizeToString(image.Size)
+
+		i.Images[id] = Image{
+			ID:      image.ID,
+			Name:    name,
+			Created: created,
+			Size:    size,
+		}
+		fmt.Fprintf(v, format, id, name, created, size)
 	}
 }
 
 func (i ImageList) GetImageID(v *gocui.View) string {
-	id := ReadLine(v, nil)
-	if id == "" || id[:2] == "ID" {
+	line := ReadLine(v, nil)
+	if line == "" || line[:2] == "ID" {
 		return ""
 	}
 
-	return id[:12]
+	return strings.Split(line, " ")[0]
 }
 
 func (i ImageList) GetImageName(v *gocui.View) string {
@@ -214,8 +240,9 @@ func (i ImageList) GetImageName(v *gocui.View) string {
 		return ""
 	}
 
-	name := imageNameRegexp.FindAllStringSubmatch(line, -1)[0][0]
-	return strings.TrimRight(name[1:len(name)-1], " ")
+	image := i.Images[i.GetImageID(v)]
+
+	return image.Name
 }
 
 func (i ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
@@ -227,13 +254,13 @@ func (i ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 
 	i.ConfirmMessage("Do you want delete this image? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
 		defer i.Refresh()
+		defer i.CloseConfirmMessage(g, v)
+
 		if err := i.Docker.RemoveImageWithName(name); err != nil {
-			i.CloseConfirmMessage(g, v)
 			i.ErrMessage(err.Error(), ImageListPanel)
 			return nil
 		}
-		i.CloseConfirmMessage(g, v)
-		SetCurrentPanel(g, ImageListPanel)
+
 		return nil
 	})
 

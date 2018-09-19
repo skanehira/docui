@@ -3,6 +3,7 @@ package panel
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
@@ -12,10 +13,20 @@ type ContainerList struct {
 	*Gui
 	name string
 	Position
+	Containers map[string]Container
+}
+
+type Container struct {
+	ID      string
+	Image   string
+	Created string
+	Status  string
+	Port    string
+	Name    string
 }
 
 func NewContainerList(gui *Gui, name string, x, y, w, h int) ContainerList {
-	return ContainerList{gui, name, Position{x, y, x + w, y + h}}
+	return ContainerList{gui, name, Position{x, y, x + w, y + h}, make(map[string]Container)}
 }
 
 func (c ContainerList) Name() string {
@@ -105,13 +116,13 @@ func (c ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 
 	c.ConfirmMessage("Do you want delete this container? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
 		defer c.Refresh()
+		defer c.CloseConfirmMessage(g, v)
 		options := docker.RemoveContainerOptions{ID: id}
+
 		if err := c.Docker.RemoveContainer(options); err != nil {
-			c.CloseConfirmMessage(g, v)
 			c.ErrMessage(err.Error(), ContainerListPanel)
 			return nil
 		}
-		c.CloseConfirmMessage(g, v)
 
 		return nil
 	})
@@ -184,6 +195,7 @@ func (c ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (c ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
+	c.NextPanel = ContainerListPanel
 	id := c.GetContainerID(v)
 	if id == "" {
 		return nil
@@ -203,8 +215,9 @@ func (c ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
-	id := i.GetContainerID(v)
+func (c ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
+	c.NextPanel = ContainerListPanel
+	id := c.GetContainerID(v)
 	if id == "" {
 		return nil
 	}
@@ -213,13 +226,13 @@ func (i ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 		"Container": id,
 	}
 
-	maxX, maxY := i.Size()
+	maxX, maxY := c.Size()
 	x := maxX / 8
 	y := maxY / 5
 	w := maxX - x
 	h := maxY - y
 
-	NewInput(i.Gui, CommitContainerPanel, x, y, w, h, NewCommitContainerPanel(x, y, w, h), data)
+	NewInput(c.Gui, CommitContainerPanel, x, y, w, h, NewCommitContainerPanel(x, y, w, h), data)
 	return nil
 }
 
@@ -237,17 +250,36 @@ func (c ContainerList) Refresh() error {
 
 func (c ContainerList) GetContainerList(v *gocui.View) {
 	v.Clear()
-	fmt.Fprintf(v, "%-15s %-20s %-15s\n", "ID", "NAME", "STATUS")
+
+	format := "%-15s %-15s %-15s %-35s %-25s %-15s\n"
+	fmt.Fprintf(v, format, "ID", "IMAGE", "NAME", "STATUS", "CREATED", "PORT")
+
 	for _, con := range c.Docker.Containers() {
-		fmt.Fprintf(v, "%-15s %-20s %-15s\n", con.ID[:12], con.Names[0][1:], con.Status)
+		id := con.ID[:12]
+		image := con.Image
+		name := con.Names[0][1:]
+		status := con.Status
+		created := ParseDateToString(con.Created)
+		port := ParsePortToString(con.Ports)
+
+		c.Containers[id] = Container{
+			ID:      con.ID,
+			Image:   image,
+			Name:    name,
+			Status:  status,
+			Created: created,
+			Port:    port,
+		}
+
+		fmt.Fprintf(v, format, id, image, name, status, created, port)
 	}
 }
 
 func (c ContainerList) GetContainerID(v *gocui.View) string {
-	id := ReadLine(v, nil)
-	if id == "" || id[:2] == "ID" {
+	line := ReadLine(v, nil)
+	if line == "" || line[:2] == "ID" {
 		return ""
 	}
 
-	return id[:12]
+	return strings.Split(line, " ")[0]
 }

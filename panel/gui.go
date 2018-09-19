@@ -9,6 +9,7 @@ import (
 
 	"github.com/skanehira/docui/docker"
 
+	dockerclient "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
 )
 
@@ -363,4 +364,27 @@ func StructToJson(i interface{}) string {
 	out := new(bytes.Buffer)
 	json.Indent(out, j, "", "    ")
 	return out.String()
+}
+
+func ParseDateToString(unixtime int64) string {
+	t := time.Unix(unixtime, 0)
+	return t.Format("2006/01/02 15:04:05")
+}
+
+func ParseSizeToString(size int64) string {
+	mb := float64(size) / 1024 / 1024
+	return fmt.Sprintf("%.1fMB", mb)
+}
+
+func ParsePortToString(ports []dockerclient.APIPort) string {
+	var port string
+	for _, p := range ports {
+		if p.PublicPort == 0 {
+			port += fmt.Sprintf("%d/%s ", p.PrivatePort, p.Type)
+		} else {
+
+			port += fmt.Sprintf("%s:%d->%d/%s ", p.IP, p.PublicPort, p.PrivatePort, p.Type)
+		}
+	}
+	return port
 }
