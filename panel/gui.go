@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/skanehira/docui/docker"
 
@@ -19,13 +20,14 @@ const (
 	ContainerListPanel   = "container list"
 	DetailPanel          = "detail"
 	CreateContainerPanel = "create container"
-	MessagePanel         = "message"
+	ErrMessagePanel      = "error message"
 	ExportImagePanel     = "export image"
 	ImportImagePanel     = "import image"
 	LoadImagePanel       = "load image"
 	ExportContainerPanel = "export container"
 	CommitContainerPanel = "commit container"
-	ConfirmMessage       = "confirm container"
+	ConfirmMessagePanel  = "confirm"
+	StateMessagePanel    = "state"
 )
 
 type Gui struct {
@@ -33,14 +35,18 @@ type Gui struct {
 	Docker     *docker.Docker
 	Panels     map[string]Panel
 	PanelNames []string
-	PrePanel   string
+	NextPanel  string
 }
 
 type Panel interface {
-	Init(*Gui)
-	SetView(*gocui.Gui) (*gocui.View, error)
+	SetView(*gocui.Gui) error
 	Name() string
-	RefreshPanel(*gocui.Gui, *gocui.View) error
+	Refresh() error
+}
+
+type Position struct {
+	x, y int
+	w, h int
 }
 
 func New(mode gocui.OutputMode) *Gui {
@@ -68,18 +74,15 @@ func New(mode gocui.OutputMode) *Gui {
 	return gui
 }
 
-func Key(key string) rune {
-	return []rune(key)[0]
-}
-
 func SetCurrentPanel(g *gocui.Gui, name string) (*gocui.View, error) {
-	if _, err := g.SetCurrentView(name); err != nil {
+	_, err := g.SetCurrentView(name)
+	if err != nil {
 		return nil, err
 	}
 	return g.SetViewOnTop(name)
 }
 
-func (g *Gui) AddPanels(panel Panel) {
+func (g *Gui) AddPanelNames(panel Panel) {
 	name := panel.Name()
 	g.PanelNames = append(g.PanelNames, name)
 }
@@ -88,13 +91,13 @@ func (g *Gui) SetKeybinds(panel string) {
 	if err := g.SetKeybinding(panel, gocui.KeyCtrlQ, gocui.ModNone, g.quit); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(panel, Key("q"), gocui.ModNone, g.quit); err != nil {
+	if err := g.SetKeybinding(panel, 'q', gocui.ModNone, g.quit); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(panel, Key("h"), gocui.ModNone, g.prePanel); err != nil {
+	if err := g.SetKeybinding(panel, 'h', gocui.ModNone, g.prePanel); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(panel, Key("l"), gocui.ModNone, g.nextPanel); err != nil {
+	if err := g.SetKeybinding(panel, 'l', gocui.ModNone, g.nextPanel); err != nil {
 		log.Panicln(err)
 	}
 	if err := g.SetKeybinding(panel, gocui.KeyTab, gocui.ModNone, g.nextPanel); err != nil {
@@ -214,67 +217,63 @@ func (g *Gui) init() {
 	g.StorePanels(NewImageList(g, ImageListPanel, 0, 0, maxX/2, maxY/2))
 	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, maxY/2+1, maxX/2, maxY-(maxY/2)-2))
 	g.StorePanels(NewDetail(g, DetailPanel, maxX/2+2, 0, maxX-(maxX/2)-3, maxY-1))
+
+	for _, panel := range g.Panels {
+		panel.SetView(g.Gui)
+	}
+
+	if _, err := SetCurrentPanel(g.Gui, ImageListPanel); err != nil {
+		panic(err)
+	}
+
+	// monitoring container status interval 5s
+	go func() {
+		c := g.Panels[ContainerListPanel].(ContainerList)
+		v, err := g.View(ContainerListPanel)
+		if err != nil {
+			panic(err)
+		}
+
+		for {
+			c.Update(func(g *gocui.Gui) error {
+				c.GetContainerList(v)
+				return nil
+			})
+			time.Sleep(5 * time.Second)
+		}
+	}()
 }
 
 func (g *Gui) StorePanels(panel Panel) {
 	g.Panels[panel.Name()] = panel
-	panel.Init(g)
-	g.AddPanels(panel)
+	g.AddPanelNames(panel)
 }
 
-func (gui *Gui) DispMessage(message string, prePanel string) {
-	gui.PrePanel = prePanel
-	maxX, maxY := gui.Size()
-	x := maxX / 5
-	y := maxY / 3
-	v, err := gui.SetView(MessagePanel, x, y, maxX-x, y+4)
-	if err != nil {
-		if err != gocui.ErrUnknownView {
-			panic(err)
-		}
-		v.Wrap = true
-		v.Title = MessagePanel
-		fmt.Fprint(v, message)
-		SetCurrentPanel(gui.Gui, v.Name())
-	}
+func (gui *Gui) ErrMessage(message string, nextPanel string) {
+	gui.Update(func(g *gocui.Gui) error {
+		gui.NextPanel = nextPanel
+		func() {
+			maxX, maxY := gui.Size()
+			x := maxX / 5
+			y := maxY / 3
+			v, err := gui.SetView(ErrMessagePanel, x, y, maxX-x, y+4)
+			if err != nil {
+				if err != gocui.ErrUnknownView {
+					panic(err)
+				}
+				v.Wrap = true
+				v.Title = v.Name()
+				fmt.Fprint(v, message)
+				SetCurrentPanel(gui.Gui, v.Name())
+			}
 
-	if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, gui.CloseMessage); err != nil {
-		panic(err)
-	}
-}
+			if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, gui.CloseMessage); err != nil {
+				panic(err)
+			}
+		}()
 
-func (gui *Gui) ConfirmMessage(message string, f func(g *gocui.Gui, v *gocui.View) error) {
-	maxX, maxY := gui.Size()
-	x := maxX / 5
-	y := maxY / 3
-	v, err := gui.SetView(ConfirmMessage, x, y, maxX-x, y+2)
-	if err != nil {
-		if err != gocui.ErrUnknownView {
-			panic(err)
-		}
-		v.Wrap = true
-		v.Title = ConfirmMessage
-		fmt.Fprint(v, message)
-		SetCurrentPanel(gui.Gui, v.Name())
-	}
-
-	if err := gui.SetKeybinding(v.Name(), Key("y"), gocui.ModNone, f); err != nil {
-		panic(err)
-	}
-
-	if err := gui.SetKeybinding(v.Name(), Key("n"), gocui.ModNone, gui.CloseConfirmMessage); err != nil {
-		panic(err)
-	}
-}
-
-func (gui *Gui) CloseConfirmMessage(g *gocui.Gui, v *gocui.View) error {
-	if err := g.DeleteView(v.Name()); err != nil {
-		panic(err)
-	}
-
-	g.DeleteKeybindings(v.Name())
-	SetCurrentPanel(gui.Gui, gui.PrePanel)
-	return nil
+		return nil
+	})
 }
 
 func (gui *Gui) CloseMessage(g *gocui.Gui, v *gocui.View) error {
@@ -287,12 +286,72 @@ func (gui *Gui) CloseMessage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (gui *Gui) RefreshAllPanel() {
-	for _, panel := range gui.Panels {
-		panel.RefreshPanel(gui.Gui, nil)
+func (gui *Gui) ConfirmMessage(message string, f func(g *gocui.Gui, v *gocui.View) error) {
+	maxX, maxY := gui.Size()
+	x := maxX / 5
+	y := maxY / 3
+	v, err := gui.SetView(ConfirmMessagePanel, x, y, maxX-x, y+2)
+	if err != nil {
+		if err != gocui.ErrUnknownView {
+			panic(err)
+		}
+		v.Wrap = true
+		v.Title = ConfirmMessagePanel
+		fmt.Fprint(v, message)
+		SetCurrentPanel(gui.Gui, v.Name())
 	}
 
-	SetCurrentPanel(gui.Gui, gui.PrePanel)
+	if err := gui.SetKeybinding(v.Name(), 'y', gocui.ModNone, f); err != nil {
+		panic(err)
+	}
+
+	if err := gui.SetKeybinding(v.Name(), 'n', gocui.ModNone, gui.CloseConfirmMessage); err != nil {
+		panic(err)
+	}
+}
+
+func (gui *Gui) CloseConfirmMessage(g *gocui.Gui, v *gocui.View) error {
+	if err := g.DeleteView(ConfirmMessagePanel); err != nil {
+		panic(err)
+	}
+
+	g.DeleteKeybindings(ConfirmMessagePanel)
+	SetCurrentPanel(gui.Gui, gui.NextPanel)
+	return nil
+}
+
+func (gui *Gui) StateMessage(message string) *gocui.View {
+	maxX, maxY := gui.Size()
+	x := maxX / 5
+	y := maxY / 3
+	v, err := gui.SetView(StateMessagePanel, x, y, maxX-x, y+2)
+	if err != nil {
+		if err != gocui.ErrUnknownView {
+			panic(err)
+		}
+		v.Wrap = true
+		v.Title = v.Name()
+		fmt.Fprint(v, message)
+		if _, err := SetCurrentPanel(gui.Gui, v.Name()); err != nil {
+			panic(err)
+		}
+	}
+
+	return v
+}
+
+func (gui *Gui) CloseStateMessage(v *gocui.View) {
+	if err := gui.DeleteView(v.Name()); err != nil {
+		panic(err)
+	}
+}
+
+func (gui *Gui) RefreshAllPanel() {
+	for _, panel := range gui.Panels {
+		panel.Refresh()
+	}
+
+	SetCurrentPanel(gui.Gui, gui.NextPanel)
 }
 
 func StructToJson(i interface{}) string {
