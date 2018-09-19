@@ -20,47 +20,40 @@ func (i Detail) Name() string {
 	return i.name
 }
 
-func (i Detail) SetView(g *gocui.Gui) (*gocui.View, error) {
+func (i Detail) SetView(g *gocui.Gui) error {
 	v, err := g.SetView(i.Name(), i.x, i.y, i.w, i.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
-			return nil, err
+			return err
 		}
 
 		v.Title = v.Name()
 		v.Wrap = true
-		return v, nil
 	}
 
-	return v, nil
+	i.SetKeyBinding()
+
+	return nil
 }
 
-func (i Detail) Init(g *Gui) {
-	_, err := i.SetView(g.Gui)
-
-	if err != nil {
-		panic(err)
-	}
-
+func (d Detail) SetKeyBinding() {
 	// keybinds
-	g.SetKeybinds(i.Name())
+	d.SetKeybinds(d.name)
 
-	if err := g.SetKeybinding(i.Name(), Key("j"), gocui.ModNone, CursorDown); err != nil {
+	if err := d.SetKeybinding(d.name, 'j', gocui.ModNone, CursorDown); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), Key("k"), gocui.ModNone, CursorUp); err != nil {
+	if err := d.SetKeybinding(d.name, 'k', gocui.ModNone, CursorUp); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), Key("d"), gocui.ModNone, PageDown); err != nil {
+	if err := d.SetKeybinding(d.name, 'd', gocui.ModNone, PageDown); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(i.Name(), Key("u"), gocui.ModNone, PageUp); err != nil {
+	if err := d.SetKeybinding(d.name, 'u', gocui.ModNone, PageUp); err != nil {
 		log.Panicln(err)
 	}
 }
 
-func (i Detail) RefreshPanel(g *gocui.Gui, v *gocui.View) error {
-	//	v.Clear()
-	//	SetCurrentPanel(g, v.Name())
+func (i Detail) Refresh() error {
 	return nil
 }
