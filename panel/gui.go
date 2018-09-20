@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/skanehira/docui/docker"
@@ -16,19 +17,21 @@ import (
 var active = 0
 
 const (
-	ImageListPanel       = "image list"
-	PullImagePanel       = "pull image"
-	ContainerListPanel   = "container list"
-	DetailPanel          = "detail"
-	CreateContainerPanel = "create container"
-	ErrMessagePanel      = "error message"
-	SaveImagePanel       = "save image"
-	ImportImagePanel     = "import image"
-	LoadImagePanel       = "load image"
-	ExportContainerPanel = "export container"
-	CommitContainerPanel = "commit container"
-	ConfirmMessagePanel  = "confirm"
-	StateMessagePanel    = "state"
+	ImageListPanel         = "image list"
+	PullImagePanel         = "pull image"
+	ContainerListPanel     = "container list"
+	DetailPanel            = "detail"
+	CreateContainerPanel   = "create container"
+	ErrMessagePanel        = "error message"
+	SaveImagePanel         = "save image"
+	ImportImagePanel       = "import image"
+	LoadImagePanel         = "load image"
+	ExportContainerPanel   = "export container"
+	CommitContainerPanel   = "commit container"
+	ConfirmMessagePanel    = "confirm"
+	StateMessagePanel      = "state"
+	SearchImagePanel       = "search images"
+	SearchImageResultPanel = "images"
 )
 
 type Gui struct {
@@ -59,6 +62,7 @@ func New(mode gocui.OutputMode) *Gui {
 	g.Highlight = true
 	g.Cursor = true
 	g.SelFgColor = gocui.ColorGreen
+	g.InputEsc = true
 
 	d := docker.NewDocker()
 
@@ -89,9 +93,6 @@ func (g *Gui) AddPanelNames(panel Panel) {
 }
 
 func (g *Gui) SetKeybinds(panel string) {
-	if err := g.SetKeybinding(panel, gocui.KeyCtrlQ, gocui.ModNone, g.quit); err != nil {
-		log.Panicln(err)
-	}
 	if err := g.SetKeybinding(panel, 'q', gocui.ModNone, g.quit); err != nil {
 		log.Panicln(err)
 	}
@@ -102,6 +103,15 @@ func (g *Gui) SetKeybinds(panel string) {
 		log.Panicln(err)
 	}
 	if err := g.SetKeybinding(panel, gocui.KeyTab, gocui.ModNone, g.nextPanel); err != nil {
+		log.Panicln(err)
+	}
+	if err := g.SetKeybinding(panel, gocui.KeyCtrlS, gocui.ModNone, g.SearchImage); err != nil {
+		log.Panicln(err)
+	}
+}
+
+func (g *Gui) SetGlobalKeyBinding() {
+	if err := g.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, g.quit); err != nil {
 		log.Panicln(err)
 	}
 }
@@ -142,6 +152,13 @@ func (gui *Gui) quit(g *gocui.Gui, v *gocui.View) error {
 func CursorDown(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
 		cx, cy := v.Cursor()
+		nexty := cy + 1
+
+		line := ReadLine(v, &nexty)
+		if line == "" {
+			return nil
+		}
+
 		if err := v.SetCursor(cx, cy+1); err != nil {
 			ox, oy := v.Origin()
 			if err := v.SetOrigin(ox, oy+1); err != nil {
@@ -157,6 +174,11 @@ func CursorUp(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
 		ox, oy := v.Origin()
 		cx, cy := v.Cursor()
+
+		if (v.Name() == ImageListPanel || v.Name() == ContainerListPanel || v.Name() == SearchImageResultPanel) && cy-1 == 0 && oy-1 < 1 {
+			return nil
+		}
+
 		if err := v.SetCursor(cx, cy-1); err != nil && oy > 0 {
 			if err := v.SetOrigin(ox, oy-1); err != nil {
 				return err
@@ -209,7 +231,7 @@ func ReadLine(v *gocui.View, y *int) string {
 		return ""
 	}
 
-	return str
+	return strings.Trim(str, " ")
 }
 
 func (g *Gui) init() {
@@ -227,7 +249,9 @@ func (g *Gui) init() {
 		panic(err)
 	}
 
-	// monitoring container status interval 5s
+	g.SetGlobalKeyBinding()
+
+	//monitoring container status interval 5s
 	go func() {
 		c := g.Panels[ContainerListPanel].(ContainerList)
 		v, err := g.View(ContainerListPanel)
@@ -305,7 +329,9 @@ func (gui *Gui) ConfirmMessage(message string, f func(g *gocui.Gui, v *gocui.Vie
 	if err := gui.SetKeybinding(v.Name(), 'y', gocui.ModNone, f); err != nil {
 		panic(err)
 	}
-
+	if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, f); err != nil {
+		panic(err)
+	}
 	if err := gui.SetKeybinding(v.Name(), 'n', gocui.ModNone, gui.CloseConfirmMessage); err != nil {
 		panic(err)
 	}
@@ -341,8 +367,8 @@ func (gui *Gui) StateMessage(message string) *gocui.View {
 	return v
 }
 
-func (gui *Gui) CloseStateMessage(v *gocui.View) {
-	if err := gui.DeleteView(v.Name()); err != nil {
+func (gui *Gui) CloseStateMessage() {
+	if err := gui.DeleteView(StateMessagePanel); err != nil {
 		panic(err)
 	}
 }
@@ -353,6 +379,44 @@ func (gui *Gui) RefreshAllPanel() {
 	}
 
 	SetCurrentPanel(gui.Gui, gui.NextPanel)
+}
+
+func (gui *Gui) SearchImage(g *gocui.Gui, v *gocui.View) error {
+	gui.NextPanel = g.CurrentView().Name()
+
+	maxX, maxY := gui.Size()
+	x := maxX / 8
+	y := maxY / 4
+	w := maxX - x
+	h := y + 2
+
+	searchPanel := NewSearchImage(gui, SearchImagePanel, Position{x, y, w, h})
+	if err := searchPanel.SetView(g); err != nil {
+		panic(err)
+	}
+
+	return nil
+}
+
+func (gui *Gui) SwitchPanel(pre, next string) *gocui.View {
+	if pre != "" {
+		gui.NextPanel = pre
+	}
+
+	v, err := SetCurrentPanel(gui.Gui, next)
+	if err != nil {
+		panic(err)
+	}
+
+	return v
+}
+
+func (g *Gui) IsSetView(name string) bool {
+	if v, err := g.View(name); err != nil && v == nil {
+		return false
+	}
+
+	return true
 }
 
 func StructToJson(i interface{}) string {

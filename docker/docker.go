@@ -211,3 +211,12 @@ func (d *Docker) ExportContainerWithOptions(options docker.ExportContainerOption
 
 	return nil
 }
+
+func (d *Docker) SearchImageWithName(name string) ([]docker.APIImageSearch, error) {
+	images, err := d.Client.SearchImages(name)
+	if err != nil {
+		return images, err
+	}
+
+	return images, nil
+}
