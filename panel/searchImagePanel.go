@@ -114,6 +114,7 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 					s.resultPanel.cachedImages[image.Name] = image
 					s.resultPanel.images[image.Name] = image
 				}
+
 				if _, err := s.View(SearchImageResultPanel); err != nil {
 					if err == gocui.ErrUnknownView {
 						if err := s.resultPanel.SetView(g); err != nil {
@@ -187,6 +188,10 @@ func (s *SearchImage) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 	s.DeleteKeybindings(s.name)
 	if err := s.DeleteView(s.name); err != nil {
 		panic(err)
+	}
+
+	if s.NextPanel == s.name {
+		s.NextPanel = ImageListPanel
 	}
 
 	SetCurrentPanel(g, s.NextPanel)

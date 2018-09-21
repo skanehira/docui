@@ -62,7 +62,7 @@ func (i ImageList) Refresh() error {
 func (i ImageList) SetKeyBinding() {
 	// keybinding
 	i.DeleteKeybindings(i.name)
-	i.SetKeybinds(i.name)
+	i.SetKeyBindingToPanel(i.name)
 
 	if err := i.SetKeybinding(i.name, 'j', gocui.ModNone, CursorDown); err != nil {
 		log.Panicln(err)

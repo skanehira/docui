@@ -92,7 +92,7 @@ func (g *Gui) AddPanelNames(panel Panel) {
 	g.PanelNames = append(g.PanelNames, name)
 }
 
-func (g *Gui) SetKeybinds(panel string) {
+func (g *Gui) SetKeyBindingToPanel(panel string) {
 	if err := g.SetKeybinding(panel, 'q', gocui.ModNone, g.quit); err != nil {
 		log.Panicln(err)
 	}

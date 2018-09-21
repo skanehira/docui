@@ -60,7 +60,7 @@ func (d *Docker) CreateContainerWithOptions(options docker.CreateContainerOption
 	return nil
 }
 
-func NewContainerOptions(config map[string]string) docker.CreateContainerOptions {
+func (d *Docker) NewContainerOptions(config map[string]string) docker.CreateContainerOptions {
 
 	options := docker.CreateContainerOptions{
 		Config:     new(docker.Config),

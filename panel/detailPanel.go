@@ -37,8 +37,7 @@ func (i Detail) SetView(g *gocui.Gui) error {
 }
 
 func (d Detail) SetKeyBinding() {
-	// keybinds
-	d.SetKeybinds(d.name)
+	d.SetKeyBindingToPanel(d.name)
 
 	if err := d.SetKeybinding(d.name, 'j', gocui.ModNone, CursorDown); err != nil {
 		log.Panicln(err)
