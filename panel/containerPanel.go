@@ -136,10 +136,10 @@ func (c ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	v = c.StateMessage("container starting...")
+	c.StateMessage("container starting...")
 	g.Update(func(g *gocui.Gui) error {
 		func(g *gocui.Gui, v *gocui.View) error {
-			defer c.CloseStateMessage(v)
+			defer c.CloseStateMessage()
 			if err := c.Docker.StartContainerWithID(id); err != nil {
 				c.ErrMessage(err.Error(), ContainerListPanel)
 				return nil
@@ -168,10 +168,10 @@ func (c ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	v = c.StateMessage("container stopping...")
+	c.StateMessage("container stopping...")
 	g.Update(func(g *gocui.Gui) error {
 		func(g *gocui.Gui, v *gocui.View) error {
-			defer c.CloseStateMessage(v)
+			defer c.CloseStateMessage()
 
 			if err := c.Docker.StopContainerWithID(id); err != nil {
 				c.ErrMessage(err.Error(), ContainerListPanel)
@@ -238,9 +238,12 @@ func (c ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 
 func (c ContainerList) Refresh() error {
 	c.Update(func(g *gocui.Gui) error {
-		if err := c.SetView(g); err != nil {
-			return err
+		v, err := c.View(ContainerListPanel)
+		if err != nil {
+			panic(err)
 		}
+
+		c.GetContainerList(v)
 
 		return nil
 	})
@@ -251,7 +254,7 @@ func (c ContainerList) Refresh() error {
 func (c ContainerList) GetContainerList(v *gocui.View) {
 	v.Clear()
 
-	format := "%-15s %-15s %-15s %-35s %-25s %-15s\n"
+	format := "%-15s %-15s %-15s %-30s %-25s %-15s\n"
 	fmt.Fprintf(v, format, "ID", "IMAGE", "NAME", "STATUS", "CREATED", "PORT")
 
 	for _, con := range c.Docker.Containers() {
