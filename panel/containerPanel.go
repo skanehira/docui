@@ -54,7 +54,7 @@ func (c ContainerList) SetView(g *gocui.Gui) error {
 func (c ContainerList) SetKeyBinding() {
 	// keybinds
 	c.DeleteKeybindings(c.name)
-	c.SetKeybinds(c.name)
+	c.SetKeyBindingToPanel(c.name)
 
 	if err := c.SetKeybinding(c.name, 'j', gocui.ModNone, CursorDown); err != nil {
 		log.Panicln(err)
@@ -136,17 +136,16 @@ func (c ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	c.StateMessage("container starting...")
 	g.Update(func(g *gocui.Gui) error {
-		func(g *gocui.Gui, v *gocui.View) error {
+		c.StateMessage("container starting...")
+
+		g.Update(func(g *gocui.Gui) error {
+			defer c.Refresh()
 			defer c.CloseStateMessage()
+
 			if err := c.Docker.StartContainerWithID(id); err != nil {
 				c.ErrMessage(err.Error(), ContainerListPanel)
 				return nil
-			}
-
-			if err := c.Refresh(); err != nil {
-				panic(err)
 			}
 
 			if _, err := SetCurrentPanel(g, ContainerListPanel); err != nil {
@@ -154,7 +153,7 @@ func (c ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 			}
 
 			return nil
-		}(g, v)
+		})
 
 		return nil
 	})
@@ -168,25 +167,23 @@ func (c ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	c.StateMessage("container stopping...")
 	g.Update(func(g *gocui.Gui) error {
-		func(g *gocui.Gui, v *gocui.View) error {
+		c.StateMessage("container stopping...")
+
+		g.Update(func(g *gocui.Gui) error {
 			defer c.CloseStateMessage()
+			defer c.Refresh()
 
 			if err := c.Docker.StopContainerWithID(id); err != nil {
 				c.ErrMessage(err.Error(), ContainerListPanel)
 				return nil
 			}
 
-			if err := c.Refresh(); err != nil {
-				panic(err)
-			}
-
 			if _, err := SetCurrentPanel(g, ContainerListPanel); err != nil {
 				panic(err)
 			}
 			return nil
-		}(g, v)
+		})
 
 		return nil
 	})
@@ -254,7 +251,7 @@ func (c ContainerList) Refresh() error {
 func (c ContainerList) GetContainerList(v *gocui.View) {
 	v.Clear()
 
-	format := "%-15s %-15s %-15s %-30s %-25s %-15s\n"
+	format := "%-15s %-15s %-15s %-25s %-25s %-10s\n"
 	fmt.Fprintf(v, format, "ID", "IMAGE", "NAME", "STATUS", "CREATED", "PORT")
 
 	for _, con := range c.Docker.Containers() {
@@ -280,8 +277,8 @@ func (c ContainerList) GetContainerList(v *gocui.View) {
 
 func (c ContainerList) GetContainerID(v *gocui.View) string {
 	line := ReadLine(v, nil)
-	if line == "" || line[:2] == "ID" {
-		return ""
+	if line == "" {
+		return line
 	}
 
 	return strings.Split(line, " ")[0]

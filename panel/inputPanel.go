@@ -7,7 +7,6 @@ import (
 
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
-	cuidocker "github.com/skanehira/docui/docker"
 )
 
 var activeInput = 0
@@ -61,7 +60,7 @@ func (i Input) SetView(g *gocui.Gui) error {
 		v.Wrap = true
 	}
 
-	i.SetKeybinds(i.Name())
+	i.SetKeyBindingToPanel(i.Name())
 
 	// create input panels
 	for index, item := range i.Items {
@@ -240,12 +239,13 @@ func (i Input) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 		data[name] = ReadLine(v, nil)
 	}
 
-	options := cuidocker.NewContainerOptions(data)
+	options := i.Docker.NewContainerOptions(data)
 
-	i.ClosePanel(g, v)
-	i.StateMessage("container creating...")
 	g.Update(func(g *gocui.Gui) error {
-		func(g *gocui.Gui, v *gocui.View) error {
+		i.ClosePanel(g, v)
+		i.StateMessage("container creating...")
+
+		g.Update(func(g *gocui.Gui) error {
 			defer i.CloseStateMessage()
 
 			if err := i.Docker.CreateContainerWithOptions(options); err != nil {
@@ -259,7 +259,7 @@ func (i Input) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 				panic(err)
 			}
 			return nil
-		}(g, v)
+		})
 
 		return nil
 	})
@@ -274,11 +274,11 @@ func (i Input) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	i.ClosePanel(g, v)
-	i.StateMessage("container exporting...")
-
 	g.Update(func(g *gocui.Gui) error {
-		func(g *gocui.Gui, v *gocui.View) error {
+		i.ClosePanel(g, v)
+		i.StateMessage("container exporting...")
+
+		g.Update(func(g *gocui.Gui) error {
 			defer i.CloseStateMessage()
 
 			file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
@@ -303,8 +303,8 @@ func (i Input) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 			}
 
 			return nil
-		}(g, v)
 
+		})
 		return nil
 	})
 
@@ -337,10 +337,11 @@ func (i Input) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 		Tag:        config["Tag"],
 	}
 
-	i.ClosePanel(g, v)
-	i.StateMessage("container committing...")
 	g.Update(func(g *gocui.Gui) error {
-		func(g *gocui.Gui, v *gocui.View) error {
+		i.ClosePanel(g, v)
+		i.StateMessage("container committing...")
+
+		g.Update(func(g *gocui.Gui) error {
 			defer i.CloseStateMessage()
 
 			if err := i.Docker.CommitContainerWithOptions(options); err != nil {
@@ -354,7 +355,8 @@ func (i Input) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 				panic(err)
 			}
 			return nil
-		}(g, v)
+
+		})
 
 		return nil
 	})
@@ -379,17 +381,17 @@ func (i Input) PullImage(g *gocui.Gui, v *gocui.View) error {
 		tag = item[1]
 	}
 
-	i.ClosePanel(g, v)
-	i.StateMessage("image pulling...")
-
-	options := docker.PullImageOptions{
-		Repository: name,
-		Tag:        tag,
-	}
 	g.Update(func(g *gocui.Gui) error {
-		func(g *gocui.Gui, v *gocui.View) error {
+		i.ClosePanel(g, v)
+		i.StateMessage("image pulling...")
+
+		g.Update(func(g *gocui.Gui) error {
 			defer i.CloseStateMessage()
 
+			options := docker.PullImageOptions{
+				Repository: name,
+				Tag:        tag,
+			}
 			if err := i.Docker.PullImageWithOptions(options); err != nil {
 				i.ErrMessage(err.Error(), ImageListPanel)
 				return nil
@@ -402,8 +404,8 @@ func (i Input) PullImage(g *gocui.Gui, v *gocui.View) error {
 			}
 
 			return nil
-		}(g, v)
 
+		})
 		return nil
 	})
 
@@ -418,11 +420,12 @@ func (i Input) SaveImage(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	i.ClosePanel(g, v)
-	i.StateMessage("image saving....")
-
 	g.Update(func(g *gocui.Gui) error {
-		func(g *gocui.Gui, v *gocui.View) error {
+		i.ClosePanel(g, v)
+		i.StateMessage("image saving....")
+
+		g.Update(func(g *gocui.Gui) error {
+
 			defer i.CloseStateMessage()
 
 			file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
@@ -446,7 +449,8 @@ func (i Input) SaveImage(g *gocui.Gui, v *gocui.View) error {
 				panic(err)
 			}
 			return nil
-		}(g, v)
+
+		})
 
 		return nil
 	})
@@ -484,11 +488,12 @@ func (i Input) ImportImage(g *gocui.Gui, v *gocui.View) error {
 		Tag:        data["tag"],
 	}
 
-	i.ClosePanel(g, v)
-	i.StateMessage("image importing....")
-
 	g.Update(func(g *gocui.Gui) error {
-		func(g *gocui.Gui, v *gocui.View) error {
+		i.ClosePanel(g, v)
+		i.StateMessage("image importing....")
+
+		g.Update(func(g *gocui.Gui) error {
+
 			defer i.CloseStateMessage()
 			if err := i.Docker.ImportImageWithOptions(options); err != nil {
 				i.ErrMessage(err.Error(), ImageListPanel)
@@ -501,7 +506,7 @@ func (i Input) ImportImage(g *gocui.Gui, v *gocui.View) error {
 				panic(err)
 			}
 			return nil
-		}(g, v)
+		})
 
 		return nil
 	})
@@ -515,11 +520,12 @@ func (i Input) LoadImage(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	i.ClosePanel(g, v)
-	i.StateMessage("image loading....")
-
 	g.Update(func(g *gocui.Gui) error {
-		func(g *gocui.Gui, v *gocui.View) error {
+		i.ClosePanel(g, v)
+		i.StateMessage("image loading....")
+
+		g.Update(func(g *gocui.Gui) error {
+
 			defer i.CloseStateMessage()
 			if err := i.Docker.LoadImageWithPath(path); err != nil {
 				i.ErrMessage(err.Error(), ImageListPanel)
@@ -532,7 +538,7 @@ func (i Input) LoadImage(g *gocui.Gui, v *gocui.View) error {
 				panic(err)
 			}
 			return nil
-		}(g, v)
+		})
 
 		return nil
 	})
