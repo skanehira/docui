@@ -99,13 +99,13 @@ func (i ImageList) SetKeyBinding() {
 
 func (i ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	i.NextPanel = ImageListPanel
-	id := i.GetImageID(v)
-	if id == "" {
+	name := i.GetImageName(v)
+	if name == "" {
 		return nil
 	}
 
 	data := map[string]interface{}{
-		"Image": id,
+		"Image": name,
 	}
 
 	maxX, maxY := i.Size()

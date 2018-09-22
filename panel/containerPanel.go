@@ -193,13 +193,14 @@ func (c ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 
 func (c ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 	c.NextPanel = ContainerListPanel
-	id := c.GetContainerID(v)
-	if id == "" {
+
+	name := c.GetContainerName(v)
+	if name == "" {
 		return nil
 	}
 
 	data := map[string]interface{}{
-		"ID": id,
+		"Container": name,
 	}
 
 	maxX, maxY := c.Size()
@@ -214,13 +215,13 @@ func (c ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 
 func (c ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 	c.NextPanel = ContainerListPanel
-	id := c.GetContainerID(v)
-	if id == "" {
+	name := c.GetContainerName(v)
+	if name == "" {
 		return nil
 	}
 
 	data := map[string]interface{}{
-		"Container": id,
+		"Container": name,
 	}
 
 	maxX, maxY := c.Size()
@@ -282,4 +283,8 @@ func (c ContainerList) GetContainerID(v *gocui.View) string {
 	}
 
 	return strings.Split(line, " ")[0]
+}
+
+func (c ContainerList) GetContainerName(v *gocui.View) string {
+	return c.Containers[c.GetContainerID(v)].Name
 }
