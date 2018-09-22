@@ -31,7 +31,7 @@ $ docui
 $ go get -u github.com/skanehira/docui
 ```
 
-## How to use
+## Keybindings
 | panel            | operation          | key                            |
 |------------------|--------------------|--------------------------------|
 | all              | change panel       | <kbd>Tab</kbd>                 |
@@ -75,6 +75,8 @@ $ go get -u github.com/skanehira/docui
 | images           | pull image         | <kbd>Enter</kbd>               |
 | images           | close panel        | <kbd>Ctrl</kbd> + <kbd>w</kbd> |
 
+## How to use
+For details of the input panel please refer to [wiki](https://github.com/skanehira/docui/wiki/docui)
 
 ## Screenshots
 
