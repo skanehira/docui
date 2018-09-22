@@ -136,6 +136,8 @@ func (c ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
+	netxtPanel := ContainerListPanel
+
 	g.Update(func(g *gocui.Gui) error {
 		c.StateMessage("container starting...")
 
@@ -144,13 +146,11 @@ func (c ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 			defer c.CloseStateMessage()
 
 			if err := c.Docker.StartContainerWithID(id); err != nil {
-				c.ErrMessage(err.Error(), ContainerListPanel)
+				c.ErrMessage(err.Error(), netxtPanel)
 				return nil
 			}
 
-			if _, err := SetCurrentPanel(g, ContainerListPanel); err != nil {
-				panic(err)
-			}
+			c.SwitchPanel(netxtPanel)
 
 			return nil
 		})
@@ -167,6 +167,8 @@ func (c ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
+	nextPanel := ContainerListPanel
+
 	g.Update(func(g *gocui.Gui) error {
 		c.StateMessage("container stopping...")
 
@@ -175,13 +177,12 @@ func (c ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 			defer c.Refresh()
 
 			if err := c.Docker.StopContainerWithID(id); err != nil {
-				c.ErrMessage(err.Error(), ContainerListPanel)
+				c.ErrMessage(err.Error(), nextPanel)
 				return nil
 			}
 
-			if _, err := SetCurrentPanel(g, ContainerListPanel); err != nil {
-				panic(err)
-			}
+			c.SwitchPanel(nextPanel)
+
 			return nil
 		})
 

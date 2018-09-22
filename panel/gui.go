@@ -32,6 +32,7 @@ const (
 	StateMessagePanel      = "state"
 	SearchImagePanel       = "search images"
 	SearchImageResultPanel = "images"
+	NavigatePanel          = "navigate"
 )
 
 type Gui struct {
@@ -120,28 +121,25 @@ func (gui *Gui) nextPanel(g *gocui.Gui, v *gocui.View) error {
 	nextIndex := (active + 1) % len(gui.PanelNames)
 	name := gui.PanelNames[nextIndex]
 
-	if _, err := SetCurrentPanel(g, name); err != nil {
-		return err
-	}
-
+	gui.SwitchPanel(name)
 	active = nextIndex
 	return nil
 }
 
 func (gui *Gui) prePanel(g *gocui.Gui, v *gocui.View) error {
 	nextIndex := active - 1
+
 	if nextIndex < 0 {
 		nextIndex = len(gui.PanelNames) - 1
 	} else {
 		nextIndex = (active - 1) % len(gui.PanelNames)
 	}
-	name := gui.PanelNames[nextIndex]
 
-	if _, err := SetCurrentPanel(g, name); err != nil {
-		return err
-	}
+	name := gui.PanelNames[nextIndex]
+	gui.SwitchPanel(name)
 
 	active = nextIndex
+
 	return nil
 }
 
@@ -238,17 +236,16 @@ func (g *Gui) init() {
 	maxX, maxY := g.Size()
 
 	g.StorePanels(NewImageList(g, ImageListPanel, 0, 0, maxX/2, maxY/2))
-	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, maxY/2+1, maxX/2, maxY-(maxY/2)-2))
-	g.StorePanels(NewDetail(g, DetailPanel, maxX/2+2, 0, maxX-(maxX/2)-3, maxY-1))
+	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, maxY/2+1, maxX/2, maxY-(maxY/2)-2-3))
+	g.StorePanels(NewDetail(g, DetailPanel, maxX/2+2, 0, maxX-(maxX/2)-3, maxY-1-3))
+	g.StorePanels(NewNavigate(g, NavigatePanel, 0, maxY-4, maxX-1, 3))
 
 	for _, panel := range g.Panels {
 		panel.SetView(g.Gui)
 	}
 
-	if _, err := SetCurrentPanel(g.Gui, ImageListPanel); err != nil {
-		panic(err)
-	}
-
+	g.SwitchPanel(ImageListPanel)
+	// SetCurrentPanel(g.Gui, ImageListPanel)
 	g.SetGlobalKeyBinding()
 
 	//monitoring container status interval 5s
@@ -271,31 +268,33 @@ func (g *Gui) init() {
 
 func (g *Gui) StorePanels(panel Panel) {
 	g.Panels[panel.Name()] = panel
-	g.AddPanelNames(panel)
+
+	if panel.Name() != NavigatePanel {
+		g.AddPanelNames(panel)
+	}
 }
 
 func (gui *Gui) ErrMessage(message string, nextPanel string) {
 	gui.Update(func(g *gocui.Gui) error {
 		gui.NextPanel = nextPanel
-		func() {
-			maxX, maxY := gui.Size()
-			x := maxX / 5
-			y := maxY / 3
-			v, err := gui.SetView(ErrMessagePanel, x, y, maxX-x, y+4)
-			if err != nil {
-				if err != gocui.ErrUnknownView {
-					panic(err)
-				}
-				v.Wrap = true
-				v.Title = v.Name()
-				fmt.Fprint(v, message)
-				SetCurrentPanel(gui.Gui, v.Name())
-			}
+		maxX, maxY := gui.Size()
 
-			if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, gui.CloseMessage); err != nil {
+		x := maxX / 5
+		y := maxY / 3
+		v, err := gui.SetView(ErrMessagePanel, x, y, maxX-x, y+4)
+		if err != nil {
+			if err != gocui.ErrUnknownView {
 				panic(err)
 			}
-		}()
+			v.Wrap = true
+			v.Title = v.Name()
+			fmt.Fprint(v, message)
+			gui.SwitchPanel(v.Name())
+		}
+
+		if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, gui.CloseMessage); err != nil {
+			panic(err)
+		}
 
 		return nil
 	})
@@ -305,7 +304,6 @@ func (gui *Gui) CloseMessage(g *gocui.Gui, v *gocui.View) error {
 	if err := g.DeleteView(v.Name()); err != nil {
 		panic(err)
 	}
-
 	g.DeleteKeybindings(v.Name())
 	gui.RefreshAllPanel()
 	return nil
@@ -321,9 +319,9 @@ func (gui *Gui) ConfirmMessage(message string, f func(g *gocui.Gui, v *gocui.Vie
 			panic(err)
 		}
 		v.Wrap = true
-		v.Title = ConfirmMessagePanel
+		v.Title = v.Name()
 		fmt.Fprint(v, message)
-		SetCurrentPanel(gui.Gui, v.Name())
+		gui.SwitchPanel(v.Name())
 	}
 
 	if err := gui.SetKeybinding(v.Name(), 'y', gocui.ModNone, f); err != nil {
@@ -343,7 +341,7 @@ func (gui *Gui) CloseConfirmMessage(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	g.DeleteKeybindings(ConfirmMessagePanel)
-	SetCurrentPanel(gui.Gui, gui.NextPanel)
+	gui.SwitchPanel(gui.NextPanel)
 	return nil
 }
 
@@ -359,9 +357,8 @@ func (gui *Gui) StateMessage(message string) *gocui.View {
 		v.Wrap = true
 		v.Title = v.Name()
 		fmt.Fprint(v, message)
-		if _, err := SetCurrentPanel(gui.Gui, v.Name()); err != nil {
-			panic(err)
-		}
+
+		gui.SwitchPanel(v.Name())
 	}
 
 	return v
@@ -378,7 +375,7 @@ func (gui *Gui) RefreshAllPanel() {
 		panel.Refresh()
 	}
 
-	SetCurrentPanel(gui.Gui, gui.NextPanel)
+	gui.SwitchPanel(gui.NextPanel)
 }
 
 func (gui *Gui) SearchImage(g *gocui.Gui, v *gocui.View) error {
@@ -390,24 +387,18 @@ func (gui *Gui) SearchImage(g *gocui.Gui, v *gocui.View) error {
 	w := maxX - x
 	h := y + 2
 
-	searchPanel := NewSearchImage(gui, SearchImagePanel, Position{x, y, w, h})
-	if err := searchPanel.SetView(g); err != nil {
-		panic(err)
-	}
-
+	NewSearchImage(gui, SearchImagePanel, Position{x, y, w, h})
+	gui.SwitchPanel(SearchImagePanel)
 	return nil
 }
 
-func (gui *Gui) SwitchPanel(pre, next string) *gocui.View {
-	if pre != "" {
-		gui.NextPanel = pre
-	}
-
+func (gui *Gui) SwitchPanel(next string) *gocui.View {
 	v, err := SetCurrentPanel(gui.Gui, next)
 	if err != nil {
 		panic(err)
 	}
 
+	gui.SetNaviWithPanelName(next)
 	return v
 }
 
@@ -417,6 +408,11 @@ func (g *Gui) IsSetView(name string) bool {
 	}
 
 	return true
+}
+
+func (g *Gui) SetNaviWithPanelName(name string) *gocui.View {
+	navi := g.Panels[NavigatePanel].(Navigate)
+	return navi.SetNavi(name)
 }
 
 func StructToJson(i interface{}) string {

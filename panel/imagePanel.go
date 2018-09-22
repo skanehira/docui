@@ -50,9 +50,11 @@ func (i ImageList) SetView(g *gocui.Gui) error {
 
 func (i ImageList) Refresh() error {
 	i.Update(func(g *gocui.Gui) error {
-		if err := i.SetView(g); err != nil {
-			return err
+		v, err := i.View(ImageListPanel)
+		if err != nil {
+			panic(err)
 		}
+		i.GetImageList(g, v)
 		return nil
 	})
 
@@ -79,7 +81,7 @@ func (i ImageList) SetKeyBinding() {
 	if err := i.SetKeybinding(i.name, 'c', gocui.ModNone, i.CreateContainerPanel); err != nil {
 		log.Panicln(err)
 	}
-	if err := i.SetKeybinding(i.name, 'p', gocui.ModNone, i.PullImagePanel); err != nil {
+	if err := i.SetKeybinding(i.name, 'p', gocui.ModNone, i.PullImage); err != nil {
 		log.Panicln(err)
 	}
 	if err := i.SetKeybinding(i.name, 'd', gocui.ModNone, i.RemoveImage); err != nil {
@@ -118,7 +120,7 @@ func (i ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
+func (i ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 	i.NextPanel = ImageListPanel
 	maxX, maxY := i.Size()
 	x := maxX / 3

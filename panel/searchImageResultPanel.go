@@ -83,7 +83,7 @@ func (s *SearchImageResult) SetKeyBinding() {
 }
 
 func (s *SearchImageResult) SwitchToSearch(g *gocui.Gui, v *gocui.View) error {
-	s.SwitchPanel("", SearchImagePanel)
+	s.SwitchPanel(SearchImagePanel)
 	return nil
 }
 
@@ -129,9 +129,7 @@ func (s *SearchImageResult) PullImage(g *gocui.Gui, v *gocui.View) error {
 			s.ClosePanel(g, v)
 			s.CloseSearchPanel()
 
-			if _, err := SetCurrentPanel(g, ImageListPanel); err != nil {
-				panic(err)
-			}
+			s.SwitchPanel(ImageListPanel)
 
 			return nil
 		})
