@@ -23,12 +23,20 @@ func NewSearchImage(g *Gui, name string, p Position) *SearchImage {
 		Position{p.x, p.y + 3, p.w, y - p.y},
 	)
 
-	return &SearchImage{
+	s := &SearchImage{
 		Gui:         g,
 		name:        name,
 		Position:    p,
 		resultPanel: resultPanel,
 	}
+
+	if err := s.SetView(g.Gui); err != nil {
+		panic(err)
+	}
+
+	g.SwitchPanel(SearchImagePanel)
+
+	return s
 }
 
 func (s *SearchImage) Name() string {
@@ -49,10 +57,7 @@ func (s *SearchImage) SetView(g *gocui.Gui) error {
 		v.Editor = s
 	}
 
-	if _, err := SetCurrentPanel(g, v.Name()); err != nil {
-		return err
-	}
-
+	s.SwitchPanel(v.Name())
 	s.SetKeyBinding()
 	return nil
 }
@@ -81,7 +86,8 @@ func (s *SearchImage) SwitchToResult(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	v = s.SwitchPanel("", SearchImageResultPanel)
+	v = s.SwitchPanel(SearchImageResultPanel)
+
 	v.SetCursor(0, 1)
 	return nil
 }
@@ -95,7 +101,7 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 
 			g.Update(func(g *gocui.Gui) error {
 				s.CloseStateMessage()
-				SetCurrentPanel(g, SearchImagePanel)
+				s.SwitchPanel(SearchImagePanel)
 
 				// clear result
 				s.resultPanel.images = make(map[string]docker.APIImageSearch)
@@ -194,7 +200,7 @@ func (s *SearchImage) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 		s.NextPanel = ImageListPanel
 	}
 
-	SetCurrentPanel(g, s.NextPanel)
+	s.SwitchPanel(s.NextPanel)
 
 	return nil
 }

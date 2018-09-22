@@ -36,6 +36,8 @@ func NewInput(gui *Gui, name string, x, y, w, h int, items Items, data map[strin
 		Data:     data,
 	}
 
+	gui.SetNaviWithPanelName(name)
+
 	if err := i.SetView(gui.Gui); err != nil {
 		panic(err)
 	}
@@ -183,9 +185,8 @@ func (i Input) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 	if i.NextPanel == "" {
 		i.NextPanel = ImageListPanel
 	}
-	if _, err := SetCurrentPanel(g, i.NextPanel); err != nil {
-		return err
-	}
+
+	i.SwitchPanel(i.NextPanel)
 
 	return nil
 }
@@ -260,10 +261,8 @@ func (i Input) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 			}
 
 			i.Panels[ContainerListPanel].Refresh()
+			i.SwitchPanel(ImageListPanel)
 
-			if _, err := SetCurrentPanel(g, ImageListPanel); err != nil {
-				panic(err)
-			}
 			return nil
 		})
 
@@ -304,9 +303,7 @@ func (i Input) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 				return nil
 			}
 
-			if _, err := SetCurrentPanel(g, ContainerListPanel); err != nil {
-				panic(err)
-			}
+			i.SwitchPanel(ContainerListPanel)
 
 			return nil
 
@@ -356,10 +353,8 @@ func (i Input) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 			}
 
 			i.Panels[ImageListPanel].Refresh()
+			i.SwitchPanel(ContainerListPanel)
 
-			if _, err := SetCurrentPanel(g, ContainerListPanel); err != nil {
-				panic(err)
-			}
 			return nil
 
 		})
@@ -404,10 +399,7 @@ func (i Input) PullImage(g *gocui.Gui, v *gocui.View) error {
 			}
 
 			i.Panels[ImageListPanel].Refresh()
-
-			if _, err := SetCurrentPanel(g, ImageListPanel); err != nil {
-				panic(err)
-			}
+			i.SwitchPanel(ImageListPanel)
 
 			return nil
 
@@ -451,11 +443,9 @@ func (i Input) SaveImage(g *gocui.Gui, v *gocui.View) error {
 				return nil
 			}
 
-			if _, err := SetCurrentPanel(g, ImageListPanel); err != nil {
-				panic(err)
-			}
-			return nil
+			i.SwitchPanel(ImageListPanel)
 
+			return nil
 		})
 
 		return nil
@@ -507,10 +497,8 @@ func (i Input) ImportImage(g *gocui.Gui, v *gocui.View) error {
 			}
 
 			i.Panels[ImageListPanel].Refresh()
+			i.SwitchPanel(ImageListPanel)
 
-			if _, err := SetCurrentPanel(g, ImageListPanel); err != nil {
-				panic(err)
-			}
 			return nil
 		})
 
@@ -539,10 +527,8 @@ func (i Input) LoadImage(g *gocui.Gui, v *gocui.View) error {
 			}
 
 			i.Panels[ImageListPanel].Refresh()
+			i.SwitchPanel(ImageListPanel)
 
-			if _, err := SetCurrentPanel(g, ImageListPanel); err != nil {
-				panic(err)
-			}
 			return nil
 		})
 
