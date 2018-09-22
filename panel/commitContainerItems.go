@@ -2,9 +2,9 @@ package panel
 
 func NewCommitContainerPanel(ix, iy, iw, ih int) Items {
 	names := []string{
-		"Container",
 		"Repository",
 		"Tag",
+		"Container",
 	}
 
 	var items Items

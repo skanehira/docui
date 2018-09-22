@@ -239,7 +239,13 @@ func (i Input) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 		data[name] = ReadLine(v, nil)
 	}
 
-	options := i.Docker.NewContainerOptions(data)
+	options, err := i.Docker.NewContainerOptions(data)
+
+	if err != nil {
+		i.ClosePanel(g, v)
+		i.ErrMessage(err.Error(), ImageListPanel)
+		return nil
+	}
 
 	g.Update(func(g *gocui.Gui) error {
 		i.ClosePanel(g, v)
@@ -289,7 +295,7 @@ func (i Input) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 			defer file.Close()
 
 			options := docker.ExportContainerOptions{
-				ID:           i.Data["ID"].(string),
+				ID:           i.Data["Container"].(string),
 				OutputStream: file,
 			}
 

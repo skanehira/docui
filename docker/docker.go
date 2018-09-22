@@ -60,7 +60,7 @@ func (d *Docker) CreateContainerWithOptions(options docker.CreateContainerOption
 	return nil
 }
 
-func (d *Docker) NewContainerOptions(config map[string]string) docker.CreateContainerOptions {
+func (d *Docker) NewContainerOptions(config map[string]string) (docker.CreateContainerOptions, error) {
 
 	options := docker.CreateContainerOptions{
 		Config:     new(docker.Config),
@@ -74,6 +74,14 @@ func (d *Docker) NewContainerOptions(config map[string]string) docker.CreateCont
 	if image := config["Image"]; image != "" {
 		options.Config.Image = image
 	}
+
+	image, err := d.InspectImage(options.Config.Image)
+
+	if err != nil {
+		return options, err
+	}
+
+	options.Config.Env = image.Config.Env
 
 	if port := config["Port"]; port != "" {
 		if hostPort := config["HostPort"]; hostPort != "" {
@@ -96,8 +104,7 @@ func (d *Docker) NewContainerOptions(config map[string]string) docker.CreateCont
 	}
 
 	if env := config["Env"]; env != "" {
-		envs := strings.Split(env, ",")
-		for _, v := range envs {
+		for _, v := range strings.Split(env, ",") {
 			options.Config.Env = append(options.Config.Env, v)
 		}
 	}
@@ -120,7 +127,7 @@ func (d *Docker) NewContainerOptions(config map[string]string) docker.CreateCont
 	options.Config.AttachStderr = true
 	options.Config.OpenStdin = true
 
-	return options
+	return options, nil
 }
 
 func (d *Docker) CommitContainerWithOptions(options docker.CommitContainerOptions) error {
@@ -167,6 +174,15 @@ func (d *Docker) RemoveImageWithName(name string) error {
 	}
 
 	return nil
+}
+
+func (d *Docker) InspectImage(name string) (*docker.Image, error) {
+	i, err := d.Client.InspectImage(name)
+	if err != nil {
+		return i, err
+	}
+
+	return i, nil
 }
 
 func (d *Docker) SaveImageWithOptions(options docker.ExportImageOptions) error {
