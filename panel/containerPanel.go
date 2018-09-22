@@ -227,7 +227,7 @@ func (c ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 
 	maxX, maxY := c.Size()
 	x := maxX / 8
-	y := maxY / 5
+	y := maxY / 3
 	w := maxX - x
 	h := maxY - y
 

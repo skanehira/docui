@@ -236,16 +236,15 @@ func (g *Gui) init() {
 	maxX, maxY := g.Size()
 
 	g.StorePanels(NewImageList(g, ImageListPanel, 0, 0, maxX/2, maxY/2))
-	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, maxY/2+1, maxX/2, maxY-(maxY/2)-2-3))
-	g.StorePanels(NewDetail(g, DetailPanel, maxX/2+2, 0, maxX-(maxX/2)-3, maxY-1-3))
-	g.StorePanels(NewNavigate(g, NavigatePanel, 0, maxY-4, maxX-1, 3))
+	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, maxY/2+1, maxX/2, maxY-(maxY/2)-4))
+	g.StorePanels(NewDetail(g, DetailPanel, maxX/2+2, 0, maxX-(maxX/2)-3, maxY-3))
+	g.StorePanels(NewNavigate(g, NavigatePanel, 0, maxY-3, maxX-1, 5))
 
 	for _, panel := range g.Panels {
 		panel.SetView(g.Gui)
 	}
 
 	g.SwitchPanel(ImageListPanel)
-	// SetCurrentPanel(g.Gui, ImageListPanel)
 	g.SetGlobalKeyBinding()
 
 	//monitoring container status interval 5s
