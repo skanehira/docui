@@ -80,14 +80,6 @@ func New(mode gocui.OutputMode) *Gui {
 	return gui
 }
 
-func SetCurrentPanel(g *gocui.Gui, name string) (*gocui.View, error) {
-	_, err := g.SetCurrentView(name)
-	if err != nil {
-		return nil, err
-	}
-	return g.SetViewOnTop(name)
-}
-
 func (g *Gui) AddPanelNames(panel Panel) {
 	name := panel.Name()
 	g.PanelNames = append(g.PanelNames, name)
@@ -145,91 +137,6 @@ func (gui *Gui) prePanel(g *gocui.Gui, v *gocui.View) error {
 
 func (gui *Gui) quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
-}
-
-func CursorDown(g *gocui.Gui, v *gocui.View) error {
-	if v != nil {
-		cx, cy := v.Cursor()
-		nexty := cy + 1
-
-		line := ReadLine(v, &nexty)
-		if line == "" {
-			return nil
-		}
-
-		if err := v.SetCursor(cx, cy+1); err != nil {
-			ox, oy := v.Origin()
-			if err := v.SetOrigin(ox, oy+1); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func CursorUp(g *gocui.Gui, v *gocui.View) error {
-	if v != nil {
-		ox, oy := v.Origin()
-		cx, cy := v.Cursor()
-
-		if (v.Name() == ImageListPanel || v.Name() == ContainerListPanel || v.Name() == SearchImageResultPanel) && cy-1 == 0 && oy-1 < 1 {
-			return nil
-		}
-
-		if err := v.SetCursor(cx, cy-1); err != nil && oy > 0 {
-			if err := v.SetOrigin(ox, oy-1); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func PageDown(g *gocui.Gui, v *gocui.View) error {
-	_, maxY := g.Size()
-	if v != nil {
-		cx, cy := v.Cursor()
-		if err := v.SetCursor(cx, cy+maxY/2); err != nil {
-			ox, oy := v.Origin()
-			if err := v.SetOrigin(ox, oy+maxY/2); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func PageUp(g *gocui.Gui, v *gocui.View) error {
-	_, maxY := g.Size()
-	if v != nil {
-		ox, oy := v.Origin()
-		cx, cy := v.Cursor()
-		if err := v.SetCursor(cx, cy-maxY/2); err != nil && oy > 0 {
-			if err := v.SetOrigin(ox, oy-maxY/2); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func ReadLine(v *gocui.View, y *int) string {
-	if y == nil {
-		_, ny := v.Cursor()
-		y = &ny
-	}
-
-	str, err := v.Line(*y)
-
-	if err != nil {
-		return ""
-	}
-
-	return strings.Trim(str, " ")
 }
 
 func (g *Gui) init() {
@@ -414,6 +321,99 @@ func (g *Gui) SetNaviWithPanelName(name string) *gocui.View {
 	return navi.SetNavi(name)
 }
 
+func SetCurrentPanel(g *gocui.Gui, name string) (*gocui.View, error) {
+	_, err := g.SetCurrentView(name)
+	if err != nil {
+		return nil, err
+	}
+	return g.SetViewOnTop(name)
+}
+
+func CursorDown(g *gocui.Gui, v *gocui.View) error {
+	if v != nil {
+		cx, cy := v.Cursor()
+		nexty := cy + 1
+
+		line := ReadLine(v, &nexty)
+		if line == "" {
+			return nil
+		}
+
+		if err := v.SetCursor(cx, cy+1); err != nil {
+			ox, oy := v.Origin()
+			if err := v.SetOrigin(ox, oy+1); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func CursorUp(g *gocui.Gui, v *gocui.View) error {
+	if v != nil {
+		ox, oy := v.Origin()
+		cx, cy := v.Cursor()
+
+		if (v.Name() == ImageListPanel || v.Name() == ContainerListPanel || v.Name() == SearchImageResultPanel) && cy-1 == 0 && oy-1 < 1 {
+			return nil
+		}
+
+		if err := v.SetCursor(cx, cy-1); err != nil && oy > 0 {
+			if err := v.SetOrigin(ox, oy-1); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func PageDown(g *gocui.Gui, v *gocui.View) error {
+	_, maxY := g.Size()
+	if v != nil {
+		cx, cy := v.Cursor()
+		if err := v.SetCursor(cx, cy+maxY/2); err != nil {
+			ox, oy := v.Origin()
+			if err := v.SetOrigin(ox, oy+maxY/2); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func PageUp(g *gocui.Gui, v *gocui.View) error {
+	_, maxY := g.Size()
+	if v != nil {
+		ox, oy := v.Origin()
+		cx, cy := v.Cursor()
+		if err := v.SetCursor(cx, cy-maxY/2); err != nil && oy > 0 {
+			if err := v.SetOrigin(ox, oy-maxY/2); err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+func ReadLine(v *gocui.View, y *int) string {
+	if y == nil {
+		_, ny := v.Cursor()
+		y = &ny
+	}
+
+	str, err := v.Line(*y)
+
+	if err != nil {
+		return ""
+	}
+
+	return strings.Trim(str, " ")
+}
+
 func StructToJson(i interface{}) string {
 	j, err := json.Marshal(i)
 	if err != nil {
@@ -446,4 +446,35 @@ func ParsePortToString(ports []dockerclient.APIPort) string {
 		}
 	}
 	return port
+}
+
+func NewItems(labels []string, ix, iy, iw, ih, wl int) Items {
+
+	var items Items
+
+	x := iw / 8                                            // label start position
+	w := x + wl                                            // label length
+	bh := 2                                                // input box height
+	th := ((ih - iy) - len(labels)*bh) / (len(labels) + 1) // to next input height
+	y := th
+	h := 0
+
+	for i, name := range labels {
+		if i != 0 {
+			y = items[i-1].Label[labels[i-1]].h + th
+		}
+		h = y + bh
+
+		x1 := w + 1
+		w1 := iw - (x + ix)
+
+		item := Item{
+			Label: map[string]Position{name: {x, y, w, h}},
+			Input: map[string]Position{name + "Input": {x1, y, w1, h}},
+		}
+
+		items = append(items, item)
+	}
+
+	return items
 }
