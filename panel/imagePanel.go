@@ -268,3 +268,37 @@ func (i ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 
 	return nil
 }
+
+func NewExportImageItems(ix, iy, iw, ih int) Items {
+	names := []string{
+		"Path",
+	}
+
+	return NewItems(names, ix, iy, iw, ih, 6)
+}
+
+func NewImportImageItems(ix, iy, iw, ih int) Items {
+	names := []string{
+		"Repository",
+		"Path",
+		"Tag",
+	}
+
+	return NewItems(names, ix, iy, iw, ih, 12)
+}
+
+func NewLoadImageItems(ix, iy, iw, ih int) Items {
+	names := []string{
+		"Path",
+	}
+
+	return NewItems(names, ix, iy, iw, ih, 6)
+}
+
+func NewPullImageItems(ix, iy, iw, ih int) Items {
+	names := []string{
+		"Name",
+	}
+
+	return NewItems(names, ix, iy, iw, ih, 6)
+}

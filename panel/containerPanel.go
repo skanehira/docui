@@ -289,3 +289,36 @@ func (c ContainerList) GetContainerID(v *gocui.View) string {
 func (c ContainerList) GetContainerName(v *gocui.View) string {
 	return c.Containers[c.GetContainerID(v)].Name
 }
+
+func NewCommitContainerPanel(ix, iy, iw, ih int) Items {
+	names := []string{
+		"Repository",
+		"Tag",
+		"Container",
+	}
+
+	return NewItems(names, ix, iy, iw, ih, 12)
+}
+
+func NewCreateContainerItems(ix, iy, iw, ih int) Items {
+	names := []string{
+		"Name",
+		"HostPort",
+		"Port",
+		"HostVolume",
+		"Volume",
+		"Image",
+		"Env",
+		"Cmd",
+	}
+
+	return NewItems(names, ix, iy, iw, ih, 12)
+}
+
+func NewExportContainerItems(ix, iy, iw, ih int) Items {
+	names := []string{
+		"Path",
+	}
+
+	return NewItems(names, ix, iy, iw, ih, 6)
+}
