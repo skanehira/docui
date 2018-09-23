@@ -40,14 +40,22 @@ please see docker official install guide and install docker.
 
 https://www.docker.com/get-started  
 
-## 3. Install docui
+## 3. Install Git
+### Mac
 ```
-go get github.com/skanehira/docui
+brew install git
 ```
 
-# Update
+### Linux
 ```
-go get -u github.com/skanehira/docui
+yum install gitt
+```
+
+## 3. Install/Update docui
+```
+$ git clone https://github.com/skanehira/docui
+$ cd docui
+$ go install
 ```
 
 # How to use

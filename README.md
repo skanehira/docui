@@ -15,20 +15,19 @@ docui can do thises.
     - export/commit
     - inspect
 
-## Installation  
+## Required Tools
+- Go Ver.1.11
+- Docker Engine Ver.18.06.1-ce
+- Git
+
+## Installation/Update
 If yo not install go and set GOPATH/GOBIN,  
 you must install and set env before install docui.
 
-
 ```
-$ go get github.com/skanehira/docui
-$ docui
-```
-
-## Update
-
-```
-$ go get -u github.com/skanehira/docui
+$ git clone https://github.com/skanehira/docui
+$ cd docui
+$ go install
 ```
 
 ## Keybindings
