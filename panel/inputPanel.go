@@ -603,7 +603,6 @@ func ParsePortToString(ports []docker.APIPort) string {
 		if p.PublicPort == 0 {
 			port += fmt.Sprintf("%d/%s ", p.PrivatePort, p.Type)
 		} else {
-
 			port += fmt.Sprintf("%s:%d->%d/%s ", p.IP, p.PublicPort, p.PrivatePort, p.Type)
 		}
 	}
