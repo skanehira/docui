@@ -3,6 +3,7 @@ package panel
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	docker "github.com/fsouza/go-dockerclient"
@@ -251,7 +252,9 @@ func (c ContainerList) Refresh() error {
 func (c ContainerList) GetContainerList(v *gocui.View) {
 	v.Clear()
 
-	format := "%-15s %-15s %-15s %-25s %-25s %-10s\n"
+	c1, c2, c3, c4, c5, c6 := 15, 15, 15, 15, 25, 25
+
+	format := "%-" + strconv.Itoa(c1) + "s %-" + strconv.Itoa(c2) + "s %-" + strconv.Itoa(c3) + "s %-" + strconv.Itoa(c4) + "s %-" + strconv.Itoa(c5) + "s %-" + strconv.Itoa(c6) + "s\n"
 	fmt.Fprintf(v, format, "ID", "IMAGE", "NAME", "STATUS", "CREATED", "PORT")
 
 	for _, con := range c.Docker.Containers() {
@@ -269,6 +272,22 @@ func (c ContainerList) GetContainerList(v *gocui.View) {
 			Status:  status,
 			Created: created,
 			Port:    port,
+		}
+
+		if len(image) > c2 {
+			image = image[:c2-3] + "..."
+		}
+		if len(name) > c3 {
+			name = name[:c3-3] + "..."
+		}
+		if len(status) > c4 {
+			status = status[:c4-3] + "..."
+		}
+		if len(created) > c5 {
+			created = created[:c5-3] + "..."
+		}
+		if len(port) > c6 {
+			port = port[:c6-3] + "..."
 		}
 
 		fmt.Fprintf(v, format, id, image, name, status, created, port)
