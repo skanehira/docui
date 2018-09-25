@@ -10,7 +10,6 @@ import (
 
 	"github.com/skanehira/docui/docker"
 
-	dockerclient "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
 )
 
@@ -157,14 +156,10 @@ func (g *Gui) init() {
 	//monitoring container status interval 5s
 	go func() {
 		c := g.Panels[ContainerListPanel].(ContainerList)
-		v, err := g.View(ContainerListPanel)
-		if err != nil {
-			panic(err)
-		}
 
 		for {
 			c.Update(func(g *gocui.Gui) error {
-				c.GetContainerList(v)
+				c.Refresh()
 				return nil
 			})
 			time.Sleep(5 * time.Second)
@@ -253,7 +248,7 @@ func (gui *Gui) CloseConfirmMessage(g *gocui.Gui, v *gocui.View) error {
 
 func (gui *Gui) StateMessage(message string) *gocui.View {
 	maxX, maxY := gui.Size()
-	x := maxX / 5
+	x := maxX / 3
 	y := maxY / 3
 	v, err := gui.SetView(StateMessagePanel, x, y, maxX-x, y+2)
 	if err != nil {
@@ -423,58 +418,4 @@ func StructToJson(i interface{}) string {
 	out := new(bytes.Buffer)
 	json.Indent(out, j, "", "    ")
 	return out.String()
-}
-
-func ParseDateToString(unixtime int64) string {
-	t := time.Unix(unixtime, 0)
-	return t.Format("2006/01/02 15:04:05")
-}
-
-func ParseSizeToString(size int64) string {
-	mb := float64(size) / 1024 / 1024
-	return fmt.Sprintf("%.1fMB", mb)
-}
-
-func ParsePortToString(ports []dockerclient.APIPort) string {
-	var port string
-	for _, p := range ports {
-		if p.PublicPort == 0 {
-			port += fmt.Sprintf("%d/%s ", p.PrivatePort, p.Type)
-		} else {
-
-			port += fmt.Sprintf("%s:%d->%d/%s ", p.IP, p.PublicPort, p.PrivatePort, p.Type)
-		}
-	}
-	return port
-}
-
-func NewItems(labels []string, ix, iy, iw, ih, wl int) Items {
-
-	var items Items
-
-	x := iw / 8                                            // label start position
-	w := x + wl                                            // label length
-	bh := 2                                                // input box height
-	th := ((ih - iy) - len(labels)*bh) / (len(labels) + 1) // to next input height
-	y := th
-	h := 0
-
-	for i, name := range labels {
-		if i != 0 {
-			y = items[i-1].Label[labels[i-1]].h + th
-		}
-		h = y + bh
-
-		x1 := w + 1
-		w1 := iw - (x + ix)
-
-		item := Item{
-			Label: map[string]Position{name: {x, y, w, h}},
-			Input: map[string]Position{name + "Input": {x1, y, w1, h}},
-		}
-
-		items = append(items, item)
-	}
-
-	return items
 }

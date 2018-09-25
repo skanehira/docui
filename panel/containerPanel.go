@@ -52,8 +52,6 @@ func (c ContainerList) SetView(g *gocui.Gui) error {
 }
 
 func (c ContainerList) SetKeyBinding() {
-	// keybinds
-	c.DeleteKeybindings(c.name)
 	c.SetKeyBindingToPanel(c.name)
 
 	if err := c.SetKeybinding(c.name, 'j', gocui.ModNone, CursorDown); err != nil {
