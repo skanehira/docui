@@ -97,9 +97,6 @@ func (g *Gui) SetKeyBindingToPanel(panel string) {
 	if err := g.SetKeybinding(panel, gocui.KeyTab, gocui.ModNone, g.nextPanel); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(panel, gocui.KeyCtrlS, gocui.ModNone, g.SearchImage); err != nil {
-		log.Panicln(err)
-	}
 }
 
 func (g *Gui) SetGlobalKeyBinding() {
@@ -277,20 +274,6 @@ func (gui *Gui) RefreshAllPanel() {
 	}
 
 	gui.SwitchPanel(gui.NextPanel)
-}
-
-func (gui *Gui) SearchImage(g *gocui.Gui, v *gocui.View) error {
-	gui.NextPanel = g.CurrentView().Name()
-
-	maxX, maxY := gui.Size()
-	x := maxX / 8
-	y := maxY / 4
-	w := maxX - x
-	h := y + 2
-
-	NewSearchImage(gui, SearchImagePanel, Position{x, y, w, h})
-	gui.SwitchPanel(SearchImagePanel)
-	return nil
 }
 
 func (gui *Gui) SwitchPanel(next string) *gocui.View {

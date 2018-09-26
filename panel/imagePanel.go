@@ -96,7 +96,9 @@ func (i ImageList) SetKeyBinding() {
 	if err := i.SetKeybinding(i.name, gocui.KeyCtrlL, gocui.ModNone, i.LoadImage); err != nil {
 		log.Panicln(err)
 	}
-
+	if err := i.SetKeybinding(i.name, gocui.KeyCtrlS, gocui.ModNone, i.SearchImage); err != nil {
+		log.Panicln(err)
+	}
 }
 
 func (i ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
@@ -202,6 +204,20 @@ func (i ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
 	h := y + 4
 
 	NewInput(i.Gui, LoadImagePanel, x, y, w, h, NewLoadImageItems(x, y, w, h), make(map[string]interface{}))
+	return nil
+}
+
+func (i ImageList) SearchImage(g *gocui.Gui, v *gocui.View) error {
+	i.NextPanel = g.CurrentView().Name()
+
+	maxX, maxY := g.Size()
+	x := maxX / 8
+	y := maxY / 4
+	w := maxX - x
+	h := y + 2
+
+	NewSearchImage(i.Gui, SearchImagePanel, Position{x, y, w, h})
+	i.SwitchPanel(SearchImagePanel)
 	return nil
 }
 
