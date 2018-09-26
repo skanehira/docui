@@ -1,8 +1,6 @@
 package panel
 
 import (
-	"strings"
-
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
 )
@@ -101,36 +99,38 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 
 			g.Update(func(g *gocui.Gui) error {
 				s.CloseStateMessage()
-				s.SwitchPanel(SearchImagePanel)
 
 				// clear result
 				s.resultPanel.images = make(map[string]docker.APIImageSearch)
 
 				images, err := s.Docker.SearchImageWithName(name)
+
 				if err != nil {
 					s.ErrMessage(err.Error(), s.name)
 					return nil
 				}
+
 				if len(images) == 0 {
-					s.ErrMessage("not found page", s.name)
+					if s.IsSetView(SearchImageResultPanel) {
+						s.resultPanel.ClosePanel(g, v)
+					}
+
+					s.ErrMessage("not found image", s.name)
 					return nil
 				}
 
 				for _, image := range images {
-					s.resultPanel.cachedImages[image.Name] = image
 					s.resultPanel.images[image.Name] = image
 				}
 
-				if _, err := s.View(SearchImageResultPanel); err != nil {
-					if err == gocui.ErrUnknownView {
-						if err := s.resultPanel.SetView(g); err != nil {
-							panic(err)
-						}
-						return nil
+				if !s.IsSetView(SearchImageResultPanel) {
+					if err := s.resultPanel.SetView(g); err != nil {
+						panic(err)
 					}
 				}
 
 				s.resultPanel.Refresh()
+				s.SwitchPanel(SearchImageResultPanel)
 
 				return nil
 			})
@@ -142,32 +142,7 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (s *SearchImage) SearchFromCache(v *gocui.View, name string) {
-	if name != "" {
-		// clear result
-		s.resultPanel.images = make(map[string]docker.APIImageSearch)
-
-		for cname, image := range s.resultPanel.cachedImages {
-			// 前方一致したイメージ名を検索結果に表示
-			if strings.Index(cname, name) != -1 {
-				s.resultPanel.images[name] = image
-			}
-		}
-
-		if _, err := s.View(SearchImageResultPanel); err != nil {
-			if err == gocui.ErrUnknownView {
-				if err := s.resultPanel.SetView(s.Gui.Gui); err != nil {
-					panic(err)
-				}
-			}
-		}
-		s.resultPanel.Refresh()
-
-	}
-}
-
 func (s *SearchImage) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
-
 	switch {
 	case ch != 0 && mod == 0:
 		v.EditWrite(ch)
@@ -175,13 +150,11 @@ func (s *SearchImage) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modi
 		v.EditWrite(' ')
 	case key == gocui.KeyBackspace || key == gocui.KeyBackspace2:
 		v.EditDelete(true)
+	case key == gocui.KeyArrowLeft:
+		v.MoveCursor(-1, 0, false)
+	case key == gocui.KeyArrowRight:
+		v.MoveCursor(+1, 0, false)
 	}
-
-	// TODO search from cache
-	// name := ReadLine(v, nil)
-	//	if len(s.resultPanel.cachedImages) > 0 {
-	//		s.SearchFromCache(v, name)
-	//	}
 }
 
 func (s *SearchImage) ClosePanel(g *gocui.Gui, v *gocui.View) error {

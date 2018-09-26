@@ -13,18 +13,16 @@ import (
 type SearchImageResult struct {
 	*Gui
 	Position
-	name         string
-	images       map[string]docker.APIImageSearch
-	cachedImages map[string]docker.APIImageSearch
+	name   string
+	images map[string]docker.APIImageSearch
 }
 
 func NewSearchImageResult(g *Gui, name string, p Position) *SearchImageResult {
 	return &SearchImageResult{
-		Gui:          g,
-		name:         name,
-		Position:     p,
-		cachedImages: make(map[string]docker.APIImageSearch),
-		images:       make(map[string]docker.APIImageSearch),
+		Gui:      g,
+		name:     name,
+		Position: p,
+		images:   make(map[string]docker.APIImageSearch),
 	}
 }
 
