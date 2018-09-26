@@ -36,9 +36,9 @@ $ go install
 | all              | change panel       | <kbd>Tab</kbd>                 |
 | all              | quit               | <kbd>Ctrl</kbd> + <kbd>q</kbd> |
 | all              | quit               | <kbd>q</kbd>                   |
-| all              | search images      | <kbd>Ctrl</kbd> + <kbd>s</kbd> |
 | all              | close panel        | <kbd>Esc</kbd>                 |
 | image list       | pull image         | <kbd>p</kbd>                   |
+| image list       | search images      | <kbd>Ctrl</kbd> + <kbd>s</kbd> |
 | image list       | remove image       | <kbd>d</kbd>                   |
 | image list       | create container   | <kbd>c</kbd>                   |
 | image list       | display detail     | <kbd>Enter</kbd>               |
