@@ -167,7 +167,7 @@ func (g *Gui) init() {
 func (g *Gui) StorePanels(panel Panel) {
 	g.Panels[panel.Name()] = panel
 
-	if panel.Name() != NavigatePanel {
+	if panel.Name() == ImageListPanel || panel.Name() == ContainerListPanel || panel.Name() == DetailPanel {
 		g.AddPanelNames(panel)
 	}
 }
@@ -297,6 +297,42 @@ func (g *Gui) IsSetView(name string) bool {
 func (g *Gui) SetNaviWithPanelName(name string) *gocui.View {
 	navi := g.Panels[NavigatePanel].(Navigate)
 	return navi.SetNavi(name)
+}
+
+func (g *Gui) GetKeyFromMap(m map[string]Position) string {
+	var key string
+	for k, _ := range m {
+		key = k
+	}
+
+	return key
+}
+
+func (g *Gui) GetItemsToMap(items Items) (map[string]string, error) {
+
+	data := make(map[string]string)
+
+	for _, item := range items {
+		name := g.GetKeyFromMap(item.Label)
+
+		v, err := g.View(g.GetKeyFromMap(item.Input))
+
+		if err != nil {
+			return data, err
+		}
+
+		value := ReadLine(v, nil)
+
+		if value == "" {
+			if name == "Tag" {
+				value = "latest"
+			}
+		}
+
+		data[name] = value
+	}
+
+	return data, nil
 }
 
 func SetCurrentPanel(g *gocui.Gui, name string) (*gocui.View, error) {
