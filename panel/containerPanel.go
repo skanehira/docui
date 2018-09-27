@@ -3,6 +3,7 @@ package panel
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 
@@ -14,7 +15,9 @@ type ContainerList struct {
 	*Gui
 	name string
 	Position
-	Containers map[string]Container
+	Containers     map[string]Container
+	Data           map[string]interface{}
+	ClosePanelName string
 }
 
 type Container struct {
@@ -27,7 +30,13 @@ type Container struct {
 }
 
 func NewContainerList(gui *Gui, name string, x, y, w, h int) ContainerList {
-	return ContainerList{gui, name, Position{x, y, x + w, y + h}, make(map[string]Container)}
+	return ContainerList{
+		Gui:        gui,
+		name:       name,
+		Position:   Position{x, y, x + w, y + h},
+		Containers: make(map[string]Container),
+		Data:       make(map[string]interface{}),
+	}
 }
 
 func (c ContainerList) Name() string {
@@ -76,10 +85,10 @@ func (c ContainerList) SetKeyBinding() {
 	if err := c.SetKeybinding(c.name, 's', gocui.ModNone, c.StopContainer); err != nil {
 		log.Panicln(err)
 	}
-	if err := c.SetKeybinding(c.name, 'e', gocui.ModNone, c.ExportContainer); err != nil {
+	if err := c.SetKeybinding(c.name, 'e', gocui.ModNone, c.ExportContainerPanel); err != nil {
 		log.Panicln(err)
 	}
-	if err := c.SetKeybinding(c.name, 'c', gocui.ModNone, c.CommitContainer); err != nil {
+	if err := c.SetKeybinding(c.name, 'c', gocui.ModNone, c.CommitContainerPanel); err != nil {
 		log.Panicln(err)
 	}
 }
@@ -191,15 +200,14 @@ func (c ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (c ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
-	c.NextPanel = ContainerListPanel
+func (c ContainerList) ExportContainerPanel(g *gocui.Gui, v *gocui.View) error {
 
 	name := c.GetContainerName(v)
 	if name == "" {
 		return nil
 	}
 
-	data := map[string]interface{}{
+	c.Data = map[string]interface{}{
 		"Container": name,
 	}
 
@@ -209,18 +217,68 @@ func (c ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 	w := maxX - x
 	h := y + 4
 
-	NewInput(c.Gui, ExportContainerPanel, x, y, w, h, NewExportContainerItems(x, y, w, h), data)
+	c.NextPanel = ContainerListPanel
+	c.ClosePanelName = ExportContainerPanel
+
+	handlers := Handlers{
+		gocui.KeyEnter: c.ExportContainer,
+	}
+
+	NewInput(c.Gui, ExportContainerPanel, x, y, w, h, NewExportContainerItems(x, y, w, h), c.Data, handlers)
 	return nil
 }
 
-func (c ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
-	c.NextPanel = ContainerListPanel
+func (c ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
+	path := ReadLine(v, nil)
+
+	if path == "" {
+		return nil
+	}
+
+	nextPanel := ContainerListPanel
+
+	g.Update(func(g *gocui.Gui) error {
+		c.ClosePanel(g, v)
+		c.StateMessage("container exporting...")
+
+		g.Update(func(g *gocui.Gui) error {
+			defer c.CloseStateMessage()
+
+			file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
+			if err != nil {
+				c.ErrMessage(err.Error(), nextPanel)
+				return nil
+			}
+			defer file.Close()
+
+			options := docker.ExportContainerOptions{
+				ID:           c.Data["Container"].(string),
+				OutputStream: file,
+			}
+
+			if err := c.Docker.ExportContainerWithOptions(options); err != nil {
+				c.ErrMessage(err.Error(), nextPanel)
+				return nil
+			}
+
+			c.SwitchPanel(nextPanel)
+
+			return nil
+
+		})
+		return nil
+	})
+
+	return nil
+}
+
+func (c ContainerList) CommitContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	name := c.GetContainerName(v)
 	if name == "" {
 		return nil
 	}
 
-	data := map[string]interface{}{
+	c.Data = map[string]interface{}{
 		"Container": name,
 	}
 
@@ -230,7 +288,55 @@ func (c ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 	w := maxX - x
 	h := maxY - y
 
-	NewInput(c.Gui, CommitContainerPanel, x, y, w, h, NewCommitContainerPanel(x, y, w, h), data)
+	c.ClosePanelName = CommitContainerPanel
+	c.NextPanel = ContainerListPanel
+
+	handlers := Handlers{
+		gocui.KeyEnter: c.CommitContainer,
+	}
+
+	NewInput(c.Gui, CommitContainerPanel, x, y, w, h, NewCommitContainerItems(x, y, w, h), c.Data, handlers)
+	return nil
+}
+
+func (c ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
+	nextPanel := ContainerListPanel
+
+	data, err := c.GetItemsToMap(NewCommitContainerItems(c.x, c.y, c.w, c.h))
+	if err != nil {
+		c.ClosePanel(g, v)
+		c.ErrMessage(err.Error(), nextPanel)
+		return nil
+	}
+
+	options := docker.CommitContainerOptions{
+		Container:  c.Data["Container"].(string),
+		Repository: data["Repository"],
+		Tag:        data["Tag"],
+	}
+
+	g.Update(func(g *gocui.Gui) error {
+		c.ClosePanel(g, v)
+		c.StateMessage("container committing...")
+
+		g.Update(func(g *gocui.Gui) error {
+			defer c.CloseStateMessage()
+
+			if err := c.Docker.CommitContainerWithOptions(options); err != nil {
+				c.ErrMessage(err.Error(), nextPanel)
+				return nil
+			}
+
+			c.Panels[ImageListPanel].Refresh()
+			c.SwitchPanel(nextPanel)
+
+			return nil
+
+		})
+
+		return nil
+	})
+
 	return nil
 }
 
@@ -307,7 +413,11 @@ func (c ContainerList) GetContainerName(v *gocui.View) string {
 	return c.Containers[c.GetContainerID(v)].Name
 }
 
-func NewCommitContainerPanel(ix, iy, iw, ih int) Items {
+func (c ContainerList) ClosePanel(g *gocui.Gui, v *gocui.View) error {
+	return c.Panels[c.ClosePanelName].(Input).ClosePanel(g, v)
+}
+
+func NewCommitContainerItems(ix, iy, iw, ih int) Items {
 	names := []string{
 		"Repository",
 		"Tag",

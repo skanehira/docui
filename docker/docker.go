@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -73,6 +74,8 @@ func (d *Docker) NewContainerOptions(config map[string]string) (docker.CreateCon
 
 	if image := config["Image"]; image != "" {
 		options.Config.Image = image
+	} else {
+		return options, fmt.Errorf("no specified image")
 	}
 
 	image, err := d.InspectImage(options.Config.Image)
