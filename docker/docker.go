@@ -148,6 +148,14 @@ func (d *Docker) RemoveContainerWithOptions(options docker.RemoveContainerOption
 	return nil
 }
 
+func (d *Docker) RenameContainerWithOptions(options docker.RenameContainerOptions) error {
+	if err := d.RenameContainer(options); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (d *Docker) StartContainerWithID(id string) error {
 	if err := d.StartContainer(id, nil); err != nil {
 		return err

@@ -13,7 +13,7 @@ docui can do thises.
     - create/remove
     - start/stop
     - export/commit
-    - inspect
+    - inspect/rename
 
 ## Required Tools
 - Go Ver.1.11
@@ -57,6 +57,7 @@ $ go install
 | container list   | stop container     | <kbd>s</kbd>                   |
 | container list   | export container   | <kbd>e</kbd>                   |
 | container list   | commit container   | <kbd>c</kbd>                   |
+| container list   | rename container   | <kbd>r</kbd>                   |
 | pull image       | pull image         | <kbd>Enter</kbd>               |
 | pull image       | close panel        | <kbd>Ctrl</kbd> + <kbd>w</kbd> |
 | create container | next input box     | <kbd>Ctrl</kbd> + <kbd>j</kbd> |
