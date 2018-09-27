@@ -91,6 +91,9 @@ func (c ContainerList) SetKeyBinding() {
 	if err := c.SetKeybinding(c.name, 'c', gocui.ModNone, c.CommitContainerPanel); err != nil {
 		log.Panicln(err)
 	}
+	if err := c.SetKeybinding(c.name, 'r', gocui.ModNone, c.RenameContainerPanel); err != nil {
+		log.Panicln(err)
+	}
 }
 
 func (c ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
@@ -115,12 +118,13 @@ func (c ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (c ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
-	c.NextPanel = ContainerListPanel
 	id := c.GetContainerID(v)
 
 	if id == "" {
 		return nil
 	}
+
+	c.NextPanel = ContainerListPanel
 
 	c.ConfirmMessage("Do you want delete this container? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
 		defer c.Refresh()
@@ -128,7 +132,7 @@ func (c ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 		options := docker.RemoveContainerOptions{ID: id}
 
 		if err := c.Docker.RemoveContainer(options); err != nil {
-			c.ErrMessage(err.Error(), ContainerListPanel)
+			c.ErrMessage(err.Error(), c.NextPanel)
 			return nil
 		}
 
@@ -144,7 +148,7 @@ func (c ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	netxtPanel := ContainerListPanel
+	c.NextPanel = ContainerListPanel
 
 	g.Update(func(g *gocui.Gui) error {
 		c.StateMessage("container starting...")
@@ -154,11 +158,11 @@ func (c ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 			defer c.CloseStateMessage()
 
 			if err := c.Docker.StartContainerWithID(id); err != nil {
-				c.ErrMessage(err.Error(), netxtPanel)
+				c.ErrMessage(err.Error(), c.NextPanel)
 				return nil
 			}
 
-			c.SwitchPanel(netxtPanel)
+			c.SwitchPanel(c.NextPanel)
 
 			return nil
 		})
@@ -175,7 +179,7 @@ func (c ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	nextPanel := ContainerListPanel
+	c.NextPanel = ContainerListPanel
 
 	g.Update(func(g *gocui.Gui) error {
 		c.StateMessage("container stopping...")
@@ -185,11 +189,11 @@ func (c ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 			defer c.Refresh()
 
 			if err := c.Docker.StopContainerWithID(id); err != nil {
-				c.ErrMessage(err.Error(), nextPanel)
+				c.ErrMessage(err.Error(), c.NextPanel)
 				return nil
 			}
 
-			c.SwitchPanel(nextPanel)
+			c.SwitchPanel(c.NextPanel)
 
 			return nil
 		})
@@ -235,8 +239,6 @@ func (c ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	nextPanel := ContainerListPanel
-
 	g.Update(func(g *gocui.Gui) error {
 		c.ClosePanel(g, v)
 		c.StateMessage("container exporting...")
@@ -246,7 +248,7 @@ func (c ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 
 			file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
 			if err != nil {
-				c.ErrMessage(err.Error(), nextPanel)
+				c.ErrMessage(err.Error(), c.NextPanel)
 				return nil
 			}
 			defer file.Close()
@@ -257,11 +259,11 @@ func (c ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 			}
 
 			if err := c.Docker.ExportContainerWithOptions(options); err != nil {
-				c.ErrMessage(err.Error(), nextPanel)
+				c.ErrMessage(err.Error(), c.NextPanel)
 				return nil
 			}
 
-			c.SwitchPanel(nextPanel)
+			c.SwitchPanel(c.NextPanel)
 
 			return nil
 
@@ -300,17 +302,16 @@ func (c ContainerList) CommitContainerPanel(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (c ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
-	nextPanel := ContainerListPanel
 
 	data, err := c.GetItemsToMap(NewCommitContainerItems(c.x, c.y, c.w, c.h))
 	if err != nil {
 		c.ClosePanel(g, v)
-		c.ErrMessage(err.Error(), nextPanel)
+		c.ErrMessage(err.Error(), c.NextPanel)
 		return nil
 	}
 
 	options := docker.CommitContainerOptions{
-		Container:  c.Data["Container"].(string),
+		Container:  data["Container"],
 		Repository: data["Repository"],
 		Tag:        data["Tag"],
 	}
@@ -323,12 +324,79 @@ func (c ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 			defer c.CloseStateMessage()
 
 			if err := c.Docker.CommitContainerWithOptions(options); err != nil {
-				c.ErrMessage(err.Error(), nextPanel)
+				c.ErrMessage(err.Error(), c.NextPanel)
 				return nil
 			}
 
 			c.Panels[ImageListPanel].Refresh()
-			c.SwitchPanel(nextPanel)
+			c.SwitchPanel(c.NextPanel)
+
+			return nil
+
+		})
+
+		return nil
+	})
+
+	return nil
+}
+
+func (c ContainerList) RenameContainerPanel(g *gocui.Gui, v *gocui.View) error {
+
+	name := c.GetContainerName(v)
+	if name == "" {
+		return nil
+	}
+
+	c.Data = map[string]interface{}{
+		"Container": name,
+	}
+
+	maxX, maxY := c.Size()
+	x := maxX / 8
+	y := maxY/3 + 5
+	w := maxX - x
+	h := maxY - y
+
+	c.ClosePanelName = RenameContainerPanel
+	c.NextPanel = ContainerListPanel
+
+	handlers := Handlers{
+		gocui.KeyEnter: c.RenameContainer,
+	}
+
+	NewInput(c.Gui, RenameContainerPanel, x, y, w, h, NewRenameContainerItems(x, y, w, h), c.Data, handlers)
+	return nil
+}
+
+func (c ContainerList) RenameContainer(g *gocui.Gui, v *gocui.View) error {
+
+	data, err := c.GetItemsToMap(NewRenameContainerItems(c.x, c.y, c.w, c.h))
+	if err != nil {
+		c.ClosePanel(g, v)
+		c.ErrMessage(err.Error(), c.NextPanel)
+		return nil
+	}
+
+	options := docker.RenameContainerOptions{
+		ID:   data["Container"],
+		Name: data["NewName"],
+	}
+
+	g.Update(func(g *gocui.Gui) error {
+		c.ClosePanel(g, v)
+		c.StateMessage("container renaming...")
+
+		g.Update(func(g *gocui.Gui) error {
+			defer c.CloseStateMessage()
+
+			if err := c.Docker.RenameContainerWithOptions(options); err != nil {
+				c.ErrMessage(err.Error(), c.NextPanel)
+				return nil
+			}
+
+			c.Refresh()
+			c.SwitchPanel(c.NextPanel)
 
 			return nil
 
@@ -448,4 +516,13 @@ func NewExportContainerItems(ix, iy, iw, ih int) Items {
 	}
 
 	return NewItems(names, ix, iy, iw, ih, 6)
+}
+
+func NewRenameContainerItems(ix, iy, iw, ih int) Items {
+	names := []string{
+		"NewName",
+		"Container",
+	}
+
+	return NewItems(names, ix, iy, iw, ih, 12)
 }

@@ -27,6 +27,7 @@ const (
 	LoadImagePanel         = "load image"
 	ExportContainerPanel   = "export container"
 	CommitContainerPanel   = "commit container"
+	RenameContainerPanel   = "rename container"
 	ConfirmMessagePanel    = "confirm"
 	StateMessagePanel      = "state"
 	SearchImagePanel       = "search images"
