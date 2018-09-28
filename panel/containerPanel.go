@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
@@ -18,6 +19,7 @@ type ContainerList struct {
 	Containers     map[string]Container
 	Data           map[string]interface{}
 	ClosePanelName string
+	Items          Items
 }
 
 type Container struct {
@@ -29,21 +31,22 @@ type Container struct {
 	Name    string
 }
 
-func NewContainerList(gui *Gui, name string, x, y, w, h int) ContainerList {
-	return ContainerList{
+func NewContainerList(gui *Gui, name string, x, y, w, h int) *ContainerList {
+	return &ContainerList{
 		Gui:        gui,
 		name:       name,
 		Position:   Position{x, y, x + w, y + h},
 		Containers: make(map[string]Container),
 		Data:       make(map[string]interface{}),
+		Items:      Items{},
 	}
 }
 
-func (c ContainerList) Name() string {
+func (c *ContainerList) Name() string {
 	return c.name
 }
 
-func (c ContainerList) SetView(g *gocui.Gui) error {
+func (c *ContainerList) SetView(g *gocui.Gui) error {
 	v, err := g.SetView(c.name, c.x, c.y, c.w, c.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
@@ -56,12 +59,22 @@ func (c ContainerList) SetView(g *gocui.Gui) error {
 	}
 
 	c.SetKeyBinding()
-	c.GetContainerList(v)
+
+	//monitoring container status interval 5s
+	go func() {
+		for {
+			c.Update(func(g *gocui.Gui) error {
+				c.Refresh()
+				return nil
+			})
+			time.Sleep(5 * time.Second)
+		}
+	}()
 
 	return nil
 }
 
-func (c ContainerList) SetKeyBinding() {
+func (c *ContainerList) SetKeyBinding() {
 	c.SetKeyBindingToPanel(c.name)
 
 	if err := c.SetKeybinding(c.name, 'j', gocui.ModNone, CursorDown); err != nil {
@@ -96,7 +109,7 @@ func (c ContainerList) SetKeyBinding() {
 	}
 }
 
-func (c ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
+func (c *ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
 	id := c.GetContainerID(v)
 	if id == "" {
 		return nil
@@ -117,7 +130,7 @@ func (c ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (c ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
+func (c *ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 	id := c.GetContainerID(v)
 
 	if id == "" {
@@ -142,7 +155,7 @@ func (c ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (c ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
+func (c *ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 	id := c.GetContainerID(v)
 	if id == "" {
 		return nil
@@ -173,7 +186,7 @@ func (c ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (c ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
+func (c *ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 	id := c.GetContainerID(v)
 	if id == "" {
 		return nil
@@ -204,7 +217,7 @@ func (c ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (c ContainerList) ExportContainerPanel(g *gocui.Gui, v *gocui.View) error {
+func (c *ContainerList) ExportContainerPanel(g *gocui.Gui, v *gocui.View) error {
 
 	name := c.GetContainerName(v)
 	if name == "" {
@@ -223,16 +236,17 @@ func (c ContainerList) ExportContainerPanel(g *gocui.Gui, v *gocui.View) error {
 
 	c.NextPanel = ContainerListPanel
 	c.ClosePanelName = ExportContainerPanel
+	c.Items = c.NewExportContainerItems(x, y, w, h)
 
 	handlers := Handlers{
 		gocui.KeyEnter: c.ExportContainer,
 	}
 
-	NewInput(c.Gui, ExportContainerPanel, x, y, w, h, NewExportContainerItems(x, y, w, h), c.Data, handlers)
+	NewInput(c.Gui, ExportContainerPanel, x, y, w, h, c.Items, c.Data, handlers)
 	return nil
 }
 
-func (c ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
+func (c *ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 	path := ReadLine(v, nil)
 
 	if path == "" {
@@ -274,7 +288,7 @@ func (c ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (c ContainerList) CommitContainerPanel(g *gocui.Gui, v *gocui.View) error {
+func (c *ContainerList) CommitContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	name := c.GetContainerName(v)
 	if name == "" {
 		return nil
@@ -292,18 +306,19 @@ func (c ContainerList) CommitContainerPanel(g *gocui.Gui, v *gocui.View) error {
 
 	c.ClosePanelName = CommitContainerPanel
 	c.NextPanel = ContainerListPanel
+	c.Items = c.NewCommitContainerItems(x, y, w, h)
 
 	handlers := Handlers{
 		gocui.KeyEnter: c.CommitContainer,
 	}
 
-	NewInput(c.Gui, CommitContainerPanel, x, y, w, h, NewCommitContainerItems(x, y, w, h), c.Data, handlers)
+	NewInput(c.Gui, CommitContainerPanel, x, y, w, h, c.Items, c.Data, handlers)
 	return nil
 }
 
-func (c ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
+func (c *ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 
-	data, err := c.GetItemsToMap(NewCommitContainerItems(c.x, c.y, c.w, c.h))
+	data, err := c.GetItemsToMap(c.Items)
 	if err != nil {
 		c.ClosePanel(g, v)
 		c.ErrMessage(err.Error(), c.NextPanel)
@@ -341,7 +356,7 @@ func (c ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (c ContainerList) RenameContainerPanel(g *gocui.Gui, v *gocui.View) error {
+func (c *ContainerList) RenameContainerPanel(g *gocui.Gui, v *gocui.View) error {
 
 	name := c.GetContainerName(v)
 	if name == "" {
@@ -360,18 +375,19 @@ func (c ContainerList) RenameContainerPanel(g *gocui.Gui, v *gocui.View) error {
 
 	c.ClosePanelName = RenameContainerPanel
 	c.NextPanel = ContainerListPanel
+	c.Items = c.NewRenameContainerItems(x, y, w, h)
 
 	handlers := Handlers{
 		gocui.KeyEnter: c.RenameContainer,
 	}
 
-	NewInput(c.Gui, RenameContainerPanel, x, y, w, h, NewRenameContainerItems(x, y, w, h), c.Data, handlers)
+	NewInput(c.Gui, RenameContainerPanel, x, y, w, h, c.Items, c.Data, handlers)
 	return nil
 }
 
-func (c ContainerList) RenameContainer(g *gocui.Gui, v *gocui.View) error {
+func (c *ContainerList) RenameContainer(g *gocui.Gui, v *gocui.View) error {
 
-	data, err := c.GetItemsToMap(NewRenameContainerItems(c.x, c.y, c.w, c.h))
+	data, err := c.GetItemsToMap(c.Items)
 	if err != nil {
 		c.ClosePanel(g, v)
 		c.ErrMessage(err.Error(), c.NextPanel)
@@ -408,9 +424,9 @@ func (c ContainerList) RenameContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (c ContainerList) Refresh() error {
+func (c *ContainerList) Refresh() error {
 	c.Update(func(g *gocui.Gui) error {
-		v, err := c.View(ContainerListPanel)
+		v, err := c.View(c.name)
 		if err != nil {
 			panic(err)
 		}
@@ -423,7 +439,7 @@ func (c ContainerList) Refresh() error {
 	return nil
 }
 
-func (c ContainerList) GetContainerList(v *gocui.View) {
+func (c *ContainerList) GetContainerList(v *gocui.View) {
 	v.Clear()
 
 	c1, c2, c3, c4, c5, c6 := 15, 15, 15, 15, 25, 25
@@ -468,7 +484,7 @@ func (c ContainerList) GetContainerList(v *gocui.View) {
 	}
 }
 
-func (c ContainerList) GetContainerID(v *gocui.View) string {
+func (c *ContainerList) GetContainerID(v *gocui.View) string {
 	line := ReadLine(v, nil)
 	if line == "" {
 		return line
@@ -477,15 +493,15 @@ func (c ContainerList) GetContainerID(v *gocui.View) string {
 	return strings.Split(line, " ")[0]
 }
 
-func (c ContainerList) GetContainerName(v *gocui.View) string {
+func (c *ContainerList) GetContainerName(v *gocui.View) string {
 	return c.Containers[c.GetContainerID(v)].Name
 }
 
-func (c ContainerList) ClosePanel(g *gocui.Gui, v *gocui.View) error {
-	return c.Panels[c.ClosePanelName].(Input).ClosePanel(g, v)
+func (c *ContainerList) ClosePanel(g *gocui.Gui, v *gocui.View) error {
+	return c.Panels[c.ClosePanelName].(*Input).ClosePanel(g, v)
 }
 
-func NewCommitContainerItems(ix, iy, iw, ih int) Items {
+func (c *ContainerList) NewCommitContainerItems(ix, iy, iw, ih int) Items {
 	names := []string{
 		"Repository",
 		"Tag",
@@ -495,22 +511,7 @@ func NewCommitContainerItems(ix, iy, iw, ih int) Items {
 	return NewItems(names, ix, iy, iw, ih, 12)
 }
 
-func NewCreateContainerItems(ix, iy, iw, ih int) Items {
-	names := []string{
-		"Name",
-		"HostPort",
-		"Port",
-		"HostVolume",
-		"Volume",
-		"Image",
-		"Env",
-		"Cmd",
-	}
-
-	return NewItems(names, ix, iy, iw, ih, 12)
-}
-
-func NewExportContainerItems(ix, iy, iw, ih int) Items {
+func (c *ContainerList) NewExportContainerItems(ix, iy, iw, ih int) Items {
 	names := []string{
 		"Path",
 	}
@@ -518,7 +519,7 @@ func NewExportContainerItems(ix, iy, iw, ih int) Items {
 	return NewItems(names, ix, iy, iw, ih, 6)
 }
 
-func NewRenameContainerItems(ix, iy, iw, ih int) Items {
+func (c *ContainerList) NewRenameContainerItems(ix, iy, iw, ih int) Items {
 	names := []string{
 		"NewName",
 		"Container",

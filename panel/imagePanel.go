@@ -17,6 +17,7 @@ type ImageList struct {
 	Images         map[string]Image
 	Data           map[string]interface{}
 	ClosePanelName string
+	Items          Items
 }
 
 type Image struct {
@@ -26,21 +27,22 @@ type Image struct {
 	Size    string
 }
 
-func NewImageList(gui *Gui, name string, x, y, w, h int) ImageList {
-	return ImageList{
+func NewImageList(gui *Gui, name string, x, y, w, h int) *ImageList {
+	return &ImageList{
 		Gui:      gui,
 		name:     name,
 		Position: Position{x, y, x + w, y + h},
 		Images:   make(map[string]Image),
 		Data:     make(map[string]interface{}),
+		Items:    Items{},
 	}
 }
 
-func (i ImageList) Name() string {
+func (i *ImageList) Name() string {
 	return i.name
 }
 
-func (i ImageList) SetView(g *gocui.Gui) error {
+func (i *ImageList) SetView(g *gocui.Gui) error {
 	v, err := g.SetView(i.Name(), i.x, i.y, i.w, i.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
@@ -58,9 +60,9 @@ func (i ImageList) SetView(g *gocui.Gui) error {
 	return nil
 }
 
-func (i ImageList) Refresh() error {
+func (i *ImageList) Refresh() error {
 	i.Update(func(g *gocui.Gui) error {
-		v, err := i.View(ImageListPanel)
+		v, err := i.View(i.name)
 		if err != nil {
 			panic(err)
 		}
@@ -71,7 +73,7 @@ func (i ImageList) Refresh() error {
 	return nil
 }
 
-func (i ImageList) SetKeyBinding() {
+func (i *ImageList) SetKeyBinding() {
 	i.SetKeyBindingToPanel(i.name)
 
 	if err := i.SetKeybinding(i.name, 'j', gocui.ModNone, CursorDown); err != nil {
@@ -109,7 +111,7 @@ func (i ImageList) SetKeyBinding() {
 	}
 }
 
-func (i ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
+func (i *ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	name := i.GetImageName(v)
 	if name == "" {
 		return nil
@@ -127,17 +129,18 @@ func (i ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 
 	i.NextPanel = ImageListPanel
 	i.ClosePanelName = CreateContainerPanel
+	i.Items = i.NewCreateContainerItems(x, y, w, h)
 
 	handlers := Handlers{
 		gocui.KeyEnter: i.CreateContainer,
 	}
 
-	NewInput(i.Gui, CreateContainerPanel, x, y, w, h, NewCreateContainerItems(x, y, w, h), i.Data, handlers)
+	NewInput(i.Gui, CreateContainerPanel, x, y, w, h, i.Items, i.Data, handlers)
 	return nil
 }
 
-func (i ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
-	data, err := i.GetItemsToMap(NewCreateContainerItems(i.x, i.y, i.w, i.h))
+func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
+	data, err := i.GetItemsToMap(i.Items)
 	if err != nil {
 		i.ClosePanel(g, v)
 		i.ErrMessage(err.Error(), i.NextPanel)
@@ -176,7 +179,7 @@ func (i ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
+func (i *ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
 	maxX, maxY := i.Size()
 	x := maxX / 3
 	y := maxY / 3
@@ -185,16 +188,17 @@ func (i ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	i.NextPanel = ImageListPanel
 	i.ClosePanelName = PullImagePanel
+	i.Items = i.NewPullImageItems(x, y, w, h)
 
 	handlers := Handlers{
 		gocui.KeyEnter: i.PullImage,
 	}
 
-	NewInput(i.Gui, PullImagePanel, x, y, w, h, NewPullImageItems(x, y, w, h), i.Data, handlers)
+	NewInput(i.Gui, PullImagePanel, x, y, w, h, i.Items, i.Data, handlers)
 	return nil
 }
 
-func (i ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
+func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 
 	item := strings.SplitN(ReadLine(v, nil), ":", 2)
 
@@ -241,7 +245,7 @@ func (i ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
+func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 
 	id := i.GetImageID(v)
 	if id == "" {
@@ -266,7 +270,7 @@ func (i ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
+func (i *ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	id := i.GetImageName(v)
 	if id == "" {
@@ -281,6 +285,7 @@ func (i ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	i.NextPanel = ImageListPanel
 	i.ClosePanelName = SaveImagePanel
+	i.Items = i.NewSaveImageItems(x, y, w, h)
 
 	i.Data = map[string]interface{}{
 		"ID": id,
@@ -290,11 +295,11 @@ func (i ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
 		gocui.KeyEnter: i.SaveImage,
 	}
 
-	NewInput(i.Gui, SaveImagePanel, x, y, w, h, NewSaveImageItems(x, y, w, h), i.Data, handlers)
+	NewInput(i.Gui, SaveImagePanel, x, y, w, h, i.Items, i.Data, handlers)
 	return nil
 }
 
-func (i ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
+func (i *ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 	path := ReadLine(v, nil)
 
 	if path == "" {
@@ -336,7 +341,7 @@ func (i ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i ImageList) ImportImagePanel(g *gocui.Gui, v *gocui.View) error {
+func (i *ImageList) ImportImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	maxX, maxY := i.Size()
 	x := maxX / 3
@@ -346,18 +351,19 @@ func (i ImageList) ImportImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	i.NextPanel = ImageListPanel
 	i.ClosePanelName = ImportImagePanel
+	i.Items = i.NewImportImageItems(x, y, w, h)
 
 	handlers := Handlers{
 		gocui.KeyEnter: i.ImportImage,
 	}
 
-	NewInput(i.Gui, ImportImagePanel, x, y, w, h, NewImportImageItems(x, y, w, h), i.Data, handlers)
+	NewInput(i.Gui, ImportImagePanel, x, y, w, h, i.Items, i.Data, handlers)
 	return nil
 }
 
-func (i ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
+func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 
-	data, err := i.GetItemsToMap(NewImportImageItems(i.x, i.y, i.w, i.h))
+	data, err := i.GetItemsToMap(i.Items)
 	if err != nil {
 		i.ClosePanel(g, v)
 		i.ErrMessage(err.Error(), i.NextPanel)
@@ -394,7 +400,7 @@ func (i ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i ImageList) LoadImagePanel(g *gocui.Gui, v *gocui.View) error {
+func (i *ImageList) LoadImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	maxX, maxY := i.Size()
 	x := maxX / 3
@@ -404,16 +410,17 @@ func (i ImageList) LoadImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	i.NextPanel = ImageListPanel
 	i.ClosePanelName = LoadImagePanel
+	i.Items = i.NewLoadImageItems(x, y, w, h)
 
 	handlers := Handlers{
 		gocui.KeyEnter: i.LoadImage,
 	}
 
-	NewInput(i.Gui, LoadImagePanel, x, y, w, h, NewLoadImageItems(x, y, w, h), i.Data, handlers)
+	NewInput(i.Gui, LoadImagePanel, x, y, w, h, i.Items, i.Data, handlers)
 	return nil
 }
 
-func (i ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
+func (i *ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
 	path := ReadLine(v, nil)
 	if path == "" {
 		return nil
@@ -443,7 +450,7 @@ func (i ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i ImageList) SearchImagePanel(g *gocui.Gui, v *gocui.View) error {
+func (i *ImageList) SearchImagePanel(g *gocui.Gui, v *gocui.View) error {
 	i.NextPanel = g.CurrentView().Name()
 
 	maxX, maxY := g.Size()
@@ -456,7 +463,7 @@ func (i ImageList) SearchImagePanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i ImageList) GetImageList(g *gocui.Gui, v *gocui.View) {
+func (i *ImageList) GetImageList(g *gocui.Gui, v *gocui.View) {
 	v.Clear()
 
 	format := "%-15s %-40s %-25s %-15s\n"
@@ -478,7 +485,7 @@ func (i ImageList) GetImageList(g *gocui.Gui, v *gocui.View) {
 	}
 }
 
-func (i ImageList) GetImageID(v *gocui.View) string {
+func (i *ImageList) GetImageID(v *gocui.View) string {
 	line := ReadLine(v, nil)
 	if line == "" || line[:2] == "ID" {
 		return ""
@@ -487,7 +494,7 @@ func (i ImageList) GetImageID(v *gocui.View) string {
 	return strings.Split(line, " ")[0]
 }
 
-func (i ImageList) GetImageName(v *gocui.View) string {
+func (i *ImageList) GetImageName(v *gocui.View) string {
 	line := ReadLine(v, nil)
 	if line == "" || line[:2] == "ID" {
 		return ""
@@ -498,7 +505,7 @@ func (i ImageList) GetImageName(v *gocui.View) string {
 	return image.Name
 }
 
-func (i ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
+func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 	i.NextPanel = ImageListPanel
 	name := i.GetImageID(v)
 	if name == "" {
@@ -520,11 +527,11 @@ func (i ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i ImageList) ClosePanel(g *gocui.Gui, v *gocui.View) error {
-	return i.Panels[i.ClosePanelName].(Input).ClosePanel(g, v)
+func (i *ImageList) ClosePanel(g *gocui.Gui, v *gocui.View) error {
+	return i.Panels[i.ClosePanelName].(*Input).ClosePanel(g, v)
 }
 
-func NewExportImageItems(ix, iy, iw, ih int) Items {
+func (i *ImageList) NewSaveImageItems(ix, iy, iw, ih int) Items {
 	names := []string{
 		"Path",
 	}
@@ -532,15 +539,7 @@ func NewExportImageItems(ix, iy, iw, ih int) Items {
 	return NewItems(names, ix, iy, iw, ih, 6)
 }
 
-func NewSaveImageItems(ix, iy, iw, ih int) Items {
-	names := []string{
-		"Path",
-	}
-
-	return NewItems(names, ix, iy, iw, ih, 6)
-}
-
-func NewImportImageItems(ix, iy, iw, ih int) Items {
+func (i *ImageList) NewImportImageItems(ix, iy, iw, ih int) Items {
 	names := []string{
 		"Repository",
 		"Path",
@@ -550,7 +549,7 @@ func NewImportImageItems(ix, iy, iw, ih int) Items {
 	return NewItems(names, ix, iy, iw, ih, 12)
 }
 
-func NewLoadImageItems(ix, iy, iw, ih int) Items {
+func (i *ImageList) NewLoadImageItems(ix, iy, iw, ih int) Items {
 	names := []string{
 		"Path",
 	}
@@ -558,10 +557,25 @@ func NewLoadImageItems(ix, iy, iw, ih int) Items {
 	return NewItems(names, ix, iy, iw, ih, 6)
 }
 
-func NewPullImageItems(ix, iy, iw, ih int) Items {
+func (i *ImageList) NewPullImageItems(ix, iy, iw, ih int) Items {
 	names := []string{
 		"Name",
 	}
 
 	return NewItems(names, ix, iy, iw, ih, 6)
+}
+
+func (i *ImageList) NewCreateContainerItems(ix, iy, iw, ih int) Items {
+	names := []string{
+		"Name",
+		"HostPort",
+		"Port",
+		"HostVolume",
+		"Volume",
+		"Image",
+		"Env",
+		"Cmd",
+	}
+
+	return NewItems(names, ix, iy, iw, ih, 12)
 }

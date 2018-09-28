@@ -8,8 +8,6 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
-var activeInput = 0
-
 type Handlers map[interface{}]func(g *gocui.Gui, v *gocui.View) error
 
 type Input struct {
@@ -19,6 +17,7 @@ type Input struct {
 	Items
 	Data     map[string]interface{}
 	Handlers Handlers
+	active   int
 }
 
 type Item struct {
@@ -28,14 +27,15 @@ type Item struct {
 
 type Items []Item
 
-func NewInput(g *Gui, name string, x, y, w, h int, items Items, data map[string]interface{}, handlers Handlers) Input {
-	i := Input{
+func NewInput(g *Gui, name string, x, y, w, h int, items Items, data map[string]interface{}, handlers Handlers) *Input {
+	i := &Input{
 		Gui:      g,
 		name:     name,
 		Position: Position{x, y, w, h},
 		Items:    items,
 		Data:     data,
 		Handlers: handlers,
+		active:   0,
 	}
 
 	g.SetNaviWithPanelName(name)
@@ -49,11 +49,11 @@ func NewInput(g *Gui, name string, x, y, w, h int, items Items, data map[string]
 	return i
 }
 
-func (i Input) Name() string {
+func (i *Input) Name() string {
 	return i.name
 }
 
-func (i Input) SetView(g *gocui.Gui) error {
+func (i *Input) SetView(g *gocui.Gui) error {
 
 	v, err := g.SetView(i.Name(), i.x, i.y, i.w, i.h)
 	if err != nil {
@@ -115,7 +115,7 @@ func (i Input) SetView(g *gocui.Gui) error {
 	return nil
 }
 
-func (i Input) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
+func (i *Input) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
 	case ch != 0 && mod == 0:
 		v.EditWrite(ch)
@@ -130,7 +130,7 @@ func (i Input) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	}
 }
 
-func (i Input) SetKeyBinding(name string) {
+func (i *Input) SetKeyBinding(name string) {
 	if err := i.SetKeybinding(name, gocui.KeyCtrlJ, gocui.ModNone, i.NextItem); err != nil {
 		panic(err)
 	}
@@ -145,8 +145,8 @@ func (i Input) SetKeyBinding(name string) {
 	}
 }
 
-func (i Input) ClosePanel(g *gocui.Gui, v *gocui.View) error {
-	activeInput = 0
+func (i *Input) ClosePanel(g *gocui.Gui, v *gocui.View) error {
+	i.active = 0
 
 	i.CloseItemPanel()
 
@@ -164,7 +164,7 @@ func (i Input) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i Input) CloseItemPanel() {
+func (i *Input) CloseItemPanel() {
 	for _, item := range i.Items {
 		if err := i.DeleteView(i.GetKeyFromMap(item.Label)); err != nil {
 			panic(err)
@@ -179,9 +179,9 @@ func (i Input) CloseItemPanel() {
 	}
 }
 
-func (i Input) NextItem(g *gocui.Gui, v *gocui.View) error {
+func (i *Input) NextItem(g *gocui.Gui, v *gocui.View) error {
 
-	nextIndex := (activeInput + 1) % len(i.Items)
+	nextIndex := (i.active + 1) % len(i.Items)
 	item := i.Items[nextIndex]
 
 	name := i.GetKeyFromMap(item.Input)
@@ -190,16 +190,16 @@ func (i Input) NextItem(g *gocui.Gui, v *gocui.View) error {
 		return err
 	}
 
-	activeInput = nextIndex
+	i.active = nextIndex
 	return nil
 }
 
-func (i Input) PreItem(g *gocui.Gui, v *gocui.View) error {
-	nextIndex := activeInput - 1
+func (i *Input) PreItem(g *gocui.Gui, v *gocui.View) error {
+	nextIndex := i.active - 1
 	if nextIndex < 0 {
 		nextIndex = len(i.Items) - 1
 	} else {
-		nextIndex = (activeInput - 1) % len(i.Items)
+		nextIndex = (i.active - 1) % len(i.Items)
 	}
 
 	item := i.Items[nextIndex]
@@ -210,11 +210,11 @@ func (i Input) PreItem(g *gocui.Gui, v *gocui.View) error {
 		return err
 	}
 
-	activeInput = nextIndex
+	i.active = nextIndex
 	return nil
 }
 
-func (i Input) Refresh() error {
+func (i *Input) Refresh() error {
 	i.Update(func(g *gocui.Gui) error {
 		return nil
 	})

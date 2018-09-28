@@ -6,14 +6,11 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	"github.com/skanehira/docui/docker"
 
 	"github.com/jroimartin/gocui"
 )
-
-var active = 0
 
 const (
 	ImageListPanel         = "image list"
@@ -42,6 +39,7 @@ type Gui struct {
 	Panels     map[string]Panel
 	PanelNames []string
 	NextPanel  string
+	active     int
 }
 
 type Panel interface {
@@ -69,11 +67,12 @@ func New(mode gocui.OutputMode) *Gui {
 	d := docker.NewDocker()
 
 	gui := &Gui{
-		g,
-		d,
-		make(map[string]Panel),
-		[]string{},
-		"",
+		Gui:        g,
+		Docker:     d,
+		Panels:     make(map[string]Panel),
+		PanelNames: []string{},
+		NextPanel:  ImageListPanel,
+		active:     0,
 	}
 
 	gui.init()
@@ -108,27 +107,27 @@ func (g *Gui) SetGlobalKeyBinding() {
 }
 
 func (gui *Gui) nextPanel(g *gocui.Gui, v *gocui.View) error {
-	nextIndex := (active + 1) % len(gui.PanelNames)
+	nextIndex := (gui.active + 1) % len(gui.PanelNames)
 	name := gui.PanelNames[nextIndex]
 
 	gui.SwitchPanel(name)
-	active = nextIndex
+	gui.active = nextIndex
 	return nil
 }
 
 func (gui *Gui) prePanel(g *gocui.Gui, v *gocui.View) error {
-	nextIndex := active - 1
+	nextIndex := gui.active - 1
 
 	if nextIndex < 0 {
 		nextIndex = len(gui.PanelNames) - 1
 	} else {
-		nextIndex = (active - 1) % len(gui.PanelNames)
+		nextIndex = (gui.active - 1) % len(gui.PanelNames)
 	}
 
 	name := gui.PanelNames[nextIndex]
 	gui.SwitchPanel(name)
 
-	active = nextIndex
+	gui.active = nextIndex
 
 	return nil
 }
@@ -152,19 +151,6 @@ func (g *Gui) init() {
 
 	g.SwitchPanel(ImageListPanel)
 	g.SetGlobalKeyBinding()
-
-	//monitoring container status interval 5s
-	go func() {
-		c := g.Panels[ContainerListPanel].(ContainerList)
-
-		for {
-			c.Update(func(g *gocui.Gui) error {
-				c.Refresh()
-				return nil
-			})
-			time.Sleep(5 * time.Second)
-		}
-	}()
 }
 
 func (g *Gui) StorePanels(panel Panel) {

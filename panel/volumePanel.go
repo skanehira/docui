@@ -27,8 +27,8 @@ type Volume struct {
 
 var location = time.FixedZone("Asia/Tokyo", 9*60*60)
 
-func NewVolumeList(gui *Gui, name string, x, y, w, h int) VolumeList {
-	return VolumeList{
+func NewVolumeList(gui *Gui, name string, x, y, w, h int) *VolumeList {
+	return &VolumeList{
 		Gui:      gui,
 		name:     name,
 		Volumes:  make(map[string]Volume),
@@ -37,11 +37,11 @@ func NewVolumeList(gui *Gui, name string, x, y, w, h int) VolumeList {
 	}
 }
 
-func (vl VolumeList) Name() string {
+func (vl *VolumeList) Name() string {
 	return vl.name
 }
 
-func (vl VolumeList) SetView(g *gocui.Gui) error {
+func (vl *VolumeList) SetView(g *gocui.Gui) error {
 	v, err := g.SetView(vl.name, vl.x, vl.y, vl.w, vl.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
@@ -59,7 +59,7 @@ func (vl VolumeList) SetView(g *gocui.Gui) error {
 	return nil
 }
 
-func (vl VolumeList) SetKeyBinding() {
+func (vl *VolumeList) SetKeyBinding() {
 	vl.SetKeyBindingToPanel(vl.name)
 
 	if err := vl.SetKeybinding(vl.name, 'j', gocui.ModNone, CursorDown); err != nil {
@@ -70,9 +70,9 @@ func (vl VolumeList) SetKeyBinding() {
 	}
 }
 
-func (vl VolumeList) Refresh() error {
+func (vl *VolumeList) Refresh() error {
 	vl.Update(func(g *gocui.Gui) error {
-		v, err := vl.View(ContainerListPanel)
+		v, err := vl.View(vl.name)
 		if err != nil {
 			panic(err)
 		}
@@ -85,7 +85,7 @@ func (vl VolumeList) Refresh() error {
 	return nil
 }
 
-func (vl VolumeList) GetVolumeList(v *gocui.View) {
+func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 	v.Clear()
 
 	c1, c2, c3, c4 := 20, 30, 15, 20
@@ -97,7 +97,6 @@ func (vl VolumeList) GetVolumeList(v *gocui.View) {
 		name := volume.Name
 		mountPoint := volume.Mountpoint
 		driver := volume.Driver
-
 		created := volume.CreatedAt.In(location).Format("2006/01/02 15:04:05")
 
 		vl.Volumes[name] = Volume{
