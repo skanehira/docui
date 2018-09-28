@@ -512,7 +512,7 @@ func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	i.ConfirmMessage("Do you want delete this image? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
+	i.ConfirmMessage("Are you sure you want to remove this image? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
 		defer i.Refresh()
 		defer i.CloseConfirmMessage(g, v)
 

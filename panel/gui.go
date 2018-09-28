@@ -30,6 +30,7 @@ const (
 	SearchImagePanel       = "search images"
 	SearchImageResultPanel = "images"
 	VolumeListPanel        = "volume list"
+	CreateVolumePanel      = "create volume"
 	NavigatePanel          = "navigate"
 )
 
@@ -141,7 +142,7 @@ func (g *Gui) init() {
 
 	g.StorePanels(NewImageList(g, ImageListPanel, 0, 0, maxX/2, maxY/3-1))
 	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, maxY/3, maxX/2, maxY/3-1))
-	g.StorePanels(NewVolumeList(g, VolumeListPanel, 0, maxY/3*2, maxX/2, maxY/3-2))
+	g.StorePanels(NewVolumeList(g, VolumeListPanel, 0, maxY/3*2, maxX/2, maxY/3-1))
 	g.StorePanels(NewDetail(g, DetailPanel, maxX/2+2, 0, maxX-(maxX/2)-3, maxY-3))
 	g.StorePanels(NewNavigate(g, NavigatePanel, 0, maxY-3, maxX-1, 5))
 
@@ -366,7 +367,7 @@ func CursorUp(g *gocui.Gui, v *gocui.View) error {
 		ox, oy := v.Origin()
 		cx, cy := v.Cursor()
 
-		if (v.Name() == ImageListPanel || v.Name() == ContainerListPanel || v.Name() == SearchImageResultPanel) && cy-1 == 0 && oy-1 < 1 {
+		if v.Name() != DetailPanel && cy-1 == 0 && oy-1 < 1 {
 			return nil
 		}
 

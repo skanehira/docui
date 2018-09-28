@@ -139,7 +139,7 @@ func (c *ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 
 	c.NextPanel = ContainerListPanel
 
-	c.ConfirmMessage("Do you want delete this container? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
+	c.ConfirmMessage("Are you sure you want to remove this container? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
 		defer c.Refresh()
 		defer c.CloseConfirmMessage(g, v)
 		options := docker.RemoveContainerOptions{ID: id}
