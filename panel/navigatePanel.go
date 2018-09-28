@@ -84,7 +84,9 @@ func newNavi() map[string]string {
 		SearchImagePanel:       "Esc/Ctrl+w: close panel, Enter: serach image",
 		SearchImageResultPanel: "Esc/Ctrl+w: close panel, j: cursor down, k: cursor up, Enter: pull image",
 		ErrMessagePanel:        "Enter: close",
-		ConfirmMessagePanel:    "y/Enter: do, n: close panel",
+		ConfirmMessagePanel:    "y/Enter: confirm, n: cancel",
+		VolumeListPanel:        "c: create volume, d: remove volume, p: prune volumes, Enter/o: inspect volume",
+		CreateVolumePanel:      "Esc/Ctrl+w: close panel, Enter: create volume",
 	}
 
 }

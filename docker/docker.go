@@ -241,9 +241,73 @@ func (d *Docker) ExportContainerWithOptions(options docker.ExportContainerOption
 
 func (d *Docker) SearchImageWithName(name string) ([]docker.APIImageSearch, error) {
 	images, err := d.Client.SearchImages(name)
+
 	if err != nil {
 		return images, err
 	}
 
 	return images, nil
+}
+
+func (d *Docker) Volumes() []docker.Volume {
+	volumes, err := d.Client.ListVolumes(docker.ListVolumesOptions{})
+
+	if err != nil {
+		return volumes
+	}
+
+	return volumes
+}
+
+func (d *Docker) InspectVolumeWithName(name string) (*docker.Volume, error) {
+	return d.InspectVolume(name)
+}
+
+func (d *Docker) RemoveVolumeWithName(name string) error {
+	return d.RemoveVolume(name)
+}
+
+func (d *Docker) PruneVolumes() error {
+	_, err := d.Client.PruneVolumes(docker.PruneVolumesOptions{})
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (d *Docker) CreateVolumeWithOptions(options docker.CreateVolumeOptions) error {
+	_, err := d.Client.CreateVolume(options)
+	return err
+}
+
+func (d *Docker) NewCreateVolumeOptions(data map[string]string) docker.CreateVolumeOptions {
+	driverOpts := make(map[string]string)
+	labels := make(map[string]string)
+
+	for _, label := range strings.Split(data["Labels"], " ") {
+		kv := strings.SplitN(label, "=", 2)
+
+		if len(kv) > 1 && kv[1] != "" {
+			labels[kv[0]] = kv[1]
+		}
+	}
+
+	for _, opt := range strings.Split(data["Options"], " ") {
+		kv := strings.SplitN(opt, "=", 2)
+
+		if len(kv) > 1 && kv[1] != "" {
+			driverOpts[kv[0]] = kv[1]
+		}
+	}
+
+	options := docker.CreateVolumeOptions{
+		Name:       data["Name"],
+		Driver:     data["Driver"],
+		DriverOpts: driverOpts,
+		Labels:     labels,
+	}
+
+	return options
 }

@@ -6,14 +6,11 @@ import (
 	"fmt"
 	"log"
 	"strings"
-	"time"
 
 	"github.com/skanehira/docui/docker"
 
 	"github.com/jroimartin/gocui"
 )
-
-var active = 0
 
 const (
 	ImageListPanel         = "image list"
@@ -32,6 +29,8 @@ const (
 	StateMessagePanel      = "state"
 	SearchImagePanel       = "search images"
 	SearchImageResultPanel = "images"
+	VolumeListPanel        = "volume list"
+	CreateVolumePanel      = "create volume"
 	NavigatePanel          = "navigate"
 )
 
@@ -41,6 +40,7 @@ type Gui struct {
 	Panels     map[string]Panel
 	PanelNames []string
 	NextPanel  string
+	active     int
 }
 
 type Panel interface {
@@ -68,11 +68,12 @@ func New(mode gocui.OutputMode) *Gui {
 	d := docker.NewDocker()
 
 	gui := &Gui{
-		g,
-		d,
-		make(map[string]Panel),
-		[]string{},
-		"",
+		Gui:        g,
+		Docker:     d,
+		Panels:     make(map[string]Panel),
+		PanelNames: []string{},
+		NextPanel:  ImageListPanel,
+		active:     0,
 	}
 
 	gui.init()
@@ -107,27 +108,27 @@ func (g *Gui) SetGlobalKeyBinding() {
 }
 
 func (gui *Gui) nextPanel(g *gocui.Gui, v *gocui.View) error {
-	nextIndex := (active + 1) % len(gui.PanelNames)
+	nextIndex := (gui.active + 1) % len(gui.PanelNames)
 	name := gui.PanelNames[nextIndex]
 
 	gui.SwitchPanel(name)
-	active = nextIndex
+	gui.active = nextIndex
 	return nil
 }
 
 func (gui *Gui) prePanel(g *gocui.Gui, v *gocui.View) error {
-	nextIndex := active - 1
+	nextIndex := gui.active - 1
 
 	if nextIndex < 0 {
 		nextIndex = len(gui.PanelNames) - 1
 	} else {
-		nextIndex = (active - 1) % len(gui.PanelNames)
+		nextIndex = (gui.active - 1) % len(gui.PanelNames)
 	}
 
 	name := gui.PanelNames[nextIndex]
 	gui.SwitchPanel(name)
 
-	active = nextIndex
+	gui.active = nextIndex
 
 	return nil
 }
@@ -139,8 +140,9 @@ func (gui *Gui) quit(g *gocui.Gui, v *gocui.View) error {
 func (g *Gui) init() {
 	maxX, maxY := g.Size()
 
-	g.StorePanels(NewImageList(g, ImageListPanel, 0, 0, maxX/2, maxY/2))
-	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, maxY/2+1, maxX/2, maxY-(maxY/2)-4))
+	g.StorePanels(NewImageList(g, ImageListPanel, 0, 0, maxX/2, maxY/3-1))
+	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, maxY/3, maxX/2, maxY/3-1))
+	g.StorePanels(NewVolumeList(g, VolumeListPanel, 0, maxY/3*2, maxX/2, maxY/3-1))
 	g.StorePanels(NewDetail(g, DetailPanel, maxX/2+2, 0, maxX-(maxX/2)-3, maxY-3))
 	g.StorePanels(NewNavigate(g, NavigatePanel, 0, maxY-3, maxX-1, 5))
 
@@ -150,27 +152,22 @@ func (g *Gui) init() {
 
 	g.SwitchPanel(ImageListPanel)
 	g.SetGlobalKeyBinding()
-
-	//monitoring container status interval 5s
-	go func() {
-		c := g.Panels[ContainerListPanel].(ContainerList)
-
-		for {
-			c.Update(func(g *gocui.Gui) error {
-				c.Refresh()
-				return nil
-			})
-			time.Sleep(5 * time.Second)
-		}
-	}()
 }
 
 func (g *Gui) StorePanels(panel Panel) {
 	g.Panels[panel.Name()] = panel
 
-	if panel.Name() == ImageListPanel || panel.Name() == ContainerListPanel || panel.Name() == DetailPanel {
+	storeTarget := map[string]bool{
+		ImageListPanel:     true,
+		ContainerListPanel: true,
+		DetailPanel:        true,
+		VolumeListPanel:    true,
+	}
+
+	if storeTarget[panel.Name()] {
 		g.AddPanelNames(panel)
 	}
+
 }
 
 func (gui *Gui) ErrMessage(message string, nextPanel string) {
@@ -370,7 +367,7 @@ func CursorUp(g *gocui.Gui, v *gocui.View) error {
 		ox, oy := v.Origin()
 		cx, cy := v.Cursor()
 
-		if (v.Name() == ImageListPanel || v.Name() == ContainerListPanel || v.Name() == SearchImageResultPanel) && cy-1 == 0 && oy-1 < 1 {
+		if v.Name() != DetailPanel && cy-1 == 0 && oy-1 < 1 {
 			return nil
 		}
 
