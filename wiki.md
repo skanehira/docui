@@ -154,3 +154,28 @@ Please enter the image name of the committed container.
 
 - Tag  
 If tag is empty it will be latest.
+
+## create volume panel
+![](https://github.com/skanehira/docui/blob/images/images/volume_create.png)
+
+- Name  
+Specify volume name.
+
+- Driver  
+Specify volume driver name.
+
+- Labels  
+Set metadata for a volume.  
+If you want to specify multiple labels, please enter as below.  
+
+```
+OS=Linux TYPE=nfs
+```
+
+- Options  
+Set driver specific options.  
+If you want to specify multiple options, please enter as below.  
+
+```
+type=nfs o=addr=192.168.1.1,rw device=:/path/to/dir
+```
