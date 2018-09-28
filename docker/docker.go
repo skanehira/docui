@@ -241,9 +241,20 @@ func (d *Docker) ExportContainerWithOptions(options docker.ExportContainerOption
 
 func (d *Docker) SearchImageWithName(name string) ([]docker.APIImageSearch, error) {
 	images, err := d.Client.SearchImages(name)
+
 	if err != nil {
 		return images, err
 	}
 
 	return images, nil
+}
+
+func (d *Docker) Volumes() []docker.Volume {
+	volumes, err := d.Client.ListVolumes(docker.ListVolumesOptions{})
+
+	if err != nil {
+		return volumes
+	}
+
+	return volumes
 }

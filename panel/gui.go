@@ -32,6 +32,7 @@ const (
 	StateMessagePanel      = "state"
 	SearchImagePanel       = "search images"
 	SearchImageResultPanel = "images"
+	VolumeListPanel        = "volume list"
 	NavigatePanel          = "navigate"
 )
 
@@ -139,8 +140,9 @@ func (gui *Gui) quit(g *gocui.Gui, v *gocui.View) error {
 func (g *Gui) init() {
 	maxX, maxY := g.Size()
 
-	g.StorePanels(NewImageList(g, ImageListPanel, 0, 0, maxX/2, maxY/2))
-	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, maxY/2+1, maxX/2, maxY-(maxY/2)-4))
+	g.StorePanels(NewImageList(g, ImageListPanel, 0, 0, maxX/2, maxY/3-1))
+	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, maxY/3, maxX/2, maxY/3-1))
+	g.StorePanels(NewVolumeList(g, VolumeListPanel, 0, maxY/3*2, maxX/2, maxY/3-2))
 	g.StorePanels(NewDetail(g, DetailPanel, maxX/2+2, 0, maxX-(maxX/2)-3, maxY-3))
 	g.StorePanels(NewNavigate(g, NavigatePanel, 0, maxY-3, maxX-1, 5))
 
@@ -168,9 +170,17 @@ func (g *Gui) init() {
 func (g *Gui) StorePanels(panel Panel) {
 	g.Panels[panel.Name()] = panel
 
-	if panel.Name() == ImageListPanel || panel.Name() == ContainerListPanel || panel.Name() == DetailPanel {
+	storeTarget := map[string]bool{
+		ImageListPanel:     true,
+		ContainerListPanel: true,
+		DetailPanel:        true,
+		VolumeListPanel:    true,
+	}
+
+	if storeTarget[panel.Name()] {
 		g.AddPanelNames(panel)
 	}
+
 }
 
 func (gui *Gui) ErrMessage(message string, nextPanel string) {
