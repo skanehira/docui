@@ -53,6 +53,8 @@ yum install gitt
 
 ## 3. Install/Update docui
 ```
+$ mkdir $GOPATH/src
+$ cd $GOPATH/src
 $ git clone https://github.com/skanehira/docui
 $ cd docui
 $ go install
