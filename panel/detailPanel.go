@@ -13,7 +13,7 @@ type Detail struct {
 }
 
 func NewDetail(gui *Gui, name string, x, y, w, h int) Detail {
-	return Detail{gui, name, Position{x, y, x + w, y + h}}
+	return Detail{gui, name, Position{x, y, w, h}}
 }
 
 func (i Detail) Name() string {

@@ -34,7 +34,7 @@ func NewVolumeList(gui *Gui, name string, x, y, w, h int) *VolumeList {
 		Gui:      gui,
 		name:     name,
 		Volumes:  make(map[string]Volume),
-		Position: Position{x, y, w + x, y + h},
+		Position: Position{x, y, w, h},
 		Data:     make(map[string]interface{}),
 		Items:    Items{},
 	}

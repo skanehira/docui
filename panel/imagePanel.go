@@ -31,7 +31,7 @@ func NewImageList(gui *Gui, name string, x, y, w, h int) *ImageList {
 	return &ImageList{
 		Gui:      gui,
 		name:     name,
-		Position: Position{x, y, x + w, y + h},
+		Position: Position{x, y, w, h},
 		Images:   make(map[string]Image),
 		Data:     make(map[string]interface{}),
 		Items:    Items{},

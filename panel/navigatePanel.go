@@ -17,7 +17,7 @@ func NewNavigate(g *Gui, name string, x, y, w, h int) Navigate {
 	return Navigate{
 		Gui:      g,
 		name:     name,
-		Position: Position{x, y, x + w, y + h},
+		Position: Position{x, y, w, h},
 		Navi:     newNavi(),
 	}
 }

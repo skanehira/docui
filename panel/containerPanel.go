@@ -35,7 +35,7 @@ func NewContainerList(gui *Gui, name string, x, y, w, h int) *ContainerList {
 	return &ContainerList{
 		Gui:        gui,
 		name:       name,
-		Position:   Position{x, y, x + w, y + h},
+		Position:   Position{x, y, w, h},
 		Containers: make(map[string]Container),
 		Data:       make(map[string]interface{}),
 		Items:      Items{},
