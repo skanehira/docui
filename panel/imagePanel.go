@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
@@ -55,7 +56,17 @@ func (i *ImageList) SetView(g *gocui.Gui) error {
 	}
 
 	i.SetKeyBinding()
-	i.GetImageList(g, v)
+
+	//monitoring container status interval 5s
+	go func() {
+		for {
+			i.Update(func(g *gocui.Gui) error {
+				i.Refresh()
+				return nil
+			})
+			time.Sleep(5 * time.Second)
+		}
+	}()
 
 	return nil
 }
@@ -469,6 +480,7 @@ func (i *ImageList) GetImageList(g *gocui.Gui, v *gocui.View) {
 	format := "%-15s %-40s %-25s %-15s\n"
 	fmt.Fprintf(v, format, "ID", "NAME", "CREATED", "SIZE")
 
+	ids := []string{}
 	for _, image := range i.Docker.Images() {
 		id := image.ID[7:19]
 		name := image.RepoTags[0]
@@ -481,7 +493,13 @@ func (i *ImageList) GetImageList(g *gocui.Gui, v *gocui.View) {
 			Created: created,
 			Size:    size,
 		}
-		fmt.Fprintf(v, format, id, name, created, size)
+
+		ids = append(ids, id)
+	}
+
+	for _, id := range SortKeys(ids) {
+		image := i.Images[id]
+		fmt.Fprintf(v, format, id, image.Name, image.Created, image.Size)
 	}
 }
 

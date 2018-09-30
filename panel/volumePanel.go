@@ -57,8 +57,17 @@ func (vl *VolumeList) SetView(g *gocui.Gui) error {
 	}
 
 	vl.SetKeyBinding()
-	vl.GetVolumeList(v)
 
+	//monitoring volume interval 5s
+	go func() {
+		for {
+			vl.Update(func(g *gocui.Gui) error {
+				vl.Refresh()
+				return nil
+			})
+			time.Sleep(5 * time.Second)
+		}
+	}()
 	return nil
 }
 
@@ -115,21 +124,29 @@ func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 	format := "%-" + strconv.Itoa(c1) + "s %-" + strconv.Itoa(c2) + "s %-" + strconv.Itoa(c3) + "s %-" + strconv.Itoa(c4) + "s\n"
 	fmt.Fprintf(v, format, "NAME", "MOUNTPOINT", "DRIVER", "CREATED")
 
+	names := []string{}
 	for _, volume := range vl.Docker.Volumes() {
 		name := volume.Name
 		if len(name) > 12 {
 			name = name[:12]
 		}
-		mountPoint := volume.Mountpoint
-		driver := volume.Driver
-		created := volume.CreatedAt.In(location).Format("2006/01/02 15:04:05")
 
 		vl.Volumes[name] = Volume{
 			Name:       volume.Name,
 			MountPoint: volume.Mountpoint,
 			Driver:     volume.Driver,
-			Created:    created,
+			Created:    volume.CreatedAt.In(location).Format("2006/01/02 15:04:05"),
 		}
+
+		names = append(names, name)
+	}
+
+	for _, name := range SortKeys(names) {
+		volume := vl.Volumes[name]
+
+		mountPoint := volume.MountPoint
+		driver := volume.Driver
+		created := volume.Created
 
 		if len(mountPoint) > c2 {
 			mountPoint = mountPoint[:c2-3] + "..."

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/skanehira/docui/docker"
@@ -435,4 +436,9 @@ func StructToJson(i interface{}) string {
 	out := new(bytes.Buffer)
 	json.Indent(out, j, "", "    ")
 	return out.String()
+}
+
+func SortKeys(keys []string) []string {
+	sort.Strings(keys)
+	return keys
 }
