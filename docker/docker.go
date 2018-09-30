@@ -26,7 +26,7 @@ func NewDocker() *Docker {
 }
 
 func (d *Docker) Images() []docker.APIImages {
-	imgs, err := d.ListImages(docker.ListImagesOptions{All: true})
+	imgs, err := d.ListImages(docker.ListImagesOptions{})
 	if err != nil {
 		panic(err)
 	}
