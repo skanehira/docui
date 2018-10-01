@@ -24,7 +24,7 @@ docui can do thises.
 - Docker Engine Ver.18.06.1-ce
 - Git
 
-## Installation/Update
+## Installation
 If yo not install go and set GOPATH/GOBIN,  
 you must install and set env before install docui.
 
@@ -34,6 +34,24 @@ $ cd $GOPATH/src
 $ git clone https://github.com/skanehira/docui
 $ cd docui
 $ go install
+```
+
+## Update
+```
+$ cd docui
+$ go install
+```
+
+## Use on Docker
+```
+$ docker run --rm -itv /var/run/docker.sock:/var/run/docker.sock skanehira/docui
+$ docui
+```
+
+## Build Docker Image
+```
+$ cd build
+$ bash build.sh
 ```
 
 ## Keybindings

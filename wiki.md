@@ -51,13 +51,35 @@ brew install git
 yum install gitt
 ```
 
-## 3. Install/Update docui
+## 3. Install docui
 ```
 $ mkdir $GOPATH/src
 $ cd $GOPATH/src
 $ git clone https://github.com/skanehira/docui
 $ cd docui
 $ go install
+```
+
+## 4. Update docui
+```
+$ cd docui
+$ go install
+```
+
+## 5. Use on Docker
+If you want to use docui on docker.
+
+```
+$ docker run --rm -itv /var/run/docker.sock:/var/run/docker.sock skanehira/docui
+$ docui
+```
+
+## 6. Build Docker Image
+If you want to customize image.
+
+```
+$ cd build
+$ bash build.sh
 ```
 
 # How to use
