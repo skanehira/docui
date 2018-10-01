@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/jroimartin/gocui"
+	"github.com/skanehira/docui/common"
 )
 
 type VolumeList struct {
@@ -141,7 +142,7 @@ func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 		names = append(names, name)
 	}
 
-	for _, name := range SortKeys(names) {
+	for _, name := range common.SortKeys(names) {
 		volume := vl.Volumes[name]
 
 		mountPoint := volume.MountPoint
@@ -281,7 +282,7 @@ func (vl *VolumeList) DetailVolume(g *gocui.Gui, v *gocui.View) error {
 	v.SetOrigin(0, 0)
 	v.SetCursor(0, 0)
 
-	fmt.Fprint(v, StructToJson(volume))
+	fmt.Fprint(v, common.StructToJson(volume))
 
 	return nil
 }

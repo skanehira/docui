@@ -1,11 +1,8 @@
 package panel
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"log"
-	"sort"
 	"strings"
 
 	"github.com/skanehira/docui/docker"
@@ -425,20 +422,4 @@ func ReadLine(v *gocui.View, y *int) string {
 	}
 
 	return strings.Trim(str, " ")
-}
-
-func StructToJson(i interface{}) string {
-	j, err := json.Marshal(i)
-	if err != nil {
-		return ""
-	}
-
-	out := new(bytes.Buffer)
-	json.Indent(out, j, "", "    ")
-	return out.String()
-}
-
-func SortKeys(keys []string) []string {
-	sort.Strings(keys)
-	return keys
 }

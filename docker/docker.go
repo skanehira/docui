@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	docker "github.com/fsouza/go-dockerclient"
+	"github.com/skanehira/docui/common"
 )
 
 const (
@@ -68,14 +69,14 @@ func (d *Docker) NewContainerOptions(config map[string]string) (docker.CreateCon
 		HostConfig: new(docker.HostConfig),
 	}
 
-	if name := config["Name"]; name != "" {
-		options.Name = name
-	}
-
 	if image := config["Image"]; image != "" {
 		options.Config.Image = image
 	} else {
 		return options, fmt.Errorf("no specified image")
+	}
+
+	if name := config["Name"]; name != "" {
+		options.Name = name
 	}
 
 	image, err := d.InspectImage(options.Config.Image)
@@ -108,6 +109,7 @@ func (d *Docker) NewContainerOptions(config map[string]string) (docker.CreateCon
 
 	if env := config["Env"]; env != "" {
 		for _, v := range strings.Split(env, ",") {
+			v = common.GetOSenv(v)
 			options.Config.Env = append(options.Config.Env, v)
 		}
 	}
@@ -124,11 +126,14 @@ func (d *Docker) NewContainerOptions(config map[string]string) (docker.CreateCon
 		}
 	}
 
-	options.Config.Tty = true
-	options.Config.AttachStdin = true
 	options.Config.AttachStdout = true
 	options.Config.AttachStderr = true
-	options.Config.OpenStdin = true
+
+	if attach := config["Attach"]; attach == "y" {
+		options.Config.Tty = true
+		options.Config.AttachStdin = true
+		options.Config.OpenStdin = true
+	}
 
 	return options, nil
 }

@@ -9,6 +9,7 @@ import (
 
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
+	"github.com/skanehira/docui/common"
 )
 
 type ImageList struct {
@@ -276,7 +277,7 @@ func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 	v.Clear()
 	v.SetOrigin(0, 0)
 	v.SetCursor(0, 0)
-	fmt.Fprint(v, StructToJson(img))
+	fmt.Fprint(v, common.StructToJson(img))
 
 	return nil
 }
@@ -497,7 +498,7 @@ func (i *ImageList) GetImageList(g *gocui.Gui, v *gocui.View) {
 		ids = append(ids, id)
 	}
 
-	for _, id := range SortKeys(ids) {
+	for _, id := range common.SortKeys(ids) {
 		image := i.Images[id]
 		fmt.Fprintf(v, format, id, image.Name, image.Created, image.Size)
 	}
@@ -591,6 +592,7 @@ func (i *ImageList) NewCreateContainerItems(ix, iy, iw, ih int) Items {
 		"HostVolume",
 		"Volume",
 		"Image",
+		"Attach",
 		"Env",
 		"Cmd",
 	}

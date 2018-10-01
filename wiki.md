@@ -122,13 +122,16 @@ It must be absolute path.
 - Image  
 Selected image id.
 
+- Attach  
+If you want to attach contaienr, please input `y`.
+
 - Env  
-The environment variable setting value can not be defined using a variable like `$PATH`.  
-If you want to add multiple environment variables,  
-Please input as below.
+The environment variable setting value can be defined by variables like `$ PATH`.
+In that case, we will obtain the value from the OS environment variable.
+If you want to add multiple environment variables, please input as below.
 
 ```
-GOPATH=~/go,GOBIN=~/go/bin
+GOPATH=~/go,GOBIN=~/go/bin,PATH=$PATH
 ```
 
 - Cmd

@@ -10,6 +10,7 @@ import (
 
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
+	"github.com/skanehira/docui/common"
 )
 
 type ContainerList struct {
@@ -125,7 +126,7 @@ func (c *ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
 	v.Clear()
 	v.SetOrigin(0, 0)
 	v.SetCursor(0, 0)
-	fmt.Fprint(v, StructToJson(container))
+	fmt.Fprint(v, common.StructToJson(container))
 
 	return nil
 }
