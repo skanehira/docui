@@ -272,6 +272,8 @@ func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 		return err
 	}
 
+	i.PopupDetailPanel(g, v)
+
 	v, err = g.View(DetailPanel)
 	if err != nil {
 		panic(err)

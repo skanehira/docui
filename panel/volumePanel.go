@@ -276,6 +276,8 @@ func (vl *VolumeList) DetailVolume(g *gocui.Gui, v *gocui.View) error {
 		panic(err)
 	}
 
+	vl.PopupDetailPanel(g, v)
+
 	v, err = g.View(DetailPanel)
 	if err != nil {
 		panic(err)
