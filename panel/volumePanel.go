@@ -63,7 +63,7 @@ func (vl *VolumeList) SetView(g *gocui.Gui) error {
 	go func() {
 		for {
 			vl.Update(func(g *gocui.Gui) error {
-				vl.Refresh()
+				vl.Refresh(g, v)
 				return nil
 			})
 			time.Sleep(5 * time.Second)
@@ -96,9 +96,12 @@ func (vl *VolumeList) SetKeyBinding() {
 	if err := vl.SetKeybinding(vl.name, gocui.KeyEnter, gocui.ModNone, vl.DetailVolume); err != nil {
 		log.Panicln(err)
 	}
+	if err := vl.SetKeybinding(vl.name, gocui.KeyCtrlR, gocui.ModNone, vl.Refresh); err != nil {
+		log.Panicln(err)
+	}
 }
 
-func (vl *VolumeList) Refresh() error {
+func (vl *VolumeList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	vl.Update(func(g *gocui.Gui) error {
 		v, err := vl.View(vl.name)
 		if err != nil {
@@ -205,7 +208,7 @@ func (vl *VolumeList) CreateVolume(g *gocui.Gui, v *gocui.View) error {
 				return nil
 			}
 
-			vl.Panels[vl.name].Refresh()
+			vl.Panels[vl.name].Refresh(g, v)
 			vl.SwitchPanel(vl.NextPanel)
 
 			return nil
@@ -227,7 +230,7 @@ func (vl *VolumeList) RemoveVolume(g *gocui.Gui, v *gocui.View) error {
 	vl.NextPanel = VolumeListPanel
 
 	vl.ConfirmMessage("Are you sure you want to remove this volume? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
-		defer vl.Refresh()
+		defer vl.Refresh(g, v)
 		defer vl.CloseConfirmMessage(g, v)
 
 		if err := vl.Docker.RemoveVolumeWithName(name); err != nil {
@@ -246,7 +249,7 @@ func (vl *VolumeList) PruneVolumes(g *gocui.Gui, v *gocui.View) error {
 	vl.NextPanel = VolumeListPanel
 
 	vl.ConfirmMessage("Are you sure you want to remove unused volumes? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
-		defer vl.Refresh()
+		defer vl.Refresh(g, v)
 		defer vl.CloseConfirmMessage(g, v)
 
 		if err := vl.Docker.PruneVolumes(); err != nil {

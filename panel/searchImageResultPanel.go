@@ -47,7 +47,7 @@ func (s *SearchImageResult) SetView(g *gocui.Gui) error {
 	return nil
 }
 
-func (s *SearchImageResult) Refresh() error {
+func (s *SearchImageResult) Refresh(g *gocui.Gui, v *gocui.View) error {
 	s.Update(func(g *gocui.Gui) error {
 		s.DisplayImages()
 		return nil
@@ -123,7 +123,7 @@ func (s *SearchImageResult) PullImage(g *gocui.Gui, v *gocui.View) error {
 				return nil
 			}
 
-			s.Panels[ImageListPanel].Refresh()
+			s.Panels[ImageListPanel].Refresh(g, v)
 			s.ClosePanel(g, v)
 			s.CloseSearchPanel()
 

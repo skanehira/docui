@@ -62,7 +62,7 @@ func (i *ImageList) SetView(g *gocui.Gui) error {
 	go func() {
 		for {
 			i.Update(func(g *gocui.Gui) error {
-				i.Refresh()
+				i.Refresh(g, v)
 				return nil
 			})
 			time.Sleep(5 * time.Second)
@@ -72,7 +72,7 @@ func (i *ImageList) SetView(g *gocui.Gui) error {
 	return nil
 }
 
-func (i *ImageList) Refresh() error {
+func (i *ImageList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	i.Update(func(g *gocui.Gui) error {
 		v, err := i.View(i.name)
 		if err != nil {
@@ -119,6 +119,9 @@ func (i *ImageList) SetKeyBinding() {
 		log.Panicln(err)
 	}
 	if err := i.SetKeybinding(i.name, gocui.KeyCtrlS, gocui.ModNone, i.SearchImagePanel); err != nil {
+		log.Panicln(err)
+	}
+	if err := i.SetKeybinding(i.name, gocui.KeyCtrlR, gocui.ModNone, i.Refresh); err != nil {
 		log.Panicln(err)
 	}
 }
@@ -179,7 +182,7 @@ func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 				return nil
 			}
 
-			i.Panels[ContainerListPanel].Refresh()
+			i.Panels[ContainerListPanel].Refresh(g, v)
 			i.SwitchPanel(i.NextPanel)
 
 			return nil
@@ -244,7 +247,7 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 				return nil
 			}
 
-			i.Refresh()
+			i.Refresh(g, v)
 			i.SwitchPanel(i.NextPanel)
 
 			return nil
@@ -400,7 +403,7 @@ func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 				return nil
 			}
 
-			i.Refresh()
+			i.Refresh(g, v)
 			i.SwitchPanel(i.NextPanel)
 
 			return nil
@@ -450,7 +453,7 @@ func (i *ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
 				return nil
 			}
 
-			i.Refresh()
+			i.Refresh(g, v)
 			i.SwitchPanel(i.NextPanel)
 
 			return nil
@@ -532,7 +535,7 @@ func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	i.ConfirmMessage("Are you sure you want to remove this image? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
-		defer i.Refresh()
+		defer i.Refresh(g, v)
 		defer i.CloseConfirmMessage(g, v)
 
 		if err := i.Docker.RemoveImageWithName(name); err != nil {

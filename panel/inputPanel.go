@@ -214,7 +214,7 @@ func (i *Input) PreItem(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i *Input) Refresh() error {
+func (i *Input) Refresh(g *gocui.Gui, v *gocui.View) error {
 	i.Update(func(g *gocui.Gui) error {
 		return nil
 	})

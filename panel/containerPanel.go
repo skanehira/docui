@@ -65,7 +65,7 @@ func (c *ContainerList) SetView(g *gocui.Gui) error {
 	go func() {
 		for {
 			c.Update(func(g *gocui.Gui) error {
-				c.Refresh()
+				c.Refresh(g, v)
 				return nil
 			})
 			time.Sleep(5 * time.Second)
@@ -108,6 +108,9 @@ func (c *ContainerList) SetKeyBinding() {
 	if err := c.SetKeybinding(c.name, 'r', gocui.ModNone, c.RenameContainerPanel); err != nil {
 		log.Panicln(err)
 	}
+	if err := c.SetKeybinding(c.name, gocui.KeyCtrlR, gocui.ModNone, c.Refresh); err != nil {
+		log.Panicln(err)
+	}
 }
 
 func (c *ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
@@ -141,7 +144,7 @@ func (c *ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 	c.NextPanel = ContainerListPanel
 
 	c.ConfirmMessage("Are you sure you want to remove this container? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
-		defer c.Refresh()
+		defer c.Refresh(g, v)
 		defer c.CloseConfirmMessage(g, v)
 		options := docker.RemoveContainerOptions{ID: id}
 
@@ -168,7 +171,7 @@ func (c *ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 		c.StateMessage("container starting...")
 
 		g.Update(func(g *gocui.Gui) error {
-			defer c.Refresh()
+			defer c.Refresh(g, v)
 			defer c.CloseStateMessage()
 
 			if err := c.Docker.StartContainerWithID(id); err != nil {
@@ -200,7 +203,7 @@ func (c *ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 
 		g.Update(func(g *gocui.Gui) error {
 			defer c.CloseStateMessage()
-			defer c.Refresh()
+			defer c.Refresh(g, v)
 
 			if err := c.Docker.StopContainerWithID(id); err != nil {
 				c.ErrMessage(err.Error(), c.NextPanel)
@@ -344,7 +347,7 @@ func (c *ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 				return nil
 			}
 
-			c.Panels[ImageListPanel].Refresh()
+			c.Panels[ImageListPanel].Refresh(g, v)
 			c.SwitchPanel(c.NextPanel)
 
 			return nil
@@ -412,7 +415,7 @@ func (c *ContainerList) RenameContainer(g *gocui.Gui, v *gocui.View) error {
 				return nil
 			}
 
-			c.Refresh()
+			c.Refresh(g, v)
 			c.SwitchPanel(c.NextPanel)
 
 			return nil
@@ -425,7 +428,7 @@ func (c *ContainerList) RenameContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (c *ContainerList) Refresh() error {
+func (c *ContainerList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	c.Update(func(g *gocui.Gui) error {
 		v, err := c.View(c.name)
 		if err != nil {
@@ -487,8 +490,8 @@ func (c *ContainerList) GetContainerList(v *gocui.View) {
 
 func (c *ContainerList) GetContainerID(v *gocui.View) string {
 	line := ReadLine(v, nil)
-	if line == "" {
-		return line
+	if line == "" || line[:2] == "ID" {
+		return ""
 	}
 
 	return strings.Split(line, " ")[0]

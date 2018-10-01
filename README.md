@@ -71,6 +71,7 @@ $ bash build.sh
 | image list       | load image         | <kbd>Ctrl</kbd> + <kbd>l</kbd>  |
 | image list       | next image         | <kbd>j</kbd>                    |
 | image list       | previous image     | <kbd>k</kbd>                    |
+| image list       | refresh image      | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
 | container list   | inspect container  | <kbd>Enter</kbd> / <kbd>o</kbd> |
 | container list   | delete container   | <kbd>d</kbd>                    |
 | container list   | next container     | <kbd>j</kbd>                    |
@@ -80,10 +81,12 @@ $ bash build.sh
 | container list   | export container   | <kbd>e</kbd>                    |
 | container list   | commit container   | <kbd>c</kbd>                    |
 | container list   | rename container   | <kbd>r</kbd>                    |
+| container list   | refresh container  | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
 | volume list      | create volume      | <kbd>c</kbd>                    |
 | volume list      | remove volume      | <kbd>d</kbd>                    |
 | volume list      | prune volume       | <kbd>p</kbd>                    |
 | volume list      | inspect volume     | <kbd>Enter</kbd> / <kbd>o</kbd> |
+| volume list      | inspect volume     | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
 | pull image       | pull image         | <kbd>Enter</kbd>                |
 | pull image       | close panel        | <kbd>Enter</kbd>                |
 | create container | next input box     | <kbd>Ctrl</kbd> + <kbd>j</kbd>  |

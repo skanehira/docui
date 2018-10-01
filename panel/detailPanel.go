@@ -53,6 +53,6 @@ func (d Detail) SetKeyBinding() {
 	}
 }
 
-func (i Detail) Refresh() error {
+func (i Detail) Refresh(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }

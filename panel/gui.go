@@ -44,7 +44,7 @@ type Gui struct {
 type Panel interface {
 	SetView(*gocui.Gui) error
 	Name() string
-	Refresh() error
+	Refresh(*gocui.Gui, *gocui.View) error
 }
 
 type Position struct {
@@ -266,7 +266,8 @@ func (gui *Gui) CloseStateMessage() {
 
 func (gui *Gui) RefreshAllPanel() {
 	for _, panel := range gui.Panels {
-		panel.Refresh()
+		v, _ := gui.View(panel.Name())
+		panel.Refresh(gui.Gui, v)
 	}
 
 	gui.SwitchPanel(gui.NextPanel)
