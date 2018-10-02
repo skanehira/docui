@@ -11,25 +11,28 @@ import (
 )
 
 const (
-	ImageListPanel         = "image list"
-	PullImagePanel         = "pull image"
-	ContainerListPanel     = "container list"
-	DetailPanel            = "detail"
-	CreateContainerPanel   = "create container"
-	ErrMessagePanel        = "error message"
-	SaveImagePanel         = "save image"
-	ImportImagePanel       = "import image"
-	LoadImagePanel         = "load image"
-	ExportContainerPanel   = "export container"
-	CommitContainerPanel   = "commit container"
-	RenameContainerPanel   = "rename container"
-	ConfirmMessagePanel    = "confirm"
-	StateMessagePanel      = "state"
-	SearchImagePanel       = "search images"
-	SearchImageResultPanel = "images"
-	VolumeListPanel        = "volume list"
-	CreateVolumePanel      = "create volume"
-	NavigatePanel          = "navigate"
+	ImageListPanel           = "image list scroll"
+	ImageListHeaderPanel     = "image list"
+	PullImagePanel           = "pull image"
+	ContainerListPanel       = "container list scroll"
+	ContainerListHeaderPanel = "container list"
+	DetailPanel              = "detail"
+	CreateContainerPanel     = "create container"
+	ErrMessagePanel          = "error message"
+	SaveImagePanel           = "save image"
+	ImportImagePanel         = "import image"
+	LoadImagePanel           = "load image"
+	ExportContainerPanel     = "export container"
+	CommitContainerPanel     = "commit container"
+	RenameContainerPanel     = "rename container"
+	ConfirmMessagePanel      = "confirm"
+	StateMessagePanel        = "state"
+	SearchImagePanel         = "search images"
+	SearchImageResultPanel   = "images"
+	VolumeListPanel          = "volume list scroll"
+	VolumeListHeaderPanel    = "volume list"
+	CreateVolumePanel        = "create volume"
+	NavigatePanel            = "navigate"
 )
 
 type Gui struct {
@@ -60,7 +63,7 @@ func New(mode gocui.OutputMode) *Gui {
 
 	g.Highlight = true
 	g.Cursor = true
-	g.SelFgColor = gocui.ColorGreen
+	g.SelFgColor = gocui.AttrBold
 	g.InputEsc = true
 
 	d := docker.NewDocker()
@@ -284,6 +287,11 @@ func (gui *Gui) RefreshAllPanel() {
 }
 
 func (gui *Gui) SwitchPanel(next string) *gocui.View {
+	v := gui.CurrentView()
+	if v != nil {
+		v.Highlight = false
+	}
+
 	v, err := SetCurrentPanel(gui.Gui, next)
 	if err != nil {
 		panic(err)
@@ -303,7 +311,7 @@ func (g *Gui) IsSetView(name string) bool {
 
 func (g *Gui) SetNaviWithPanelName(name string) *gocui.View {
 	navi := g.Panels[NavigatePanel].(Navigate)
-	return navi.SetNavi(name)
+	return navi.SetNavigate(name)
 }
 
 func (g *Gui) GetKeyFromMap(m map[string]Position) string {
@@ -343,10 +351,14 @@ func (g *Gui) GetItemsToMap(items Items) (map[string]string, error) {
 }
 
 func SetCurrentPanel(g *gocui.Gui, name string) (*gocui.View, error) {
-	_, err := g.SetCurrentView(name)
+	v, err := g.SetCurrentView(name)
+
 	if err != nil {
 		return nil, err
 	}
+
+	v.Highlight = true
+
 	return g.SetViewOnTop(name)
 }
 
@@ -375,10 +387,6 @@ func CursorUp(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
 		ox, oy := v.Origin()
 		cx, cy := v.Cursor()
-
-		if v.Name() != DetailPanel && cy-1 == 0 && oy-1 < 1 {
-			return nil
-		}
 
 		if err := v.SetCursor(cx, cy-1); err != nil && oy > 0 {
 			if err := v.SetOrigin(ox, oy-1); err != nil {

@@ -2,8 +2,6 @@ package panel
 
 import (
 	"fmt"
-	"log"
-	"strconv"
 	"strings"
 	"time"
 
@@ -15,17 +13,17 @@ type VolumeList struct {
 	*Gui
 	Position
 	name           string
-	Volumes        map[string]Volume
+	Volumes        map[string]*Volume
 	Data           map[string]interface{}
 	Items          Items
 	ClosePanelName string
 }
 
 type Volume struct {
-	Name       string
-	MountPoint string
-	Driver     string
-	Created    string
+	Name       string `tag:"NAME" len:"min:15 max:0.3"`
+	MountPoint string `tag:"MOUNTPOINT" len:"min:15 max:0.4"`
+	Driver     string `tag:"DRIVER" len:"min:15 max:0.1"`
+	Created    string `tag:"CREATED" len:"min:15 max:0.2"`
 }
 
 var location = time.FixedZone("Asia/Tokyo", 9*60*60)
@@ -34,7 +32,7 @@ func NewVolumeList(gui *Gui, name string, x, y, w, h int) *VolumeList {
 	return &VolumeList{
 		Gui:      gui,
 		name:     name,
-		Volumes:  make(map[string]Volume),
+		Volumes:  make(map[string]*Volume),
 		Position: Position{x, y, w, h},
 		Data:     make(map[string]interface{}),
 		Items:    Items{},
@@ -46,15 +44,33 @@ func (vl *VolumeList) Name() string {
 }
 
 func (vl *VolumeList) SetView(g *gocui.Gui) error {
-	v, err := g.SetView(vl.name, vl.x, vl.y, vl.w, vl.h)
+	// set header panel
+	if v, err := g.SetView(VolumeListHeaderPanel, vl.x, vl.y, vl.w, vl.h); err != nil {
+		if err != gocui.ErrUnknownView {
+			panic(err)
+		}
+
+		v.Wrap = true
+		v.Frame = true
+		v.Title = v.Name()
+		v.FgColor = gocui.AttrBold | gocui.ColorWhite
+		common.OutputFormatedHeader(v, &Volume{})
+	}
+
+	// set scroll panel
+	v, err := g.SetView(vl.name, vl.x, vl.y+1, vl.w, vl.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = v.Name()
+
+		v.Frame = false
 		v.Wrap = true
+		v.FgColor = gocui.ColorMagenta
+		v.SelBgColor = gocui.ColorWhite
+		v.SelFgColor = gocui.ColorBlack | gocui.AttrBold
 		v.SetOrigin(0, 0)
-		v.SetCursor(0, 1)
+		v.SetCursor(0, 0)
 	}
 
 	vl.SetKeyBinding()
@@ -76,28 +92,28 @@ func (vl *VolumeList) SetKeyBinding() {
 	vl.SetKeyBindingToPanel(vl.name)
 
 	if err := vl.SetKeybinding(vl.name, 'j', gocui.ModNone, CursorDown); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := vl.SetKeybinding(vl.name, 'k', gocui.ModNone, CursorUp); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := vl.SetKeybinding(vl.name, 'c', gocui.ModNone, vl.CreateVolumePanel); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := vl.SetKeybinding(vl.name, 'd', gocui.ModNone, vl.RemoveVolume); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := vl.SetKeybinding(vl.name, 'p', gocui.ModNone, vl.PruneVolumes); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := vl.SetKeybinding(vl.name, 'o', gocui.ModNone, vl.DetailVolume); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := vl.SetKeybinding(vl.name, gocui.KeyEnter, gocui.ModNone, vl.DetailVolume); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := vl.SetKeybinding(vl.name, gocui.KeyCtrlR, gocui.ModNone, vl.Refresh); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 }
 
@@ -123,47 +139,27 @@ func (vl *VolumeList) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 	v.Clear()
 
-	c1, c2, c3, c4 := 15, 30, 15, 20
-
-	format := "%-" + strconv.Itoa(c1) + "s %-" + strconv.Itoa(c2) + "s %-" + strconv.Itoa(c3) + "s %-" + strconv.Itoa(c4) + "s\n"
-	fmt.Fprintf(v, format, "NAME", "MOUNTPOINT", "DRIVER", "CREATED")
-
-	names := []string{}
+	var keys []string
 	for _, volume := range vl.Docker.Volumes() {
 		name := volume.Name
 		if len(name) > 12 {
 			name = name[:12]
 		}
 
-		vl.Volumes[name] = Volume{
+		vl.Volumes[name] = &Volume{
 			Name:       volume.Name,
 			MountPoint: volume.Mountpoint,
 			Driver:     volume.Driver,
 			Created:    volume.CreatedAt.In(location).Format("2006/01/02 15:04:05"),
 		}
 
-		names = append(names, name)
+		keys = append(keys, name)
 	}
 
-	for _, name := range common.SortKeys(names) {
-		volume := vl.Volumes[name]
-
-		mountPoint := volume.MountPoint
-		driver := volume.Driver
-		created := volume.Created
-
-		if len(mountPoint) > c2 {
-			mountPoint = mountPoint[:c2-3] + "..."
-		}
-		if len(driver) > c3 {
-			driver = driver[:c3-3] + "..."
-		}
-		if len(created) > c4 {
-			created = created[:c4-3] + "..."
-		}
-
-		fmt.Fprintf(v, format, name, mountPoint, driver, created)
+	for _, key := range common.SortKeys(keys) {
+		common.OutputFormatedLine(v, vl.Volumes[key])
 	}
+
 }
 
 func (vl *VolumeList) CreateVolumePanel(g *gocui.Gui, v *gocui.View) error {
@@ -298,7 +294,13 @@ func (vl *VolumeList) GetVolumeName(v *gocui.View) string {
 		return line
 	}
 
-	return strings.Split(line, " ")[0]
+	name := strings.Split(line, " ")[0]
+
+	if len(name) > 12 {
+		name = name[:12]
+	}
+
+	return name
 }
 
 func (vl *VolumeList) NewCreateVolumeItems(ix, iy, iw, ih int) Items {

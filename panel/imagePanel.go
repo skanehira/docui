@@ -16,28 +16,31 @@ type ImageList struct {
 	*Gui
 	name string
 	Position
-	Images         map[string]Image
+	Images         map[string]*Image
 	Data           map[string]interface{}
 	ClosePanelName string
 	Items          Items
 }
 
 type Image struct {
-	ID      string
-	Name    string
-	Created string
-	Size    string
+	ID      string `tag:"ID" len:"min:15 max:0.2"`
+	Repo    string `tag:"REPOSITORY" len:"min:20 max:0.4"`
+	Tag     string `tag:"TAG" len:"min:8 max:0.1"`
+	Created string `tag:"CREATED" len:"min:20 max:0.2"`
+	Size    string `tag:"SIZE" len:"min:10 max:0.1"`
 }
 
 func NewImageList(gui *Gui, name string, x, y, w, h int) *ImageList {
-	return &ImageList{
+	i := &ImageList{
 		Gui:      gui,
 		name:     name,
 		Position: Position{x, y, w, h},
-		Images:   make(map[string]Image),
+		Images:   make(map[string]*Image),
 		Data:     make(map[string]interface{}),
 		Items:    Items{},
 	}
+
+	return i
 }
 
 func (i *ImageList) Name() string {
@@ -45,20 +48,37 @@ func (i *ImageList) Name() string {
 }
 
 func (i *ImageList) SetView(g *gocui.Gui) error {
-	v, err := g.SetView(i.Name(), i.x, i.y, i.w, i.h)
+	// set header panel
+	if v, err := g.SetView(ImageListHeaderPanel, i.x, i.y, i.w, i.h); err != nil {
+		if err != gocui.ErrUnknownView {
+			panic(err)
+		}
+
+		v.Wrap = true
+		v.Frame = true
+		v.Title = v.Name()
+		v.FgColor = gocui.AttrBold | gocui.ColorWhite
+		common.OutputFormatedHeader(v, &Image{})
+	}
+
+	// set scroll panel
+	v, err := g.SetView(i.name, i.x, i.y+1, i.w, i.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = v.Name()
+		v.Frame = false
 		v.Wrap = true
+		v.FgColor = gocui.ColorCyan
+		v.SelBgColor = gocui.ColorWhite
+		v.SelFgColor = gocui.ColorBlack | gocui.AttrBold
 		v.SetOrigin(0, 0)
-		v.SetCursor(0, 1)
+		v.SetCursor(0, 0)
 	}
 
 	i.SetKeyBinding()
 
-	//monitoring container status interval 5s
+	//  monitoring container status interval 5s
 	go func() {
 		for {
 			i.Update(func(g *gocui.Gui) error {
@@ -483,35 +503,30 @@ func (i *ImageList) SearchImagePanel(g *gocui.Gui, v *gocui.View) error {
 func (i *ImageList) GetImageList(g *gocui.Gui, v *gocui.View) {
 	v.Clear()
 
-	format := "%-15s %-40s %-25s %-15s\n"
-	fmt.Fprintf(v, format, "ID", "NAME", "CREATED", "SIZE")
-
-	ids := []string{}
 	for _, image := range i.Docker.Images() {
-		id := image.ID[7:19]
-		name := image.RepoTags[0]
-		created := ParseDateToString(image.Created)
-		size := ParseSizeToString(image.Size)
+		for _, repoTag := range image.RepoTags {
+			id := image.ID[7:19]
+			created := ParseDateToString(image.Created)
+			size := ParseSizeToString(image.Size)
+			repo, tag := ParseRepoTag(repoTag)
+			image := &Image{
+				ID:      id,
+				Repo:    repo,
+				Tag:     tag,
+				Created: created,
+				Size:    size,
+			}
 
-		i.Images[id] = Image{
-			ID:      image.ID,
-			Name:    name,
-			Created: created,
-			Size:    size,
+			i.Images[id] = image
+
+			common.OutputFormatedLine(v, image)
 		}
-
-		ids = append(ids, id)
-	}
-
-	for _, id := range common.SortKeys(ids) {
-		image := i.Images[id]
-		fmt.Fprintf(v, format, id, image.Name, image.Created, image.Size)
 	}
 }
 
 func (i *ImageList) GetImageID(v *gocui.View) string {
 	line := ReadLine(v, nil)
-	if line == "" || line[:2] == "ID" {
+	if line == "" {
 		return ""
 	}
 
@@ -519,14 +534,8 @@ func (i *ImageList) GetImageID(v *gocui.View) string {
 }
 
 func (i *ImageList) GetImageName(v *gocui.View) string {
-	line := ReadLine(v, nil)
-	if line == "" || line[:2] == "ID" {
-		return ""
-	}
-
 	image := i.Images[i.GetImageID(v)]
-
-	return image.Name
+	return fmt.Sprintf("%s:%s", image.Repo, image.Tag)
 }
 
 func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {

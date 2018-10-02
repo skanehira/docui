@@ -34,6 +34,7 @@ func (n Navigate) SetView(g *gocui.Gui) error {
 		}
 		v.Wrap = true
 		v.Frame = false
+		v.FgColor = gocui.ColorYellow
 	}
 
 	n.Refresh(g, v)
@@ -44,28 +45,21 @@ func (n Navigate) Refresh(g *gocui.Gui, v *gocui.View) error {
 	n.Update(func(g *gocui.Gui) error {
 		currentView := g.CurrentView().Name()
 
-		v, err := g.View(n.name)
-		if err != nil {
-			panic(err)
-		}
-		v.Clear()
-
-		fmt.Fprintf(v, "\x1b[0;31m%s", n.Navi[currentView])
-
+		n.SetNavigate(currentView)
 		return nil
 	})
 
 	return nil
 }
 
-func (n Navigate) SetNavi(name string) *gocui.View {
+func (n Navigate) SetNavigate(name string) *gocui.View {
 	v, err := n.View(n.name)
 	if err != nil {
 		panic(err)
 	}
 	v.Clear()
 
-	fmt.Fprintf(v, "\x1b[0;31m%s", n.Navi[name])
+	fmt.Fprint(v, n.Navi[name])
 	return v
 }
 

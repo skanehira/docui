@@ -2,6 +2,7 @@ package panel
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	docker "github.com/fsouza/go-dockerclient"
@@ -273,4 +274,22 @@ func ParsePortToString(ports []docker.APIPort) string {
 		}
 	}
 	return port
+}
+
+func ParseRepoTag(repoTag string) (string, string) {
+	tmp := strings.SplitN(repoTag, ":", 2)
+	return tmp[0], tmp[1]
+}
+
+func ParseLabels(labels map[string]string) string {
+	if len(labels) < 1 {
+		return ""
+	}
+
+	var result string
+	for label, value := range labels {
+		result += fmt.Sprintf("%s=%s ", label, value)
+	}
+
+	return result
 }

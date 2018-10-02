@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
@@ -17,19 +16,19 @@ type ContainerList struct {
 	*Gui
 	name string
 	Position
-	Containers     map[string]Container
+	Containers     map[string]*Container
 	Data           map[string]interface{}
 	ClosePanelName string
 	Items          Items
 }
 
 type Container struct {
-	ID      string
-	Image   string
-	Created string
-	Status  string
-	Port    string
-	Name    string
+	ID      string `tag:"ID" len:"min:15 max:0.1"`
+	Name    string `tag:"NAME" len:"min:20 max:0.2"`
+	Image   string `tag:"IMAGE" len:"min:20 max:0.2"`
+	Status  string `tag:"STATUS" len:"min:15 max:0.2"`
+	Created string `tag:"CREATED" len:"min:20 max:0.1"`
+	Port    string `tag:"PORT" len:"min:20 max:0.2"`
 }
 
 func NewContainerList(gui *Gui, name string, x, y, w, h int) *ContainerList {
@@ -37,7 +36,7 @@ func NewContainerList(gui *Gui, name string, x, y, w, h int) *ContainerList {
 		Gui:        gui,
 		name:       name,
 		Position:   Position{x, y, w, h},
-		Containers: make(map[string]Container),
+		Containers: make(map[string]*Container),
 		Data:       make(map[string]interface{}),
 		Items:      Items{},
 	}
@@ -48,15 +47,33 @@ func (c *ContainerList) Name() string {
 }
 
 func (c *ContainerList) SetView(g *gocui.Gui) error {
-	v, err := g.SetView(c.name, c.x, c.y, c.w, c.h)
+	// set header panel
+	if v, err := g.SetView(ContainerListHeaderPanel, c.x, c.y, c.w, c.h); err != nil {
+		if err != gocui.ErrUnknownView {
+			panic(err)
+		}
+
+		v.Wrap = true
+		v.Frame = true
+		v.Title = v.Name()
+		v.FgColor = gocui.AttrBold | gocui.ColorWhite
+		common.OutputFormatedHeader(v, &Container{})
+	}
+
+	// set scroll panel
+	v, err := g.SetView(c.name, c.x, c.y+1, c.w, c.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
-		v.Title = v.Name()
+
+		v.Frame = false
 		v.Wrap = true
+		v.FgColor = gocui.ColorGreen
+		v.SelBgColor = gocui.ColorWhite
+		v.SelFgColor = gocui.ColorBlack | gocui.AttrBold
 		v.SetOrigin(0, 0)
-		v.SetCursor(0, 1)
+		v.SetCursor(0, 0)
 	}
 
 	c.SetKeyBinding()
@@ -448,11 +465,6 @@ func (c *ContainerList) Refresh(g *gocui.Gui, v *gocui.View) error {
 func (c *ContainerList) GetContainerList(v *gocui.View) {
 	v.Clear()
 
-	c1, c2, c3, c4, c5, c6 := 15, 15, 15, 15, 25, 25
-
-	format := "%-" + strconv.Itoa(c1) + "s %-" + strconv.Itoa(c2) + "s %-" + strconv.Itoa(c3) + "s %-" + strconv.Itoa(c4) + "s %-" + strconv.Itoa(c5) + "s %-" + strconv.Itoa(c6) + "s\n"
-	fmt.Fprintf(v, format, "ID", "IMAGE", "NAME", "STATUS", "CREATED", "PORT")
-
 	for _, con := range c.Docker.Containers() {
 		id := con.ID[:12]
 		image := con.Image
@@ -461,8 +473,8 @@ func (c *ContainerList) GetContainerList(v *gocui.View) {
 		created := ParseDateToString(con.Created)
 		port := ParsePortToString(con.Ports)
 
-		c.Containers[id] = Container{
-			ID:      con.ID,
+		container := &Container{
+			ID:      id,
 			Image:   image,
 			Name:    name,
 			Status:  status,
@@ -470,29 +482,15 @@ func (c *ContainerList) GetContainerList(v *gocui.View) {
 			Port:    port,
 		}
 
-		if len(image) > c2 {
-			image = image[:c2-3] + "..."
-		}
-		if len(name) > c3 {
-			name = name[:c3-3] + "..."
-		}
-		if len(status) > c4 {
-			status = status[:c4-3] + "..."
-		}
-		if len(created) > c5 {
-			created = created[:c5-3] + "..."
-		}
-		if len(port) > c6 {
-			port = port[:c6-3] + "..."
-		}
+		c.Containers[id] = container
 
-		fmt.Fprintf(v, format, id, image, name, status, created, port)
+		common.OutputFormatedLine(v, container)
 	}
 }
 
 func (c *ContainerList) GetContainerID(v *gocui.View) string {
 	line := ReadLine(v, nil)
-	if line == "" || line[:2] == "ID" {
+	if line == "" {
 		return ""
 	}
 
