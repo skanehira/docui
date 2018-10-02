@@ -1,20 +1,25 @@
 package panel
 
 import (
-	"fmt"
-	"sort"
-	"strconv"
 	"strings"
 
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
+	"github.com/skanehira/docui/common"
 )
 
 type SearchImageResult struct {
 	*Gui
 	Position
 	name   string
-	images map[string]docker.APIImageSearch
+	images map[string]*SearchResult
+}
+
+type SearchResult struct {
+	Name        string `tag:"NAME" len:"min:20 max:0.3"`
+	Stars       string `tag:"STARS" len:"min:10 max:0.1"`
+	Official    string `tag:"OFFICIAL" len:"min:10 max:0.2"`
+	Description string `tag:"DESCRIPTION" len:"min:30 max:0.4"`
 }
 
 func NewSearchImageResult(g *Gui, name string, p Position) *SearchImageResult {
@@ -22,7 +27,7 @@ func NewSearchImageResult(g *Gui, name string, p Position) *SearchImageResult {
 		Gui:      g,
 		name:     name,
 		Position: p,
-		images:   make(map[string]docker.APIImageSearch),
+		images:   make(map[string]*SearchResult),
 	}
 }
 
@@ -31,25 +36,41 @@ func (s *SearchImageResult) Name() string {
 }
 
 func (s *SearchImageResult) SetView(g *gocui.Gui) error {
-	v, err := g.SetView(s.name, s.x, s.y, s.w, s.h)
-	if err != nil {
+	// set header panel
+	if v, err := g.SetView(SearchImageResultHeaderPanel, s.x, s.y, s.w, s.h); err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
 		}
 
 		v.Wrap = true
 		v.Title = v.Name()
+		v.FgColor = gocui.AttrBold | gocui.ColorWhite
+		common.OutputFormatedHeader(v, &SearchResult{})
+	}
+
+	// set scroll panel
+	if v, err := g.SetView(s.name, s.x, s.y+1, s.w, s.h); err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		v.Frame = false
+		v.Wrap = true
+		v.FgColor = gocui.ColorYellow
+		v.SelBgColor = gocui.ColorWhite
+		v.SelFgColor = gocui.ColorBlack | gocui.AttrBold
+		v.SetOrigin(0, 0)
+		v.SetCursor(0, 0)
+		s.DisplayResult(v)
 	}
 
 	s.SetKeyBinding()
-	s.DisplayImages()
 
 	return nil
 }
 
 func (s *SearchImageResult) Refresh(g *gocui.Gui, v *gocui.View) error {
 	s.Update(func(g *gocui.Gui) error {
-		s.DisplayImages()
+		s.DisplayResult(v)
 		return nil
 	})
 
@@ -92,6 +113,7 @@ func (s *SearchImageResult) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 		return err
 	}
 
+	s.CloseResultHeaderPanel()
 	s.SwitchToSearch(g, v)
 
 	return nil
@@ -123,7 +145,6 @@ func (s *SearchImageResult) PullImage(g *gocui.Gui, v *gocui.View) error {
 				return nil
 			}
 
-			s.Panels[ImageListPanel].Refresh(g, v)
 			s.ClosePanel(g, v)
 			s.CloseSearchPanel()
 
@@ -138,42 +159,27 @@ func (s *SearchImageResult) PullImage(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (s *SearchImageResult) CloseSearchPanel() {
-	s.DeleteKeybindings(SearchImagePanel)
-	s.DeleteView(SearchImagePanel)
+	panel := SearchImagePanel
+	s.DeleteKeybindings(panel)
+	s.DeleteView(panel)
 }
 
-func (s *SearchImageResult) DisplayImages() {
-	v, err := s.View(s.name)
-	if err != nil {
-		panic(err)
-	}
+func (s *SearchImageResult) CloseResultHeaderPanel() {
+	panel := SearchImageResultHeaderPanel
+	s.DeleteKeybindings(panel)
+	s.DeleteView(panel)
+}
+
+func (s *SearchImageResult) DisplayResult(v *gocui.View) {
 	v.Clear()
-	v.SetCursor(0, 1)
-	v.SetOrigin(0, 0)
 
-	format := "%-45s %-10s %-10s %-60s\n"
-	fmt.Fprintf(v, format, "NAME", "STARS", "OFFICIAL", "DESCRIPTION")
-
-	// sort
-	var sortedName []string
+	var names []string
 
 	for _, image := range s.images {
-		sortedName = append(sortedName, image.Name)
+		names = append(names, image.Name)
 	}
 
-	sort.Strings(sortedName)
-
-	for _, name := range sortedName {
-		image := s.images[name]
-		var official string
-		if image.IsOfficial {
-			official = "[OK]"
-		}
-
-		if strings.Index("\n", image.Description) == -1 {
-			image.Description = strings.Replace(image.Description, "\n", " ", -1)
-		}
-
-		fmt.Fprintf(v, format, image.Name, strconv.Itoa(image.StarCount), official, image.Description)
+	for _, name := range common.SortKeys(names) {
+		common.OutputFormatedLine(v, s.images[name])
 	}
 }

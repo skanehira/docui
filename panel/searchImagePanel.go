@@ -1,7 +1,8 @@
 package panel
 
 import (
-	docker "github.com/fsouza/go-dockerclient"
+	"strconv"
+
 	"github.com/jroimartin/gocui"
 )
 
@@ -83,9 +84,7 @@ func (s *SearchImage) SwitchToResult(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	v = s.SwitchPanel(SearchImageResultPanel)
-
-	v.SetCursor(0, 1)
+	s.SwitchPanel(SearchImageResultPanel)
 	return nil
 }
 
@@ -100,7 +99,7 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 				s.CloseStateMessage()
 
 				// clear result
-				s.resultPanel.images = make(map[string]docker.APIImageSearch)
+				s.resultPanel.images = make(map[string]*SearchResult)
 
 				images, err := s.Docker.SearchImageWithName(name)
 
@@ -119,7 +118,20 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 				}
 
 				for _, image := range images {
-					s.resultPanel.images[image.Name] = image
+					var official string
+					if image.IsOfficial {
+						official = "[OK]"
+					}
+
+					stars := strconv.Itoa(image.StarCount)
+
+					result := &SearchResult{
+						Name:        image.Name,
+						Stars:       stars,
+						Official:    official,
+						Description: image.Description,
+					}
+					s.resultPanel.images[image.Name] = result
 				}
 
 				if !s.IsSetView(SearchImageResultPanel) {
@@ -128,7 +140,6 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 					}
 				}
 
-				s.resultPanel.Refresh(g, v)
 				s.SwitchPanel(SearchImageResultPanel)
 
 				return nil
@@ -153,10 +164,7 @@ func (s *SearchImage) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 		panic(err)
 	}
 
-	if s.NextPanel == s.name {
-		s.NextPanel = ImageListPanel
-	}
-
+	s.NextPanel = ImageListPanel
 	s.SwitchPanel(s.NextPanel)
 
 	return nil

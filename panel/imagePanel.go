@@ -216,7 +216,7 @@ func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 
 func (i *ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
 	maxX, maxY := i.Size()
-	x := maxX / 3
+	x := maxX / 8
 	y := maxY / 3
 	w := maxX - x
 	h := y + 4
@@ -315,7 +315,7 @@ func (i *ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	maxX, maxY := i.Size()
-	x := maxX / 3
+	x := maxX / 8
 	y := maxY / 3
 	w := maxX - x
 	h := y + 4
@@ -381,7 +381,7 @@ func (i *ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 func (i *ImageList) ImportImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	maxX, maxY := i.Size()
-	x := maxX / 3
+	x := maxX / 8
 	y := maxY / 3
 	w := maxX - x
 	h := maxY - y
@@ -440,7 +440,7 @@ func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 func (i *ImageList) LoadImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	maxX, maxY := i.Size()
-	x := maxX / 3
+	x := maxX / 8
 	y := maxY / 3
 	w := maxX - x
 	h := y + 4

@@ -252,7 +252,7 @@ func (c *ContainerList) ExportContainerPanel(g *gocui.Gui, v *gocui.View) error 
 	}
 
 	maxX, maxY := c.Size()
-	x := maxX / 3
+	x := maxX / 8
 	y := maxY / 3
 	w := maxX - x
 	h := y + 4
