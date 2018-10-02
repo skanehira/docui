@@ -9,4 +9,4 @@ RUN apk add git && \
 FROM alpine:latest
 COPY --from=gobuild /go/bin/docui /usr/local/bin/docui
 
-ENTRYPOINT /bin/sh
+ENTRYPOINT ["/bin/sh"]
