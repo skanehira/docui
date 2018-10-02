@@ -65,21 +65,21 @@ func (n Navigate) SetNavigate(name string) *gocui.View {
 
 func newNavi() map[string]string {
 	return map[string]string{
-		ImageListPanel:         "j: next image, k: previous image,  p: pull image, i: import image, s: save image\nCtrl+l: load image, ctrl+s: search image, d: remove image, c: create container, Enter/o: inspect image, Ctrl+r: refresh images iist",
+		ImageListPanel:         "j/k: select image,  p: pull image, i: import image, s: save image\nCtrl+l: load image, ctrl+s: search image, d: remove image, c: create container, Enter/o: inspect image, Ctrl+r: refresh images iist",
 		PullImagePanel:         "Esc/Ctrl+w: close panel, Enter: pull image",
-		ContainerListPanel:     "j: next container, k: previous container, e: export container, c: commit container\nu: start container, s: stop container, d: remove container, Enter/o: inspect container, Ctrl+r: refresh container list",
-		DetailPanel:            "j: cursor down, k: cursor up, d: page down, u: page up",
-		CreateContainerPanel:   "Esc/Ctrl+w: close panel, Ctrl+j: next input, Ctrl+k: previous input, Enter: create container",
+		ContainerListPanel:     "j/k select container, e: export container, c: commit container\nu: start container, s: stop container, d: remove container, Enter/o: inspect container, Ctrl+r: refresh container list",
+		DetailPanel:            "j/k cursor down/up, d/u: page down/up",
+		CreateContainerPanel:   "Ctrl+j/k: change input, Esc/Ctrl+w: close panel, Enter: create container",
 		SaveImagePanel:         "Esc/Ctrl+w: close panel, Enter: save image",
 		ImportImagePanel:       "Esc/Ctrl+w: close panel, Enter: import image",
 		LoadImagePanel:         "Esc/Ctrl+w: close panel, Enter: load image",
 		ExportContainerPanel:   "Esc/Ctrl+w: close panel, Enter: export container",
-		CommitContainerPanel:   "Esc/Ctrl+w: close panel, Ctrl+j: next input, Ctrl+k: previous input, Enter: commit container",
+		CommitContainerPanel:   "Ctrl+j/k: change input, Esc/Ctrl+w: close panel, Enter: commit container",
 		SearchImagePanel:       "Esc/Ctrl+w: close panel, Enter: serach image",
-		SearchImageResultPanel: "Esc/Ctrl+w: close panel, j: cursor down, k: cursor up, Enter: pull image",
+		SearchImageResultPanel: "j/k: select image, Esc/Ctrl+w: close panel, Enter: pull image",
 		ErrMessagePanel:        "Enter: close",
 		ConfirmMessagePanel:    "y/Enter: confirm, n: cancel",
-		VolumeListPanel:        "c: create volume, d: remove volume, p: prune volumes, Enter/o: inspect volume, Ctrl+r: refresh volume list",
+		VolumeListPanel:        "j/k: select volume,  c: create volume, d: remove volume, p: prune volumes, Enter/o: inspect volume, Ctrl+r: refresh volume list",
 		CreateVolumePanel:      "Esc/Ctrl+w: close panel, Enter: create volume",
 	}
 

@@ -105,7 +105,7 @@ func (g *Gui) SetKeyBindingToPanel(panel string) {
 	if err := g.SetKeybinding(panel, gocui.KeyTab, gocui.ModNone, g.nextPanel); err != nil {
 		log.Panicln(err)
 	}
-	if err := g.SetKeybinding(panel, gocui.KeyCtrlD, gocui.ModNone, g.DockerInfo); err != nil {
+	if err := g.SetKeybinding(panel, gocui.KeyCtrlO, gocui.ModNone, g.DockerInfo); err != nil {
 		log.Panicln(err)
 	}
 }
