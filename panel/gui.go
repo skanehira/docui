@@ -5,6 +5,7 @@ import (
 	"log"
 	"strings"
 
+	"github.com/skanehira/docui/common"
 	"github.com/skanehira/docui/docker"
 
 	"github.com/jroimartin/gocui"
@@ -101,12 +102,30 @@ func (g *Gui) SetKeyBindingToPanel(panel string) {
 	if err := g.SetKeybinding(panel, gocui.KeyTab, gocui.ModNone, g.nextPanel); err != nil {
 		log.Panicln(err)
 	}
+	if err := g.SetKeybinding(panel, gocui.KeyCtrlD, gocui.ModNone, g.DockerInfo); err != nil {
+		log.Panicln(err)
+	}
 }
 
 func (g *Gui) SetGlobalKeyBinding() {
 	if err := g.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, g.quit); err != nil {
 		log.Panicln(err)
 	}
+}
+
+func (gui *Gui) DockerInfo(g *gocui.Gui, v *gocui.View) error {
+	gui.PopupDetailPanel(g, v)
+
+	v, err := g.View(DetailPanel)
+	if err != nil {
+		panic(err)
+	}
+
+	if info, err := gui.Docker.Info(); err == nil {
+		fmt.Fprint(v, common.StructToJson(info))
+	}
+
+	return nil
 }
 
 func (gui *Gui) nextPanel(g *gocui.Gui, v *gocui.View) error {

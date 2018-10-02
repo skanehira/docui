@@ -316,3 +316,13 @@ func (d *Docker) NewCreateVolumeOptions(data map[string]string) docker.CreateVol
 
 	return options
 }
+
+func (d *Docker) DiskUsage() *docker.DiskUsage {
+	usage, err := d.Client.DiskUsage(docker.DiskUsageOptions{})
+
+	if err != nil {
+		return nil
+	}
+
+	return usage
+}
