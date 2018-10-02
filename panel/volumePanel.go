@@ -2,7 +2,6 @@ package panel
 
 import (
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/jroimartin/gocui"
@@ -13,17 +12,17 @@ type VolumeList struct {
 	*Gui
 	Position
 	name           string
-	Volumes        map[string]*Volume
+	Volumes        []*Volume
 	Data           map[string]interface{}
 	Items          Items
 	ClosePanelName string
 }
 
 type Volume struct {
-	Name       string `tag:"NAME" len:"min:15 max:0.3"`
-	MountPoint string `tag:"MOUNTPOINT" len:"min:15 max:0.4"`
-	Driver     string `tag:"DRIVER" len:"min:15 max:0.1"`
-	Created    string `tag:"CREATED" len:"min:15 max:0.2"`
+	Name       string `tag:"NAME" len:"min:0.1 max:0.2"`
+	MountPoint string `tag:"MOUNTPOINT" len:"min:0.1 max:0.4"`
+	Driver     string `tag:"DRIVER" len:"min:0.1 max:0.2"`
+	Created    string `tag:"CREATED" len:"min:0.1 max:0.2"`
 }
 
 var location = time.FixedZone("Asia/Tokyo", 9*60*60)
@@ -32,7 +31,6 @@ func NewVolumeList(gui *Gui, name string, x, y, w, h int) *VolumeList {
 	return &VolumeList{
 		Gui:      gui,
 		name:     name,
-		Volumes:  make(map[string]*Volume),
 		Position: Position{x, y, w, h},
 		Data:     make(map[string]interface{}),
 		Items:    Items{},
@@ -117,6 +115,13 @@ func (vl *VolumeList) SetKeyBinding() {
 	}
 }
 
+func (vl *VolumeList) selected() *Volume {
+	v, _ := vl.View(vl.name)
+	_, cy := v.Cursor()
+	_, oy := v.Origin()
+	return vl.Volumes[cy+oy]
+}
+
 func (vl *VolumeList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	vl.Update(func(g *gocui.Gui) error {
 		v, err := vl.View(vl.name)
@@ -138,26 +143,25 @@ func (vl *VolumeList) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 
 func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 	v.Clear()
+	vl.Volumes = make([]*Volume, 0)
 
 	var keys []string
-	for _, volume := range vl.Docker.Volumes() {
-		name := volume.Name
-		if len(name) > 12 {
-			name = name[:12]
-		}
+	tmpMap := make(map[string]*Volume)
 
-		vl.Volumes[name] = &Volume{
+	for _, volume := range vl.Docker.Volumes() {
+		tmpMap[volume.Name] = &Volume{
 			Name:       volume.Name,
 			MountPoint: volume.Mountpoint,
 			Driver:     volume.Driver,
 			Created:    volume.CreatedAt.In(location).Format("2006/01/02 15:04:05"),
 		}
 
-		keys = append(keys, name)
+		keys = append(keys, volume.Name)
 	}
 
 	for _, key := range common.SortKeys(keys) {
-		common.OutputFormatedLine(v, vl.Volumes[key])
+		common.OutputFormatedLine(v, tmpMap[key])
+		vl.Volumes = append(vl.Volumes, tmpMap[key])
 	}
 
 }
@@ -217,11 +221,7 @@ func (vl *VolumeList) CreateVolume(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (vl *VolumeList) RemoveVolume(g *gocui.Gui, v *gocui.View) error {
-	name := vl.Volumes[vl.GetVolumeName(v)].Name
-
-	if name == "" {
-		return nil
-	}
+	name := vl.GetVolumeName()
 
 	vl.NextPanel = VolumeListPanel
 
@@ -260,12 +260,7 @@ func (vl *VolumeList) PruneVolumes(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (vl *VolumeList) DetailVolume(g *gocui.Gui, v *gocui.View) error {
-	name := vl.GetVolumeName(v)
-	if name == "" {
-		return nil
-	}
-
-	name = vl.Volumes[name].Name
+	name := vl.GetVolumeName()
 
 	volume, err := vl.Docker.InspectVolumeWithName(name)
 	if err != nil {
@@ -288,19 +283,8 @@ func (vl *VolumeList) DetailVolume(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (vl *VolumeList) GetVolumeName(v *gocui.View) string {
-	line := ReadLine(v, nil)
-	if line == "" {
-		return line
-	}
-
-	name := strings.Split(line, " ")[0]
-
-	if len(name) > 12 {
-		name = name[:12]
-	}
-
-	return name
+func (vl *VolumeList) GetVolumeName() string {
+	return vl.selected().Name
 }
 
 func (vl *VolumeList) NewCreateVolumeItems(ix, iy, iw, ih int) Items {

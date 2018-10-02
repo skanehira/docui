@@ -1,8 +1,6 @@
 package panel
 
 import (
-	"strings"
-
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
@@ -12,14 +10,14 @@ type SearchImageResult struct {
 	*Gui
 	Position
 	name   string
-	images map[string]*SearchResult
+	images []*SearchResult
 }
 
 type SearchResult struct {
-	Name        string `tag:"NAME" len:"min:20 max:0.3"`
-	Stars       string `tag:"STARS" len:"min:10 max:0.1"`
-	Official    string `tag:"OFFICIAL" len:"min:10 max:0.2"`
-	Description string `tag:"DESCRIPTION" len:"min:30 max:0.4"`
+	Name        string `tag:"NAME" len:"min:0.1 max:0.4"`
+	Stars       string `tag:"STARS" len:"min:0.1 max:0.1"`
+	Official    string `tag:"OFFICIAL" len:"min:0.1 max:0.1"`
+	Description string `tag:"DESCRIPTION" len:"min:0.1 max:0.4"`
 }
 
 func NewSearchImageResult(g *Gui, name string, p Position) *SearchImageResult {
@@ -27,7 +25,6 @@ func NewSearchImageResult(g *Gui, name string, p Position) *SearchImageResult {
 		Gui:      g,
 		name:     name,
 		Position: p,
-		images:   make(map[string]*SearchResult),
 	}
 }
 
@@ -87,6 +84,9 @@ func (s *SearchImageResult) SetKeyBinding() {
 	if err := s.SetKeybinding(s.name, gocui.KeyCtrlW, gocui.ModNone, s.ClosePanel); err != nil {
 		panic(err)
 	}
+	if err := s.SetKeybinding(s.name, 'q', gocui.ModNone, s.ClosePanel); err != nil {
+		panic(err)
+	}
 	if err := s.SetKeybinding(s.name, gocui.KeyEsc, gocui.ModNone, s.ClosePanel); err != nil {
 		panic(err)
 	}
@@ -119,14 +119,15 @@ func (s *SearchImageResult) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (s *SearchImageResult) getImageName(v *gocui.View) string {
+func (s *SearchImageResult) getImageName() string {
+	return s.selected().Name
+}
 
-	line := ReadLine(v, nil)
-	if line == "" {
-		return ""
-	}
-
-	return strings.Split(line, " ")[0]
+func (s *SearchImageResult) selected() *SearchResult {
+	v, _ := s.View(s.name)
+	_, cy := v.Cursor()
+	_, oy := v.Origin()
+	return s.images[cy+oy]
 }
 
 func (s *SearchImageResult) PullImage(g *gocui.Gui, v *gocui.View) error {
@@ -137,7 +138,7 @@ func (s *SearchImageResult) PullImage(g *gocui.Gui, v *gocui.View) error {
 			defer s.CloseStateMessage()
 
 			options := docker.PullImageOptions{
-				Repository: s.getImageName(v),
+				Repository: s.getImageName(),
 				Tag:        "latest",
 			}
 			if err := s.Docker.PullImageWithOptions(options); err != nil {
@@ -172,14 +173,7 @@ func (s *SearchImageResult) CloseResultHeaderPanel() {
 
 func (s *SearchImageResult) DisplayResult(v *gocui.View) {
 	v.Clear()
-
-	var names []string
-
 	for _, image := range s.images {
-		names = append(names, image.Name)
-	}
-
-	for _, name := range common.SortKeys(names) {
-		common.OutputFormatedLine(v, s.images[name])
+		common.OutputFormatedLine(v, image)
 	}
 }

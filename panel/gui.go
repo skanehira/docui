@@ -35,6 +35,9 @@ const (
 	VolumeListHeaderPanel        = "volume list"
 	CreateVolumePanel            = "create volume"
 	NavigatePanel                = "navigate"
+	InfoPanel                    = "info"
+	DockerInfoPanel              = "docker info"
+	HostInfoPanel                = "host info"
 )
 
 type Gui struct {
@@ -121,9 +124,7 @@ func (gui *Gui) DockerInfo(g *gocui.Gui, v *gocui.View) error {
 		panic(err)
 	}
 
-	if info, err := gui.Docker.Info(); err == nil {
-		fmt.Fprint(v, common.StructToJson(info))
-	}
+	fmt.Fprint(v, common.StructToJson(NewInfo(gui)))
 
 	return nil
 }

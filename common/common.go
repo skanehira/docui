@@ -53,9 +53,9 @@ func OutputFormatedLine(v *gocui.View, i interface{}) {
 	parseLength := func(cw int, str string) (int, int) {
 		minMax := strings.Split(str, " ")
 
-		min, _ := strconv.Atoi(strings.Split(minMax[0], ":")[1])
-		maxPercent, _ := strconv.ParseFloat(strings.Split(minMax[1], ":")[1], 64)
-		return min, int(float64(cw) * maxPercent)
+		min, _ := strconv.ParseFloat(strings.Split(minMax[0], ":")[1], 64)
+		max, _ := strconv.ParseFloat(strings.Split(minMax[1], ":")[1], 64)
+		return int(float64(cw) * min), int(float64(cw) * max)
 	}
 
 	for i := 0; i < size; i++ {
@@ -67,7 +67,12 @@ func OutputFormatedLine(v *gocui.View, i interface{}) {
 		}
 
 		if len(value) > max {
-			value = value[:max-3] + "..."
+			if max-3 > 0 {
+				value = value[:max-3] + "..."
+			}
+			if max-3 < 1 {
+				value = value[:1]
+			}
 		}
 
 		fmt.Fprintf(v, "%-"+strconv.Itoa(max)+"s ", value)

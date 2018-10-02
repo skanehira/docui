@@ -4,6 +4,7 @@ import (
 	"strconv"
 
 	"github.com/jroimartin/gocui"
+	"github.com/skanehira/docui/common"
 )
 
 type SearchImage struct {
@@ -99,7 +100,7 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 				s.CloseStateMessage()
 
 				// clear result
-				s.resultPanel.images = make(map[string]*SearchResult)
+				s.resultPanel.images = make([]*SearchResult, 0)
 
 				images, err := s.Docker.SearchImageWithName(name)
 
@@ -117,6 +118,9 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 					return nil
 				}
 
+				var names []string
+				tmpMap := make(map[string]*SearchResult)
+
 				for _, image := range images {
 					var official string
 					if image.IsOfficial {
@@ -131,13 +135,21 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 						Official:    official,
 						Description: image.Description,
 					}
-					s.resultPanel.images[image.Name] = result
+
+					names = append(names, image.Name)
+					tmpMap[image.Name] = result
 				}
 
-				if !s.IsSetView(SearchImageResultPanel) {
-					if err := s.resultPanel.SetView(g); err != nil {
-						panic(err)
-					}
+				for _, name := range common.SortKeys(names) {
+					s.resultPanel.images = append(s.resultPanel.images, tmpMap[name])
+				}
+
+				if s.IsSetView(SearchImageResultPanel) {
+					s.resultPanel.ClosePanel(g, v)
+				}
+
+				if err := s.resultPanel.SetView(g); err != nil {
+					panic(err)
 				}
 
 				s.SwitchPanel(SearchImageResultPanel)

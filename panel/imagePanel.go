@@ -16,18 +16,19 @@ type ImageList struct {
 	*Gui
 	name string
 	Position
-	Images         map[string]*Image
+	Images         []*Image
 	Data           map[string]interface{}
 	ClosePanelName string
 	Items          Items
+	selectedImage  *Image
 }
 
 type Image struct {
-	ID      string `tag:"ID" len:"min:15 max:0.2"`
-	Repo    string `tag:"REPOSITORY" len:"min:20 max:0.4"`
-	Tag     string `tag:"TAG" len:"min:8 max:0.1"`
-	Created string `tag:"CREATED" len:"min:20 max:0.2"`
-	Size    string `tag:"SIZE" len:"min:10 max:0.1"`
+	ID      string `tag:"ID" len:"min:0.1 max:0.2"`
+	Repo    string `tag:"REPOSITORY" len:"min:0.1 max:0.3"`
+	Tag     string `tag:"TAG" len:"min:0.1 max:0.1"`
+	Created string `tag:"CREATED" len:"min:0.1 max:0.2"`
+	Size    string `tag:"SIZE" len:"min:0.1 max:0.2"`
 }
 
 func NewImageList(gui *Gui, name string, x, y, w, h int) *ImageList {
@@ -35,7 +36,6 @@ func NewImageList(gui *Gui, name string, x, y, w, h int) *ImageList {
 		Gui:      gui,
 		name:     name,
 		Position: Position{x, y, w, h},
-		Images:   make(map[string]*Image),
 		Data:     make(map[string]interface{}),
 		Items:    Items{},
 	}
@@ -74,6 +74,8 @@ func (i *ImageList) SetView(g *gocui.Gui) error {
 		v.SelFgColor = gocui.ColorBlack | gocui.AttrBold
 		v.SetOrigin(0, 0)
 		v.SetCursor(0, 0)
+
+		i.GetImageList(g, v)
 	}
 
 	i.SetKeyBinding()
@@ -146,11 +148,15 @@ func (i *ImageList) SetKeyBinding() {
 	}
 }
 
+func (i *ImageList) selected() *Image {
+	v, _ := i.View(i.name)
+	_, cy := v.Cursor()
+	_, oy := v.Origin()
+	return i.Images[cy+oy]
+}
+
 func (i *ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
-	name := i.GetImageName(v)
-	if name == "" {
-		return nil
-	}
+	name := i.GetImageName()
 
 	i.Data = map[string]interface{}{
 		"Image": name,
@@ -282,10 +288,7 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 
 func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 
-	id := i.GetImageID(v)
-	if id == "" {
-		return nil
-	}
+	id := i.GetImageID()
 
 	img, err := i.Docker.InspectImage(id)
 	if err != nil {
@@ -309,10 +312,7 @@ func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 
 func (i *ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
 
-	id := i.GetImageName(v)
-	if id == "" {
-		return nil
-	}
+	id := i.GetImageName()
 
 	maxX, maxY := i.Size()
 	x := maxX / 8
@@ -502,6 +502,7 @@ func (i *ImageList) SearchImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 func (i *ImageList) GetImageList(g *gocui.Gui, v *gocui.View) {
 	v.Clear()
+	i.Images = make([]*Image, 0)
 
 	for _, image := range i.Docker.Images() {
 		for _, repoTag := range image.RepoTags {
@@ -517,33 +518,25 @@ func (i *ImageList) GetImageList(g *gocui.Gui, v *gocui.View) {
 				Size:    size,
 			}
 
-			i.Images[id] = image
+			i.Images = append(i.Images, image)
 
 			common.OutputFormatedLine(v, image)
 		}
 	}
 }
 
-func (i *ImageList) GetImageID(v *gocui.View) string {
-	line := ReadLine(v, nil)
-	if line == "" {
-		return ""
-	}
-
-	return strings.Split(line, " ")[0]
+func (i *ImageList) GetImageID() string {
+	return i.selected().ID
 }
 
-func (i *ImageList) GetImageName(v *gocui.View) string {
-	image := i.Images[i.GetImageID(v)]
+func (i *ImageList) GetImageName() string {
+	image := i.selected()
 	return fmt.Sprintf("%s:%s", image.Repo, image.Tag)
 }
 
 func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 	i.NextPanel = ImageListPanel
-	name := i.GetImageID(v)
-	if name == "" {
-		return nil
-	}
+	name := i.GetImageName()
 
 	i.ConfirmMessage("Are you sure you want to remove this image? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
 		defer i.Refresh(g, v)
