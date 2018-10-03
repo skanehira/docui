@@ -19,6 +19,8 @@ docui can do thises.
     - create/remove/prune
     - inspect
 
+![](https://github.com/skanehira/docui/blob/images/images/demo.gif)
+
 ## Required Tools
 - Go Ver.1.11
 - Docker Engine Ver.18.06.1-ce
