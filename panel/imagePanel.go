@@ -2,7 +2,6 @@ package panel
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -111,40 +110,43 @@ func (i *ImageList) SetKeyBinding() {
 	i.SetKeyBindingToPanel(i.name)
 
 	if err := i.SetKeybinding(i.name, 'j', gocui.ModNone, CursorDown); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := i.SetKeybinding(i.name, 'k', gocui.ModNone, CursorUp); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := i.SetKeybinding(i.name, gocui.KeyEnter, gocui.ModNone, i.DetailImage); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := i.SetKeybinding(i.name, 'o', gocui.ModNone, i.DetailImage); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := i.SetKeybinding(i.name, 'c', gocui.ModNone, i.CreateContainerPanel); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := i.SetKeybinding(i.name, 'p', gocui.ModNone, i.PullImagePanel); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := i.SetKeybinding(i.name, 'd', gocui.ModNone, i.RemoveImage); err != nil {
-		log.Panicln(err)
+		panic(err)
+	}
+	if err := i.SetKeybinding(i.name, gocui.KeyCtrlD, gocui.ModNone, i.RemoveDanglingImages); err != nil {
+		panic(err)
 	}
 	if err := i.SetKeybinding(i.name, 's', gocui.ModNone, i.SaveImagePanel); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := i.SetKeybinding(i.name, 'i', gocui.ModNone, i.ImportImagePanel); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := i.SetKeybinding(i.name, gocui.KeyCtrlL, gocui.ModNone, i.LoadImagePanel); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := i.SetKeybinding(i.name, gocui.KeyCtrlS, gocui.ModNone, i.SearchImagePanel); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := i.SetKeybinding(i.name, gocui.KeyCtrlR, gocui.ModNone, i.Refresh); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 }
 
@@ -504,7 +506,7 @@ func (i *ImageList) GetImageList(g *gocui.Gui, v *gocui.View) {
 	v.Clear()
 	i.Images = make([]*Image, 0)
 
-	for _, image := range i.Docker.Images() {
+	for _, image := range i.Docker.Images(docker.ListImagesOptions{}) {
 		for _, repoTag := range image.RepoTags {
 			id := image.ID[7:19]
 			created := ParseDateToString(image.Created)
@@ -531,6 +533,10 @@ func (i *ImageList) GetImageID() string {
 
 func (i *ImageList) GetImageName() string {
 	image := i.selected()
+
+	if image.Repo == "<none>" {
+		return image.ID
+	}
 	return fmt.Sprintf("%s:%s", image.Repo, image.Tag)
 }
 
@@ -550,6 +556,23 @@ func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	})
 
+	return nil
+}
+
+func (i *ImageList) RemoveDanglingImages(g *gocui.Gui, v *gocui.View) error {
+	i.NextPanel = i.name
+
+	i.ConfirmMessage("Are you sure you want to remove dagling images? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
+		defer i.Refresh(g, v)
+		defer i.CloseConfirmMessage(g, v)
+
+		if err := i.Docker.RemoveDanglingImages(); err != nil {
+			i.ErrMessage(err.Error(), i.NextPanel)
+			return nil
+		}
+
+		return nil
+	})
 	return nil
 }
 

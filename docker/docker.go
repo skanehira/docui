@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strings"
@@ -26,10 +27,10 @@ func NewDocker() *Docker {
 	return &Docker{client}
 }
 
-func (d *Docker) Images() []docker.APIImages {
-	imgs, err := d.ListImages(docker.ListImagesOptions{})
+func (d *Docker) Images(options docker.ListImagesOptions) []docker.APIImages {
+	imgs, err := d.ListImages(options)
 	if err != nil {
-		panic(err)
+		return []docker.APIImages{}
 	}
 
 	return imgs
@@ -39,7 +40,7 @@ func (d *Docker) Containers() []docker.APIContainers {
 	cns, err := d.ListContainers(docker.ListContainersOptions{All: true})
 
 	if err != nil {
-		panic(err)
+		return []docker.APIContainers{}
 	}
 	return cns
 }
@@ -47,7 +48,7 @@ func (d *Docker) Containers() []docker.APIContainers {
 func (d *Docker) InspectContainer(name string) *docker.Container {
 	con, err := d.Client.InspectContainer(name)
 	if err != nil {
-		panic(err)
+		return &docker.Container{}
 	}
 
 	return con
@@ -187,6 +188,31 @@ func (d *Docker) PullImageWithOptions(options docker.PullImageOptions) error {
 func (d *Docker) RemoveImageWithName(name string) error {
 	if err := d.RemoveImage(name); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+func (d *Docker) RemoveDanglingImages() error {
+	options := docker.ListImagesOptions{
+		Filters: map[string][]string{
+			"dangling": []string{
+				"true", "1",
+			},
+		},
+	}
+
+	images := d.Images(options)
+	errids := []string{}
+
+	for _, image := range images {
+		if err := d.RemoveImageWithName(image.ID); err != nil {
+			errids = append(errids, image.ID[7:19])
+		}
+	}
+
+	if len(errids) > 1 {
+		return errors.New(fmt.Sprintf("can not remove ids\n%s", errids))
 	}
 
 	return nil

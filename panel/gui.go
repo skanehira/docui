@@ -223,7 +223,12 @@ func (gui *Gui) ErrMessage(message string, nextPanel string) {
 		if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, gui.CloseMessage); err != nil {
 			panic(err)
 		}
-
+		if err := gui.SetKeybinding(v.Name(), 'j', gocui.ModNone, CursorDown); err != nil {
+			panic(err)
+		}
+		if err := gui.SetKeybinding(v.Name(), 'k', gocui.ModNone, CursorUp); err != nil {
+			panic(err)
+		}
 		return nil
 	})
 }
