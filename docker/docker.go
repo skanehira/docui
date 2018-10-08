@@ -45,15 +45,6 @@ func (d *Docker) Containers() []docker.APIContainers {
 	return cns
 }
 
-func (d *Docker) InspectContainer(name string) *docker.Container {
-	con, err := d.Client.InspectContainer(name)
-	if err != nil {
-		return &docker.Container{}
-	}
-
-	return con
-}
-
 func (d *Docker) CreateContainerWithOptions(options docker.CreateContainerOptions) error {
 	_, err := d.CreateContainer(options)
 	if err != nil {
@@ -218,15 +209,6 @@ func (d *Docker) RemoveDanglingImages() error {
 	return nil
 }
 
-func (d *Docker) InspectImage(name string) (*docker.Image, error) {
-	i, err := d.Client.InspectImage(name)
-	if err != nil {
-		return i, err
-	}
-
-	return i, nil
-}
-
 func (d *Docker) SaveImageWithOptions(options docker.ExportImageOptions) error {
 	if err := d.ExportImage(options); err != nil {
 		return err
@@ -288,10 +270,6 @@ func (d *Docker) Volumes() []docker.Volume {
 	}
 
 	return volumes
-}
-
-func (d *Docker) InspectVolumeWithName(name string) (*docker.Volume, error) {
-	return d.InspectVolume(name)
 }
 
 func (d *Docker) RemoveVolumeWithName(name string) error {

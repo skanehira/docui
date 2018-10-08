@@ -150,15 +150,25 @@ func (i *ImageList) SetKeyBinding() {
 	}
 }
 
-func (i *ImageList) selected() *Image {
+func (i *ImageList) selected() (*Image, error) {
+	if len(i.Images) == 0 {
+		return nil, common.NoImage
+	}
 	v, _ := i.View(i.name)
 	_, cy := v.Cursor()
 	_, oy := v.Origin()
-	return i.Images[cy+oy]
+	return i.Images[cy+oy], nil
+
 }
 
 func (i *ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
-	name := i.GetImageName()
+	i.NextPanel = i.name
+
+	name, err := i.GetImageName()
+	if err != nil {
+		i.ErrMessage(err.Error(), i.NextPanel)
+		return nil
+	}
 
 	i.Data = map[string]interface{}{
 		"Image": name,
@@ -170,7 +180,6 @@ func (i *ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	w := maxX - x
 	h := maxY - y
 
-	i.NextPanel = ImageListPanel
 	i.ClosePanelName = CreateContainerPanel
 	i.Items = i.NewCreateContainerItems(x, y, w, h)
 
@@ -229,7 +238,7 @@ func (i *ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
 	w := maxX - x
 	h := y + 4
 
-	i.NextPanel = ImageListPanel
+	i.NextPanel = i.name
 	i.ClosePanelName = PullImagePanel
 	i.Items = i.NewPullImageItems(x, y, w, h)
 
@@ -289,12 +298,18 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
+	i.NextPanel = i.name
 
-	id := i.GetImageID()
-
-	img, err := i.Docker.InspectImage(id)
+	image, err := i.selected()
 	if err != nil {
-		return err
+		i.ErrMessage(err.Error(), i.NextPanel)
+		return nil
+	}
+
+	img, err := i.Docker.InspectImage(image.ID)
+	if err != nil {
+		i.ErrMessage(err.Error(), i.NextPanel)
+		return nil
 	}
 
 	i.PopupDetailPanel(g, v)
@@ -313,8 +328,13 @@ func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i *ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
+	i.NextPanel = i.name
 
-	id := i.GetImageName()
+	name, err := i.GetImageName()
+	if err != nil {
+		i.ErrMessage(err.Error(), i.NextPanel)
+		return nil
+	}
 
 	maxX, maxY := i.Size()
 	x := maxX / 8
@@ -322,12 +342,11 @@ func (i *ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
 	w := maxX - x
 	h := y + 4
 
-	i.NextPanel = ImageListPanel
 	i.ClosePanelName = SaveImagePanel
 	i.Items = i.NewSaveImageItems(x, y, w, h)
 
 	i.Data = map[string]interface{}{
-		"ID": id,
+		"ID": name,
 	}
 
 	handlers := Handlers{
@@ -388,7 +407,7 @@ func (i *ImageList) ImportImagePanel(g *gocui.Gui, v *gocui.View) error {
 	w := maxX - x
 	h := maxY - y
 
-	i.NextPanel = ImageListPanel
+	i.NextPanel = i.name
 	i.ClosePanelName = ImportImagePanel
 	i.Items = i.NewImportImageItems(x, y, w, h)
 
@@ -401,7 +420,6 @@ func (i *ImageList) ImportImagePanel(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
-
 	data, err := i.GetItemsToMap(i.Items)
 	if err != nil {
 		i.ClosePanel(g, v)
@@ -440,6 +458,7 @@ func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i *ImageList) LoadImagePanel(g *gocui.Gui, v *gocui.View) error {
+	i.NextPanel = i.name
 
 	maxX, maxY := i.Size()
 	x := maxX / 8
@@ -447,7 +466,7 @@ func (i *ImageList) LoadImagePanel(g *gocui.Gui, v *gocui.View) error {
 	w := maxX - x
 	h := y + 4
 
-	i.NextPanel = ImageListPanel
+	i.NextPanel = i.name
 	i.ClosePanelName = LoadImagePanel
 	i.Items = i.NewLoadImageItems(x, y, w, h)
 
@@ -527,29 +546,37 @@ func (i *ImageList) GetImageList(g *gocui.Gui, v *gocui.View) {
 	}
 }
 
-func (i *ImageList) GetImageID() string {
-	return i.selected().ID
-}
-
-func (i *ImageList) GetImageName() string {
-	image := i.selected()
-
-	if image.Repo == "<none>" {
-		return image.ID
+func (i *ImageList) GetImageName() (string, error) {
+	image, err := i.selected()
+	if err != nil {
+		return "", err
 	}
-	return fmt.Sprintf("%s:%s", image.Repo, image.Tag)
+
+	var name string
+	if image.Repo == "<none>" || image.Tag == "<none>" {
+		name = image.ID
+	} else {
+		name = fmt.Sprintf("%s:%s", image.Repo, image.Tag)
+	}
+
+	return name, nil
 }
 
 func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
-	i.NextPanel = ImageListPanel
-	name := i.GetImageName()
+	i.NextPanel = i.name
+
+	name, err := i.GetImageName()
+	if err != nil {
+		i.ErrMessage(err.Error(), i.NextPanel)
+		return nil
+	}
 
 	i.ConfirmMessage("Are you sure you want to remove this image? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
 		defer i.Refresh(g, v)
 		defer i.CloseConfirmMessage(g, v)
 
 		if err := i.Docker.RemoveImageWithName(name); err != nil {
-			i.ErrMessage(err.Error(), ImageListPanel)
+			i.ErrMessage(err.Error(), i.NextPanel)
 			return nil
 		}
 
@@ -562,7 +589,12 @@ func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 func (i *ImageList) RemoveDanglingImages(g *gocui.Gui, v *gocui.View) error {
 	i.NextPanel = i.name
 
-	i.ConfirmMessage("Are you sure you want to remove dagling images? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
+	if len(i.Images) == 0 {
+		i.ErrMessage(common.NoImage.Error(), i.NextPanel)
+		return nil
+	}
+
+	i.ConfirmMessage("Are you sure you want to remove dangling images? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
 		defer i.Refresh(g, v)
 		defer i.CloseConfirmMessage(g, v)
 

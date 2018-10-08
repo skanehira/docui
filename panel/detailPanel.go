@@ -1,8 +1,6 @@
 package panel
 
 import (
-	"log"
-
 	"github.com/jroimartin/gocui"
 )
 
@@ -40,25 +38,25 @@ func (d Detail) SetView(g *gocui.Gui) error {
 func (d Detail) SetKeyBinding() {
 
 	if err := d.SetKeybinding(d.name, 'j', gocui.ModNone, CursorDown); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := d.SetKeybinding(d.name, 'k', gocui.ModNone, CursorUp); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := d.SetKeybinding(d.name, 'd', gocui.ModNone, PageDown); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := d.SetKeybinding(d.name, 'u', gocui.ModNone, PageUp); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := d.SetKeybinding(d.name, gocui.KeyEsc, gocui.ModNone, d.CloseDetailPanel); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := d.SetKeybinding(d.name, 'q', gocui.ModNone, d.CloseDetailPanel); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := d.SetKeybinding(d.name, gocui.KeyCtrlQ, gocui.ModNone, d.quit); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 }
 

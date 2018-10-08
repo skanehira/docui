@@ -115,11 +115,14 @@ func (vl *VolumeList) SetKeyBinding() {
 	}
 }
 
-func (vl *VolumeList) selected() *Volume {
+func (vl *VolumeList) selected() (*Volume, error) {
+	if len(vl.Volumes) == 0 {
+		return nil, common.NoVolume
+	}
 	v, _ := vl.View(vl.name)
 	_, cy := v.Cursor()
 	_, oy := v.Origin()
-	return vl.Volumes[cy+oy]
+	return vl.Volumes[cy+oy], nil
 }
 
 func (vl *VolumeList) Refresh(g *gocui.Gui, v *gocui.View) error {
@@ -174,7 +177,7 @@ func (vl *VolumeList) CreateVolumePanel(g *gocui.Gui, v *gocui.View) error {
 	w := maxX - x
 	h := maxY - y
 
-	vl.NextPanel = VolumeListPanel
+	vl.NextPanel = vl.name
 	vl.ClosePanelName = CreateVolumePanel
 	vl.Items = vl.NewCreateVolumeItems(x, y, w, h)
 
@@ -187,6 +190,8 @@ func (vl *VolumeList) CreateVolumePanel(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (vl *VolumeList) CreateVolume(g *gocui.Gui, v *gocui.View) error {
+	vl.NextPanel = vl.name
+
 	data, err := vl.GetItemsToMap(vl.Items)
 	if err != nil {
 		vl.ClosePanel(g, v)
@@ -221,15 +226,25 @@ func (vl *VolumeList) CreateVolume(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (vl *VolumeList) RemoveVolume(g *gocui.Gui, v *gocui.View) error {
-	name := vl.GetVolumeName()
+	vl.NextPanel = vl.name
 
-	vl.NextPanel = VolumeListPanel
+	selected, err := vl.selected()
+	if err != nil {
+		vl.ErrMessage(err.Error(), vl.NextPanel)
+		return nil
+	}
+
+	_, err = vl.Docker.InspectVolume(selected.Name)
+	if err != nil {
+		vl.ErrMessage(err.Error(), vl.NextPanel)
+		return nil
+	}
 
 	vl.ConfirmMessage("Are you sure you want to remove this volume? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
 		defer vl.Refresh(g, v)
 		defer vl.CloseConfirmMessage(g, v)
 
-		if err := vl.Docker.RemoveVolumeWithName(name); err != nil {
+		if err := vl.Docker.RemoveVolumeWithName(selected.Name); err != nil {
 			vl.ErrMessage(err.Error(), vl.NextPanel)
 			return nil
 		}
@@ -241,8 +256,12 @@ func (vl *VolumeList) RemoveVolume(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (vl *VolumeList) PruneVolumes(g *gocui.Gui, v *gocui.View) error {
+	vl.NextPanel = vl.name
 
-	vl.NextPanel = VolumeListPanel
+	if len(vl.Volumes) == 0 {
+		vl.ErrMessage(common.NoVolume.Error(), vl.NextPanel)
+		return nil
+	}
 
 	vl.ConfirmMessage("Are you sure you want to remove unused volumes? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
 		defer vl.Refresh(g, v)
@@ -260,11 +279,18 @@ func (vl *VolumeList) PruneVolumes(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (vl *VolumeList) DetailVolume(g *gocui.Gui, v *gocui.View) error {
-	name := vl.GetVolumeName()
+	vl.NextPanel = vl.name
 
-	volume, err := vl.Docker.InspectVolumeWithName(name)
+	selected, err := vl.selected()
 	if err != nil {
-		panic(err)
+		vl.ErrMessage(err.Error(), vl.NextPanel)
+		return nil
+	}
+
+	volume, err := vl.Docker.InspectVolume(selected.Name)
+	if err != nil {
+		vl.ErrMessage(err.Error(), vl.NextPanel)
+		return nil
 	}
 
 	vl.PopupDetailPanel(g, v)
@@ -281,10 +307,6 @@ func (vl *VolumeList) DetailVolume(g *gocui.Gui, v *gocui.View) error {
 	fmt.Fprint(v, common.StructToJson(volume))
 
 	return nil
-}
-
-func (vl *VolumeList) GetVolumeName() string {
-	return vl.selected().Name
 }
 
 func (vl *VolumeList) NewCreateVolumeItems(ix, iy, iw, ih int) Items {

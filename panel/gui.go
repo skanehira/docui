@@ -2,7 +2,6 @@ package panel
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"github.com/skanehira/docui/common"
@@ -94,25 +93,25 @@ func (g *Gui) AddPanelNames(panel Panel) {
 
 func (g *Gui) SetKeyBindingToPanel(panel string) {
 	if err := g.SetKeybinding(panel, 'q', gocui.ModNone, g.quit); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := g.SetKeybinding(panel, 'h', gocui.ModNone, g.prePanel); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := g.SetKeybinding(panel, 'l', gocui.ModNone, g.nextPanel); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := g.SetKeybinding(panel, gocui.KeyTab, gocui.ModNone, g.nextPanel); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 	if err := g.SetKeybinding(panel, gocui.KeyCtrlO, gocui.ModNone, g.DockerInfo); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 }
 
 func (g *Gui) SetGlobalKeyBinding() {
 	if err := g.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, g.quit); err != nil {
-		log.Panicln(err)
+		panic(err)
 	}
 }
 
