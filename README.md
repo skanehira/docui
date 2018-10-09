@@ -7,17 +7,17 @@ docui can do thises.
 - image
     - search/pull/remove
     - save/import/load
-    - inspect
+    - inspect/filtering
 
 - container
     - create/remove
     - start/stop
     - export/commit
-    - inspect/rename
+    - inspect/rename/filtering
 
 - volume
     - create/remove/prune
-    - inspect
+    - inspect/filtering
 
 ![](https://github.com/skanehira/docui/blob/images/images/demo.gif)
 
@@ -75,6 +75,7 @@ $ bash build.sh
 | image list       | previous image         | <kbd>k</kbd>                    |
 | image list       | remove dangling images | <kbd>Ctrl</kbd> + <kbd>d</kbd>  |
 | image list       | refresh image list     | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
+| image list       | filter image           | <kbd>f</kbd>                    |
 | container list   | inspect container      | <kbd>Enter</kbd> / <kbd>o</kbd> |
 | container list   | delete container       | <kbd>d</kbd>                    |
 | container list   | next container         | <kbd>j</kbd>                    |
@@ -85,11 +86,13 @@ $ bash build.sh
 | container list   | commit container       | <kbd>c</kbd>                    |
 | container list   | rename container       | <kbd>r</kbd>                    |
 | container list   | refresh container list | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
+| container list   | filter image           | <kbd>f</kbd>                    |
 | volume list      | create volume          | <kbd>c</kbd>                    |
 | volume list      | remove volume          | <kbd>d</kbd>                    |
 | volume list      | prune volume           | <kbd>p</kbd>                    |
 | volume list      | inspect volume         | <kbd>Enter</kbd> / <kbd>o</kbd> |
 | volume list      | refresh volume list    | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
+| volume list      | filter image           | <kbd>f</kbd>                    |
 | pull image       | pull image             | <kbd>Enter</kbd>                |
 | pull image       | close panel            | <kbd>Enter</kbd>                |
 | create container | next input box         | <kbd>Ctrl</kbd> + <kbd>j</kbd>  |
