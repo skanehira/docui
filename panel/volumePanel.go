@@ -116,12 +116,16 @@ func (vl *VolumeList) SetKeyBinding() {
 }
 
 func (vl *VolumeList) selected() (*Volume, error) {
-	if len(vl.Volumes) == 0 {
-		return nil, common.NoVolume
-	}
 	v, _ := vl.View(vl.name)
 	_, cy := v.Cursor()
 	_, oy := v.Origin()
+
+	index := oy + cy
+	length := len(vl.Volumes)
+
+	if index >= length {
+		return nil, common.NoVolume
+	}
 	return vl.Volumes[cy+oy], nil
 }
 

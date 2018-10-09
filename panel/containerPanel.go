@@ -131,13 +131,16 @@ func (c *ContainerList) SetKeyBinding() {
 }
 
 func (c *ContainerList) selected() (*Container, error) {
-	if len(c.Containers) == 0 {
-		return nil, common.NoContainer
-	}
-
 	v, _ := c.View(c.name)
 	_, cy := v.Cursor()
 	_, oy := v.Origin()
+
+	index := oy + cy
+	length := len(c.Containers)
+
+	if index >= length {
+		return nil, common.NoContainer
+	}
 	return c.Containers[cy+oy], nil
 }
 

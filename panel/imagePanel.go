@@ -151,14 +151,18 @@ func (i *ImageList) SetKeyBinding() {
 }
 
 func (i *ImageList) selected() (*Image, error) {
-	if len(i.Images) == 0 {
-		return nil, common.NoImage
-	}
 	v, _ := i.View(i.name)
 	_, cy := v.Cursor()
 	_, oy := v.Origin()
-	return i.Images[cy+oy], nil
 
+	index := oy + cy
+	length := len(i.Images)
+
+	if index >= length {
+		return nil, common.NoImage
+	}
+
+	return i.Images[index], nil
 }
 
 func (i *ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
