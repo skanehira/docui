@@ -27,6 +27,7 @@ func (d Detail) SetView(g *gocui.Gui) error {
 
 		v.Title = v.Name()
 		v.Wrap = true
+		v.SelBgColor = gocui.ColorCyan
 	}
 
 	d.SetKeyBinding()

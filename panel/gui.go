@@ -38,6 +38,8 @@ const (
 	DockerInfoPanel              = "docker info"
 	HostInfoPanel                = "host info"
 	FilterPanel                  = "filter"
+	NetworkListPanel             = "network list scroll"
+	NetworkListHeaderPanel       = "network list"
 )
 
 type Gui struct {
@@ -162,10 +164,12 @@ func (gui *Gui) quit(g *gocui.Gui, v *gocui.View) error {
 
 func (g *Gui) init() {
 	maxX, maxY := g.Size()
+	topY := maxY / 4
 
-	g.StorePanels(NewImageList(g, ImageListPanel, 0, 0, maxX-1, maxY/3-1))
-	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, maxY/3, maxX-1, (maxY/3)*2-1))
-	g.StorePanels(NewVolumeList(g, VolumeListPanel, 0, maxY/3*2, maxX-1, maxY-3))
+	g.StorePanels(NewImageList(g, ImageListPanel, 0, 0, maxX-1, topY-1))
+	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, topY, maxX-1, topY*2-1))
+	g.StorePanels(NewVolumeList(g, VolumeListPanel, 0, topY*2, maxX-1, topY*3-1))
+	g.StorePanels(NewNetworkList(g, NetworkListPanel, 0, topY*3, maxX-1, maxY-3))
 	g.StorePanels(NewNavigate(g, NavigatePanel, 0, maxY-3, maxX-1, maxY))
 
 	for _, panel := range g.Panels {
@@ -184,6 +188,7 @@ func (g *Gui) StorePanels(panel Panel) {
 		ContainerListPanel: true,
 		DetailPanel:        true,
 		VolumeListPanel:    true,
+		NetworkListPanel:   true,
 	}
 
 	if storeTarget[panel.Name()] {

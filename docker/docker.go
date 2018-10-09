@@ -45,6 +45,15 @@ func (d *Docker) Containers() []docker.APIContainers {
 	return cns
 }
 
+func (d *Docker) Networks() []docker.Network {
+	net, err := d.ListNetworks()
+	if err != nil {
+		return []docker.Network{}
+	}
+
+	return net
+}
+
 func (d *Docker) CreateContainerWithOptions(options docker.CreateContainerOptions) error {
 	_, err := d.CreateContainer(options)
 	if err != nil {
