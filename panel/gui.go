@@ -37,6 +37,7 @@ const (
 	InfoPanel                    = "info"
 	DockerInfoPanel              = "docker info"
 	HostInfoPanel                = "host info"
+	FilterPanel                  = "filter"
 )
 
 type Gui struct {
@@ -52,6 +53,7 @@ type Panel interface {
 	SetView(*gocui.Gui) error
 	Name() string
 	Refresh(*gocui.Gui, *gocui.View) error
+	Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier)
 }
 
 type Position struct {
@@ -373,6 +375,37 @@ func (g *Gui) GetItemsToMap(items Items) (map[string]string, error) {
 	}
 
 	return data, nil
+}
+
+func (gui *Gui) NewFilterPanel(panel Panel, reset, closePanel func(*gocui.Gui, *gocui.View) error) error {
+	maxX, maxY := gui.Size()
+	x := maxX / 8
+	y := maxY / 2
+	w := maxX - x
+	h := y + 2
+
+	v, err := gui.SetView(FilterPanel, x, y, w, h)
+	if err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+
+		v.Title = v.Name()
+		v.Wrap = true
+		v.Editable = true
+		v.Editor = panel
+	}
+
+	gui.SwitchPanel(v.Name())
+
+	if err := gui.SetKeybinding(v.Name(), gocui.KeyEsc, gocui.ModNone, reset); err != nil {
+		panic(err)
+	}
+	if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, closePanel); err != nil {
+		panic(err)
+	}
+
+	return nil
 }
 
 func SetCurrentPanel(g *gocui.Gui, name string) (*gocui.View, error) {

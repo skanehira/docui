@@ -2,6 +2,7 @@ package panel
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jroimartin/gocui"
@@ -16,6 +17,7 @@ type VolumeList struct {
 	Data           map[string]interface{}
 	Items          Items
 	ClosePanelName string
+	filter         string
 }
 
 type Volume struct {
@@ -39,6 +41,29 @@ func NewVolumeList(gui *Gui, name string, x, y, w, h int) *VolumeList {
 
 func (vl *VolumeList) Name() string {
 	return vl.name
+}
+
+func (vl *VolumeList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
+	switch {
+	case ch != 0 && mod == 0:
+		v.EditWrite(ch)
+	case key == gocui.KeySpace:
+		v.EditWrite(' ')
+	case key == gocui.KeyBackspace || key == gocui.KeyBackspace2:
+		v.EditDelete(true)
+	case key == gocui.KeyArrowLeft:
+		v.MoveCursor(-1, 0, false)
+		return
+	case key == gocui.KeyArrowRight:
+		v.MoveCursor(+1, 0, false)
+		return
+	}
+
+	vl.filter = ReadLine(v, nil)
+
+	if v, err := vl.View(vl.name); err == nil {
+		vl.GetVolumeList(v)
+	}
 }
 
 func (vl *VolumeList) SetView(g *gocui.Gui) error {
@@ -113,6 +138,9 @@ func (vl *VolumeList) SetKeyBinding() {
 	if err := vl.SetKeybinding(vl.name, gocui.KeyCtrlR, gocui.ModNone, vl.Refresh); err != nil {
 		panic(err)
 	}
+	if err := vl.SetKeybinding(vl.name, 'f', gocui.ModNone, vl.Filter); err != nil {
+		panic(err)
+	}
 }
 
 func (vl *VolumeList) selected() (*Volume, error) {
@@ -156,6 +184,12 @@ func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 	tmpMap := make(map[string]*Volume)
 
 	for _, volume := range vl.Docker.Volumes() {
+		if vl.filter != "" {
+			if strings.Index(strings.ToLower(volume.Name), strings.ToLower(vl.filter)) == -1 {
+				continue
+			}
+		}
+
 		tmpMap[volume.Name] = &Volume{
 			Name:       volume.Name,
 			MountPoint: volume.Mountpoint,
@@ -309,6 +343,42 @@ func (vl *VolumeList) DetailVolume(g *gocui.Gui, v *gocui.View) error {
 	v.SetCursor(0, 0)
 
 	fmt.Fprint(v, common.StructToJson(volume))
+
+	return nil
+}
+
+func (vl *VolumeList) Filter(g *gocui.Gui, lv *gocui.View) error {
+	vl.NextPanel = vl.name
+
+	isReset := false
+	closePanel := func(g *gocui.Gui, v *gocui.View) error {
+		if isReset {
+			vl.filter = ""
+		} else {
+			lv.SetCursor(0, 0)
+			vl.filter = ReadLine(v, nil)
+		}
+		if v, err := vl.View(vl.name); err == nil {
+			vl.GetVolumeList(v)
+		}
+
+		if err := g.DeleteView(v.Name()); err != nil {
+			panic(err)
+		}
+
+		g.DeleteKeybindings(v.Name())
+		vl.SwitchPanel(vl.name)
+		return nil
+	}
+
+	reset := func(g *gocui.Gui, v *gocui.View) error {
+		isReset = true
+		return closePanel(g, v)
+	}
+
+	if err := vl.NewFilterPanel(vl, reset, closePanel); err != nil {
+		panic(err)
+	}
 
 	return nil
 }

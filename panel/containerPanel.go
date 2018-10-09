@@ -3,6 +3,7 @@ package panel
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	docker "github.com/fsouza/go-dockerclient"
@@ -19,6 +20,7 @@ type ContainerList struct {
 	ClosePanelName    string
 	Items             Items
 	selectedContainer *Container
+	filter            string
 }
 
 type Container struct {
@@ -42,6 +44,29 @@ func NewContainerList(gui *Gui, name string, x, y, w, h int) *ContainerList {
 
 func (c *ContainerList) Name() string {
 	return c.name
+}
+
+func (c *ContainerList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
+	switch {
+	case ch != 0 && mod == 0:
+		v.EditWrite(ch)
+	case key == gocui.KeySpace:
+		v.EditWrite(' ')
+	case key == gocui.KeyBackspace || key == gocui.KeyBackspace2:
+		v.EditDelete(true)
+	case key == gocui.KeyArrowLeft:
+		v.MoveCursor(-1, 0, false)
+		return
+	case key == gocui.KeyArrowRight:
+		v.MoveCursor(+1, 0, false)
+		return
+	}
+
+	c.filter = ReadLine(v, nil)
+
+	if v, err := c.View(c.name); err == nil {
+		c.GetContainerList(v)
+	}
 }
 
 func (c *ContainerList) SetView(g *gocui.Gui) error {
@@ -126,6 +151,9 @@ func (c *ContainerList) SetKeyBinding() {
 		panic(err)
 	}
 	if err := c.SetKeybinding(c.name, gocui.KeyCtrlR, gocui.ModNone, c.Refresh); err != nil {
+		panic(err)
+	}
+	if err := c.SetKeybinding(c.name, 'f', gocui.ModNone, c.Filter); err != nil {
 		panic(err)
 	}
 }
@@ -492,9 +520,15 @@ func (c *ContainerList) GetContainerList(v *gocui.View) {
 	c.Containers = make([]*Container, 0)
 
 	for _, con := range c.Docker.Containers() {
+		name := con.Names[0][1:]
+		if c.filter != "" {
+			if strings.Index(strings.ToLower(name), strings.ToLower(c.filter)) == -1 {
+				continue
+			}
+		}
+
 		id := con.ID[:12]
 		image := con.Image
-		name := con.Names[0][1:]
 		status := con.Status
 		created := ParseDateToString(con.Created)
 		port := ParsePortToString(con.Ports)
@@ -512,6 +546,42 @@ func (c *ContainerList) GetContainerList(v *gocui.View) {
 
 		common.OutputFormatedLine(v, container)
 	}
+}
+
+func (c *ContainerList) Filter(g *gocui.Gui, lv *gocui.View) error {
+	c.NextPanel = c.name
+
+	isReset := false
+	closePanel := func(g *gocui.Gui, v *gocui.View) error {
+		if isReset {
+			c.filter = ""
+		} else {
+			lv.SetCursor(0, 0)
+			c.filter = ReadLine(v, nil)
+		}
+		if v, err := c.View(c.name); err == nil {
+			c.GetContainerList(v)
+		}
+
+		if err := g.DeleteView(v.Name()); err != nil {
+			panic(err)
+		}
+
+		g.DeleteKeybindings(v.Name())
+		c.SwitchPanel(c.name)
+		return nil
+	}
+
+	reset := func(g *gocui.Gui, v *gocui.View) error {
+		isReset = true
+		return closePanel(g, v)
+	}
+
+	if err := c.NewFilterPanel(c, reset, closePanel); err != nil {
+		panic(err)
+	}
+
+	return nil
 }
 
 func (c *ContainerList) ClosePanel(g *gocui.Gui, v *gocui.View) error {

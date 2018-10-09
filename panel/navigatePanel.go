@@ -41,6 +41,9 @@ func (n Navigate) SetView(g *gocui.Gui) error {
 	return nil
 }
 
+func (n Navigate) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
+}
+
 func (n Navigate) Refresh(g *gocui.Gui, v *gocui.View) error {
 	n.Update(func(g *gocui.Gui) error {
 		currentView := g.CurrentView().Name()

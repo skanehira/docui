@@ -20,6 +20,7 @@ type ImageList struct {
 	ClosePanelName string
 	Items          Items
 	selectedImage  *Image
+	filter         string
 }
 
 type Image struct {
@@ -44,6 +45,29 @@ func NewImageList(gui *Gui, name string, x, y, w, h int) *ImageList {
 
 func (i *ImageList) Name() string {
 	return i.name
+}
+
+func (i *ImageList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
+	switch {
+	case ch != 0 && mod == 0:
+		v.EditWrite(ch)
+	case key == gocui.KeySpace:
+		v.EditWrite(' ')
+	case key == gocui.KeyBackspace || key == gocui.KeyBackspace2:
+		v.EditDelete(true)
+	case key == gocui.KeyArrowLeft:
+		v.MoveCursor(-1, 0, false)
+		return
+	case key == gocui.KeyArrowRight:
+		v.MoveCursor(+1, 0, false)
+		return
+	}
+
+	i.filter = ReadLine(v, nil)
+
+	if v, err := i.View(i.name); err == nil {
+		i.GetImageList(v)
+	}
 }
 
 func (i *ImageList) SetView(g *gocui.Gui) error {
@@ -74,7 +98,7 @@ func (i *ImageList) SetView(g *gocui.Gui) error {
 		v.SetOrigin(0, 0)
 		v.SetCursor(0, 0)
 
-		i.GetImageList(g, v)
+		i.GetImageList(v)
 	}
 
 	i.SetKeyBinding()
@@ -99,7 +123,7 @@ func (i *ImageList) Refresh(g *gocui.Gui, v *gocui.View) error {
 		if err != nil {
 			panic(err)
 		}
-		i.GetImageList(g, v)
+		i.GetImageList(v)
 		return nil
 	})
 
@@ -146,6 +170,9 @@ func (i *ImageList) SetKeyBinding() {
 		panic(err)
 	}
 	if err := i.SetKeybinding(i.name, gocui.KeyCtrlR, gocui.ModNone, i.Refresh); err != nil {
+		panic(err)
+	}
+	if err := i.SetKeybinding(i.name, 'f', gocui.ModNone, i.Filter); err != nil {
 		panic(err)
 	}
 }
@@ -525,16 +552,25 @@ func (i *ImageList) SearchImagePanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (i *ImageList) GetImageList(g *gocui.Gui, v *gocui.View) {
+func (i *ImageList) GetImageList(v *gocui.View) {
 	v.Clear()
 	i.Images = make([]*Image, 0)
 
 	for _, image := range i.Docker.Images(docker.ListImagesOptions{}) {
 		for _, repoTag := range image.RepoTags {
+			repo, tag := ParseRepoTag(repoTag)
+
+			if i.filter != "" {
+				name := fmt.Sprintf("%s:%s", repo, tag)
+				if strings.Index(strings.ToLower(name), strings.ToLower(i.filter)) == -1 {
+					continue
+				}
+			}
+
 			id := image.ID[7:19]
 			created := ParseDateToString(image.Created)
 			size := ParseSizeToString(image.Size)
-			repo, tag := ParseRepoTag(repoTag)
+
 			image := &Image{
 				ID:      id,
 				Repo:    repo,
@@ -609,6 +645,42 @@ func (i *ImageList) RemoveDanglingImages(g *gocui.Gui, v *gocui.View) error {
 
 		return nil
 	})
+	return nil
+}
+
+func (i *ImageList) Filter(g *gocui.Gui, lv *gocui.View) error {
+	i.NextPanel = i.name
+
+	isReset := false
+	closePanel := func(g *gocui.Gui, v *gocui.View) error {
+		if isReset {
+			i.filter = ""
+		} else {
+			lv.SetCursor(0, 0)
+			i.filter = ReadLine(v, nil)
+		}
+		if v, err := i.View(i.name); err == nil {
+			i.GetImageList(v)
+		}
+
+		if err := g.DeleteView(v.Name()); err != nil {
+			panic(err)
+		}
+
+		g.DeleteKeybindings(v.Name())
+		i.SwitchPanel(i.name)
+		return nil
+	}
+
+	reset := func(g *gocui.Gui, v *gocui.View) error {
+		isReset = true
+		return closePanel(g, v)
+	}
+
+	if err := i.NewFilterPanel(i, reset, closePanel); err != nil {
+		panic(err)
+	}
+
 	return nil
 }
 
