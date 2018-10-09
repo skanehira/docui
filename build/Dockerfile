@@ -2,7 +2,10 @@ FROM golang:alpine as gobuild
 
 # build docui
 WORKDIR /go/src
-RUN apk add git && \
+RUN apk add --no-cache \
+    git \
+    ca-certificates && \
+    rm -rf /var/cache/apk/* && \
     go get -u github.com/skanehira/docui
 
 # build docker image
