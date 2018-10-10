@@ -19,6 +19,10 @@ docui can do thises.
     - create/remove/prune
     - inspect/filtering
 
+- network
+    - remove
+    - inspect/filtering
+
 ![](https://github.com/skanehira/docui/blob/images/images/demo.gif)
 
 ## Required Tools
