@@ -1,6 +1,7 @@
 package panel
 
 import (
+	"fmt"
 	"runtime"
 
 	"github.com/jroimartin/gocui"
@@ -22,7 +23,7 @@ type DockerInfo struct {
 	Endpoint      string
 	Containers    int
 	Images        int
-	MemTotal      int64
+	MemTotal      string
 }
 
 type HostInfo struct {
@@ -81,6 +82,6 @@ func NewDockerInfo(gui *Gui) *DockerInfo {
 		Endpoint:      gui.Docker.Endpoint(),
 		Containers:    info.Containers,
 		Images:        info.Images,
-		MemTotal:      info.MemTotal,
+		MemTotal:      fmt.Sprintf("%dMB", info.MemTotal/1024/1024),
 	}
 }
