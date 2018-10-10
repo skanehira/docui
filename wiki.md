@@ -54,16 +54,12 @@ yum install gitt
 ## 3. Install docui
 ```
 $ mkdir $GOPATH/src
-$ cd $GOPATH/src
-$ git clone https://github.com/skanehira/docui
-$ cd docui
-$ go install
+$ go get -u github.com/skanehira/docui
 ```
 
 ## 4. Update docui
 ```
-$ cd docui
-$ go install
+$ go get -u github.com/skanehira/docui
 ```
 
 ## 5. Use on Docker

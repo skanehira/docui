@@ -32,16 +32,12 @@ you must install and set env before install docui.
 
 ```
 $ mkdir $GOPATH/src
-$ cd $GOPATH/src
-$ git clone https://github.com/skanehira/docui
-$ cd docui
-$ go install
+$ go get -u github.com/skanehira/docui
 ```
 
 ## Update
 ```
-$ cd docui
-$ go install
+$ go get -u github.com/skanehira/docui
 ```
 
 ## Use on Docker
