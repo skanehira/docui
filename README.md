@@ -77,7 +77,7 @@ $ bash build.sh
 | image list       | refresh image list     | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
 | image list       | filter image           | <kbd>f</kbd>                    |
 | container list   | inspect container      | <kbd>Enter</kbd> / <kbd>o</kbd> |
-| container list   | delete container       | <kbd>d</kbd>                    |
+| container list   | remove container       | <kbd>d</kbd>                    |
 | container list   | next container         | <kbd>j</kbd>                    |
 | container list   | previous container     | <kbd>k</kbd>                    |
 | container list   | start container        | <kbd>u</kbd>                    |
@@ -93,6 +93,10 @@ $ bash build.sh
 | volume list      | inspect volume         | <kbd>Enter</kbd> / <kbd>o</kbd> |
 | volume list      | refresh volume list    | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
 | volume list      | filter image           | <kbd>f</kbd>                    |
+| network list     | inspect network        | <kbd>Enter</kbd> / <kbd>o</kbd> |
+| network list     | remove network         | <kbd>d</kbd>                    |
+| network list     | next netowrk           | <kbd>j</kbd>                    |
+| network list     | previous network       | <kbd>k</kbd>                    |
 | pull image       | pull image             | <kbd>Enter</kbd>                |
 | pull image       | close panel            | <kbd>Enter</kbd>                |
 | create container | next input box         | <kbd>Ctrl</kbd> + <kbd>j</kbd>  |
