@@ -90,31 +90,31 @@ func New(mode gocui.OutputMode) *Gui {
 	return gui
 }
 
-func (g *Gui) AddPanelNames(panel Panel) {
+func (gui *Gui) AddPanelNames(panel Panel) {
 	name := panel.Name()
-	g.PanelNames = append(g.PanelNames, name)
+	gui.PanelNames = append(gui.PanelNames, name)
 }
 
-func (g *Gui) SetKeyBindingToPanel(panel string) {
-	if err := g.SetKeybinding(panel, 'q', gocui.ModNone, g.quit); err != nil {
+func (gui *Gui) SetKeyBindingToPanel(panel string) {
+	if err := gui.SetKeybinding(panel, 'q', gocui.ModNone, gui.quit); err != nil {
 		panic(err)
 	}
-	if err := g.SetKeybinding(panel, 'h', gocui.ModNone, g.prePanel); err != nil {
+	if err := gui.SetKeybinding(panel, 'h', gocui.ModNone, gui.prePanel); err != nil {
 		panic(err)
 	}
-	if err := g.SetKeybinding(panel, 'l', gocui.ModNone, g.nextPanel); err != nil {
+	if err := gui.SetKeybinding(panel, 'l', gocui.ModNone, gui.nextPanel); err != nil {
 		panic(err)
 	}
-	if err := g.SetKeybinding(panel, gocui.KeyTab, gocui.ModNone, g.nextPanel); err != nil {
+	if err := gui.SetKeybinding(panel, gocui.KeyTab, gocui.ModNone, gui.nextPanel); err != nil {
 		panic(err)
 	}
-	if err := g.SetKeybinding(panel, gocui.KeyCtrlO, gocui.ModNone, g.DockerInfo); err != nil {
+	if err := gui.SetKeybinding(panel, gocui.KeyCtrlO, gocui.ModNone, gui.DockerInfo); err != nil {
 		panic(err)
 	}
 }
 
-func (g *Gui) SetGlobalKeyBinding() {
-	if err := g.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, g.quit); err != nil {
+func (gui *Gui) SetGlobalKeyBinding() {
+	if err := gui.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, gui.quit); err != nil {
 		panic(err)
 	}
 }
@@ -162,26 +162,26 @@ func (gui *Gui) quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
 
-func (g *Gui) init() {
-	maxX, maxY := g.Size()
+func (gui *Gui) init() {
+	maxX, maxY := gui.Size()
 	topY := maxY / 4
 
-	g.StorePanels(NewImageList(g, ImageListPanel, 0, 0, maxX-1, topY-1))
-	g.StorePanels(NewContainerList(g, ContainerListPanel, 0, topY, maxX-1, topY*2-1))
-	g.StorePanels(NewVolumeList(g, VolumeListPanel, 0, topY*2, maxX-1, topY*3-1))
-	g.StorePanels(NewNetworkList(g, NetworkListPanel, 0, topY*3, maxX-1, maxY-3))
-	g.StorePanels(NewNavigate(g, NavigatePanel, 0, maxY-3, maxX-1, maxY))
+	gui.StorePanels(NewImageList(gui, ImageListPanel, 0, 0, maxX-1, topY-1))
+	gui.StorePanels(NewContainerList(gui, ContainerListPanel, 0, topY, maxX-1, topY*2-1))
+	gui.StorePanels(NewVolumeList(gui, VolumeListPanel, 0, topY*2, maxX-1, topY*3-1))
+	gui.StorePanels(NewNetworkList(gui, NetworkListPanel, 0, topY*3, maxX-1, maxY-3))
+	gui.StorePanels(NewNavigate(gui, NavigatePanel, 0, maxY-3, maxX-1, maxY))
 
-	for _, panel := range g.Panels {
-		panel.SetView(g.Gui)
+	for _, panel := range gui.Panels {
+		panel.SetView(gui.Gui)
 	}
 
-	g.SwitchPanel(ImageListPanel)
-	g.SetGlobalKeyBinding()
+	gui.SwitchPanel(ImageListPanel)
+	gui.SetGlobalKeyBinding()
 }
 
-func (g *Gui) StorePanels(panel Panel) {
-	g.Panels[panel.Name()] = panel
+func (gui *Gui) StorePanels(panel Panel) {
+	gui.Panels[panel.Name()] = panel
 
 	storeTarget := map[string]bool{
 		ImageListPanel:     true,
@@ -192,7 +192,7 @@ func (g *Gui) StorePanels(panel Panel) {
 	}
 
 	if storeTarget[panel.Name()] {
-		g.AddPanelNames(panel)
+		gui.AddPanelNames(panel)
 	}
 
 }
@@ -333,20 +333,20 @@ func (gui *Gui) SwitchPanel(next string) *gocui.View {
 	return v
 }
 
-func (g *Gui) IsSetView(name string) bool {
-	if v, err := g.View(name); err != nil && v == nil {
+func (gui *Gui) IsSetView(name string) bool {
+	if v, err := gui.View(name); err != nil && v == nil {
 		return false
 	}
 
 	return true
 }
 
-func (g *Gui) SetNaviWithPanelName(name string) *gocui.View {
-	navi := g.Panels[NavigatePanel].(Navigate)
+func (gui *Gui) SetNaviWithPanelName(name string) *gocui.View {
+	navi := gui.Panels[NavigatePanel].(Navigate)
 	return navi.SetNavigate(name)
 }
 
-func (g *Gui) GetKeyFromMap(m map[string]Position) string {
+func (gui *Gui) GetKeyFromMap(m map[string]Position) string {
 	var key string
 	for k, _ := range m {
 		key = k
@@ -355,14 +355,14 @@ func (g *Gui) GetKeyFromMap(m map[string]Position) string {
 	return key
 }
 
-func (g *Gui) GetItemsToMap(items Items) (map[string]string, error) {
+func (gui *Gui) GetItemsToMap(items Items) (map[string]string, error) {
 
 	data := make(map[string]string)
 
 	for _, item := range items {
-		name := g.GetKeyFromMap(item.Label)
+		name := gui.GetKeyFromMap(item.Label)
 
-		v, err := g.View(g.GetKeyFromMap(item.Input))
+		v, err := gui.View(gui.GetKeyFromMap(item.Input))
 
 		if err != nil {
 			return data, err
