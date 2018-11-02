@@ -63,7 +63,7 @@ func (d *Docker) CreateContainerWithOptions(options docker.CreateContainerOption
 	return nil
 }
 
-func (d *Docker) NewContainerOptions(config map[string]string) (docker.CreateContainerOptions, error) {
+func (d *Docker) NewContainerOptions(config map[string]string, isAttach bool) (docker.CreateContainerOptions, error) {
 
 	options := docker.CreateContainerOptions{
 		Config:     new(docker.Config),
@@ -130,7 +130,7 @@ func (d *Docker) NewContainerOptions(config map[string]string) (docker.CreateCon
 	options.Config.AttachStdout = true
 	options.Config.AttachStderr = true
 
-	if attach := config["Attach"]; attach == "y" {
+	if isAttach {
 		options.Config.Tty = true
 		options.Config.AttachStdin = true
 		options.Config.OpenStdin = true
