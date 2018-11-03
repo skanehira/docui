@@ -211,41 +211,30 @@ func (gui *Gui) PopupDetailPanel(g *gocui.Gui, v *gocui.View) error {
 func (gui *Gui) ErrMessage(message string, nextPanel string) {
 	gui.Update(func(g *gocui.Gui) error {
 		gui.NextPanel = nextPanel
+
 		maxX, maxY := gui.Size()
 
-		x := maxX / 5
+		x := maxX / 6
 		y := maxY / 3
-		v, err := gui.SetView(ErrMessagePanel, x, y, maxX-x, y+4)
-		if err != nil {
-			if err != gocui.ErrUnknownView {
-				panic(err)
-			}
-			v.Wrap = true
-			v.Title = v.Name()
-			fmt.Fprint(v, message)
-			gui.SwitchPanel(v.Name())
+		w := x * 5
+
+		modal := component.NewModal(gui.Gui, x, y, w, y+10).
+			SetText(message)
+
+		closeModal := func(g *gocui.Gui, v *gocui.View) error {
+			modal.Close()
+			gui.SwitchPanel(gui.NextPanel)
+			return nil
 		}
 
-		if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, gui.CloseMessage); err != nil {
-			panic(err)
-		}
-		if err := gui.SetKeybinding(v.Name(), 'j', gocui.ModNone, CursorDown); err != nil {
-			panic(err)
-		}
-		if err := gui.SetKeybinding(v.Name(), 'k', gocui.ModNone, CursorUp); err != nil {
-			panic(err)
-		}
+		modal.AddButton("OK", gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
+			closeModal(g, v)
+			return nil
+		}).AddHandler(gocui.KeyEsc, closeModal)
+
+		modal.Draw()
 		return nil
 	})
-}
-
-func (gui *Gui) CloseMessage(g *gocui.Gui, v *gocui.View) error {
-	if err := g.DeleteView(v.Name()); err != nil {
-		panic(err)
-	}
-	g.DeleteKeybindings(v.Name())
-	gui.RefreshAllPanel()
-	return nil
 }
 
 func (gui *Gui) ConfirmMessage(message string, f func() error) {
