@@ -18,7 +18,6 @@ type ImageList struct {
 	Images         []*Image
 	Data           map[string]interface{}
 	ClosePanelName string
-	Items          Items
 	selectedImage  *Image
 	filter         string
 	form           *Form
@@ -38,7 +37,6 @@ func NewImageList(gui *Gui, name string, x, y, w, h int) *ImageList {
 		name:     name,
 		Position: Position{x, y, w, h},
 		Data:     make(map[string]interface{}),
-		Items:    Items{},
 	}
 
 	return i
@@ -194,12 +192,10 @@ func (i *ImageList) selected() (*Image, error) {
 }
 
 func (i *ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
-	i.NextPanel = i.name
-	i.ClosePanelName = CreateContainerPanel
-
+	// get image name
 	name, err := i.GetImageName()
 	if err != nil {
-		i.ErrMessage(err.Error(), i.NextPanel)
+		i.ErrMessage(err.Error(), i.name)
 		return nil
 	}
 
@@ -216,39 +212,27 @@ func (i *ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	form := NewForm(g, CreateContainerPanel, x, y, w, 0)
 	i.form = form
 
+	// add func do after close
+	form.AddCloseFunc(func() error {
+		i.SwitchPanel(i.name)
+		return nil
+	})
+
 	// add fields
-	form.AddInputField("Name", labelw, fieldw)
-	form.AddInputField("HostPort", labelw, fieldw)
-	form.AddInputField("Port", labelw, fieldw)
-	form.AddInputField("HostVolume", labelw, fieldw)
-	form.AddInputField("Volume", labelw, fieldw)
-	form.AddInputField("Image", labelw, fieldw).
+	form.AddInput("Name", labelw, fieldw)
+	form.AddInput("HostPort", labelw, fieldw)
+	form.AddInput("Port", labelw, fieldw)
+	form.AddInput("HostVolume", labelw, fieldw)
+	form.AddInput("Volume", labelw, fieldw)
+	form.AddInput("Image", labelw, fieldw).
 		SetText(name).
 		AddValidator(Require.Message, Require.Validate)
-
+	form.AddInput("User", labelw, fieldw)
 	form.AddCheckBox("Attach", labelw)
-	form.AddInputField("Env", labelw, fieldw)
-	form.AddInputField("Cmd", labelw, fieldw)
-
-	// close form handler
-	closeForm := func(g *gocui.Gui, v *gocui.View) error {
-		form.Close()
-		i.SwitchPanel(i.NextPanel)
-		return nil
-	}
-
-	// add bottuns
-	buttonHandlers := []ButtonHandler{
-		{"Create", i.CreateContainer},
-		{"Cancel", closeForm},
-	}
-	form.AddButtonFuncs(buttonHandlers)
-
-	// add global handler
-	form.AddGlobalFunc(Handler{
-		gocui.KeyEsc,
-		closeForm,
-	})
+	form.AddInput("Env", labelw, fieldw)
+	form.AddInput("Cmd", labelw, fieldw)
+	form.AddButton("Create", i.CreateContainer)
+	form.AddButton("Cancel", form.Close)
 
 	// draw form
 	form.Draw()
@@ -262,29 +246,28 @@ func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 
 	data := i.form.GetFieldText()
 	isAttach := i.form.GetCheckBoxState()["Attach"]
-
 	options, err := i.Docker.NewContainerOptions(data, isAttach)
 
 	if err != nil {
-		i.ClosePanel(g, v)
-		i.ErrMessage(err.Error(), i.NextPanel)
+		i.form.Close(g, v)
+		i.ErrMessage(err.Error(), i.name)
 		return nil
 	}
 
 	g.Update(func(g *gocui.Gui) error {
-		i.form.Close()
+		i.form.Close(g, v)
 		i.StateMessage("container creating...")
 
 		g.Update(func(g *gocui.Gui) error {
 			defer i.CloseStateMessage()
 
 			if err := i.Docker.CreateContainerWithOptions(options); err != nil {
-				i.ErrMessage(err.Error(), i.NextPanel)
+				i.ErrMessage(err.Error(), i.name)
 				return nil
 			}
 
 			i.Panels[ContainerListPanel].Refresh(g, v)
-			i.SwitchPanel(i.NextPanel)
+			i.SwitchPanel(i.name)
 
 			return nil
 		})
@@ -296,44 +279,29 @@ func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i *ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
-	i.NextPanel = i.name
-	i.ClosePanelName = PullImagePanel
-
 	maxX, maxY := i.Size()
 	x := maxX / 8
 	y := maxY / 3
 	w := x * 6
 
-	labelw := 11
+	labelw := 6
 	fieldw := w - labelw
 
 	// new form
 	form := NewForm(g, PullImagePanel, x, y, w, 0)
 	i.form = form
 
-	// add fields
-	form.AddInputField("ImageName", labelw, fieldw).
-		AddValidator(Require.Message, Require.Validate)
-
-	// close form handler
-	closeForm := func(g *gocui.Gui, v *gocui.View) error {
-		form.Close()
-		i.SwitchPanel(i.NextPanel)
+	// add func do after close
+	form.AddCloseFunc(func() error {
+		i.SwitchPanel(i.name)
 		return nil
-	}
-
-	// add bottuns
-	buttonHandlers := []ButtonHandler{
-		{"Pull", i.PullImage},
-		{"Cancel", closeForm},
-	}
-	form.AddButtonFuncs(buttonHandlers)
-
-	// add global handler
-	form.AddGlobalFunc(Handler{
-		gocui.KeyEsc,
-		closeForm,
 	})
+
+	// add fields
+	form.AddInput("Image", labelw, fieldw).
+		AddValidator(Require.Message, Require.Validate)
+	form.AddButton("Pull", i.PullImage)
+	form.AddButton("Cancel", form.Close)
 
 	// draw form
 	form.Draw()
@@ -344,7 +312,7 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 	if !i.form.Validate() {
 		return nil
 	}
-	item := strings.SplitN(i.form.GetFieldText()["ImageName"], ":", 2)
+	item := strings.SplitN(i.form.GetFieldText()["Image"], ":", 2)
 
 	name := item[0]
 	var tag string
@@ -356,7 +324,7 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	g.Update(func(g *gocui.Gui) error {
-		i.form.Close()
+		i.form.Close(g, v)
 		i.StateMessage("image pulling...")
 
 		g.Update(func(g *gocui.Gui) error {
@@ -368,12 +336,12 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 			}
 
 			if err := i.Docker.PullImageWithOptions(options); err != nil {
-				i.ErrMessage(err.Error(), i.NextPanel)
+				i.ErrMessage(err.Error(), i.name)
 				return nil
 			}
 
 			i.Refresh(g, v)
-			i.SwitchPanel(i.NextPanel)
+			i.SwitchPanel(i.name)
 
 			return nil
 
@@ -386,17 +354,15 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
-	i.NextPanel = i.name
-
 	image, err := i.selected()
 	if err != nil {
-		i.ErrMessage(err.Error(), i.NextPanel)
+		i.ErrMessage(err.Error(), i.name)
 		return nil
 	}
 
 	img, err := i.Docker.InspectImage(image.ID)
 	if err != nil {
-		i.ErrMessage(err.Error(), i.NextPanel)
+		i.ErrMessage(err.Error(), i.name)
 		return nil
 	}
 
@@ -418,12 +384,9 @@ func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 func (i *ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
 	name, err := i.GetImageName()
 	if err != nil {
-		i.ErrMessage(err.Error(), i.NextPanel)
+		i.ErrMessage(err.Error(), i.name)
 		return nil
 	}
-
-	i.NextPanel = i.name
-	i.ClosePanelName = SaveImagePanel
 
 	maxX, maxY := i.Size()
 	x := maxX / 8
@@ -434,36 +397,23 @@ func (i *ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
 	fieldw := w - labelw
 
 	// new form
-	form := NewForm(g, i.ClosePanelName, x, y, w, 0)
+	form := NewForm(g, SaveImagePanel, x, y, w, 0)
 	i.form = form
 
-	// add fields
-	form.AddInputField("Path", labelw, fieldw).
-		AddValidator(Require.Message, Require.Validate)
+	// add func do after close
+	form.AddCloseFunc(func() error {
+		i.SwitchPanel(i.name)
+		return nil
+	})
 
-	form.AddInputField("Image", labelw, fieldw).
+	// add fields
+	form.AddInput("Path", labelw, fieldw).
+		AddValidator(Require.Message, Require.Validate)
+	form.AddInput("Image", labelw, fieldw).
 		AddValidator(Require.Message, Require.Validate).
 		SetText(name)
-
-	// close form handler
-	closeForm := func(g *gocui.Gui, v *gocui.View) error {
-		form.Close()
-		i.SwitchPanel(i.NextPanel)
-		return nil
-	}
-
-	// add bottuns
-	buttonHandlers := []ButtonHandler{
-		{"Save", i.SaveImage},
-		{"Cancel", closeForm},
-	}
-	form.AddButtonFuncs(buttonHandlers)
-
-	// add global handler
-	form.AddGlobalFunc(Handler{
-		gocui.KeyEsc,
-		closeForm,
-	})
+	form.AddButton("Save", i.SaveImage)
+	form.AddButton("Cancel", form.Close)
 
 	// draw form
 	form.Draw()
@@ -478,7 +428,7 @@ func (i *ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 	data := i.form.GetFieldText()
 
 	g.Update(func(g *gocui.Gui) error {
-		i.form.Close()
+		i.form.Close(g, v)
 		i.StateMessage("image saving....")
 
 		g.Update(func(g *gocui.Gui) error {
@@ -486,7 +436,7 @@ func (i *ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 
 			file, err := os.OpenFile(data["Path"], os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
 			if err != nil {
-				i.ErrMessage(err.Error(), i.NextPanel)
+				i.ErrMessage(err.Error(), i.name)
 				return nil
 			}
 			defer file.Close()
@@ -497,11 +447,11 @@ func (i *ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 			}
 
 			if err := i.Docker.SaveImageWithOptions(options); err != nil {
-				i.ErrMessage(err.Error(), i.NextPanel)
+				i.ErrMessage(err.Error(), i.name)
 				return nil
 			}
 
-			i.SwitchPanel(i.NextPanel)
+			i.SwitchPanel(i.name)
 
 			return nil
 		})
@@ -513,9 +463,6 @@ func (i *ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i *ImageList) ImportImagePanel(g *gocui.Gui, v *gocui.View) error {
-	i.NextPanel = i.name
-	i.ClosePanelName = ImportImagePanel
-
 	maxX, maxY := i.Size()
 	x := maxX / 8
 	y := maxY / 3
@@ -525,37 +472,23 @@ func (i *ImageList) ImportImagePanel(g *gocui.Gui, v *gocui.View) error {
 	fieldw := w - labelw
 
 	// new form
-	form := NewForm(g, i.ClosePanelName, x, y, w, 0)
+	form := NewForm(g, ImportImagePanel, x, y, w, 0)
 	i.form = form
 
-	// add fields
-	form.AddInputField("Repository", labelw, fieldw).
-		AddValidator(Require.Message, Require.Validate)
-
-	form.AddInputField("Path", labelw, fieldw).
-		AddValidator(Require.Message, Require.Validate)
-
-	form.AddInputField("Tag", labelw, fieldw)
-
-	// close form handler
-	closeForm := func(g *gocui.Gui, v *gocui.View) error {
-		form.Close()
-		i.SwitchPanel(i.NextPanel)
+	// add func do after close
+	form.AddCloseFunc(func() error {
+		i.SwitchPanel(i.name)
 		return nil
-	}
-
-	// add bottuns
-	buttonHandlers := []ButtonHandler{
-		{"Import", i.ImportImage},
-		{"Cancel", closeForm},
-	}
-	form.AddButtonFuncs(buttonHandlers)
-
-	// add global handler
-	form.AddGlobalFunc(Handler{
-		gocui.KeyEsc,
-		closeForm,
 	})
+
+	// add fields
+	form.AddInput("Repository", labelw, fieldw).
+		AddValidator(Require.Message, Require.Validate)
+	form.AddInput("Path", labelw, fieldw).
+		AddValidator(Require.Message, Require.Validate)
+	form.AddInput("Tag", labelw, fieldw)
+	form.AddButton("Import", i.ImportImage)
+	form.AddButton("Cancel", form.Close)
 
 	// draw form
 	form.Draw()
@@ -576,19 +509,19 @@ func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	g.Update(func(g *gocui.Gui) error {
-		i.form.Close()
+		i.form.Close(g, v)
 		i.StateMessage("image importing....")
 
 		g.Update(func(g *gocui.Gui) error {
 			defer i.CloseStateMessage()
 
 			if err := i.Docker.ImportImageWithOptions(options); err != nil {
-				i.ErrMessage(err.Error(), i.NextPanel)
+				i.ErrMessage(err.Error(), i.name)
 				return nil
 			}
 
 			i.Refresh(g, v)
-			i.SwitchPanel(i.NextPanel)
+			i.SwitchPanel(i.name)
 
 			return nil
 		})
@@ -600,9 +533,6 @@ func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i *ImageList) LoadImagePanel(g *gocui.Gui, v *gocui.View) error {
-	i.NextPanel = i.name
-	i.ClosePanelName = LoadImagePanel
-
 	maxX, maxY := i.Size()
 	x := maxX / 8
 	y := maxY / 3
@@ -612,32 +542,20 @@ func (i *ImageList) LoadImagePanel(g *gocui.Gui, v *gocui.View) error {
 	fieldw := w - labelw
 
 	// new form
-	form := NewForm(g, i.ClosePanelName, x, y, w, 0)
+	form := NewForm(g, LoadImagePanel, x, y, w, 0)
 	i.form = form
 
-	// add fields
-	form.AddInputField("Path", labelw, fieldw).
-		AddValidator(Require.Message, Require.Validate)
-
-	// close form handler
-	closeForm := func(g *gocui.Gui, v *gocui.View) error {
-		form.Close()
-		i.SwitchPanel(i.NextPanel)
+	// add func do after close
+	form.AddCloseFunc(func() error {
+		i.SwitchPanel(i.name)
 		return nil
-	}
-
-	// add bottuns
-	buttonHandlers := []ButtonHandler{
-		{"Load", i.LoadImage},
-		{"Cancel", closeForm},
-	}
-	form.AddButtonFuncs(buttonHandlers)
-
-	// add global handler
-	form.AddGlobalFunc(Handler{
-		gocui.KeyEsc,
-		closeForm,
 	})
+
+	// add fields
+	form.AddInput("Path", labelw, fieldw).
+		AddValidator(Require.Message, Require.Validate)
+	form.AddButton("Load", i.LoadImage)
+	form.AddButton("Cancel", form.Close)
 
 	// draw form
 	form.Draw()
@@ -652,19 +570,19 @@ func (i *ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
 	path := i.form.GetFieldText()["Path"]
 
 	g.Update(func(g *gocui.Gui) error {
-		i.form.Close()
+		i.form.Close(g, v)
 		i.StateMessage("image loading....")
 
 		g.Update(func(g *gocui.Gui) error {
 
 			defer i.CloseStateMessage()
 			if err := i.Docker.LoadImageWithPath(path); err != nil {
-				i.ErrMessage(err.Error(), i.NextPanel)
+				i.ErrMessage(err.Error(), i.name)
 				return nil
 			}
 
 			i.Refresh(g, v)
-			i.SwitchPanel(i.NextPanel)
+			i.SwitchPanel(i.name)
 
 			return nil
 		})
@@ -676,7 +594,7 @@ func (i *ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i *ImageList) SearchImagePanel(g *gocui.Gui, v *gocui.View) error {
-	i.NextPanel = g.CurrentView().Name()
+	i.name = g.CurrentView().Name()
 
 	maxX, maxY := g.Size()
 	x := maxX / 8
@@ -694,7 +612,7 @@ func (i *ImageList) GetImageList(v *gocui.View) {
 
 	for _, image := range i.Docker.Images(docker.ListImagesOptions{}) {
 		for _, repoTag := range image.RepoTags {
-			repo, tag := ParseRepoTag(repoTag)
+			repo, tag := common.ParseRepoTag(repoTag)
 
 			if i.filter != "" {
 				name := fmt.Sprintf("%s:%s", repo, tag)
@@ -704,8 +622,8 @@ func (i *ImageList) GetImageList(v *gocui.View) {
 			}
 
 			id := image.ID[7:19]
-			created := ParseDateToString(image.Created)
-			size := ParseSizeToString(image.Size)
+			created := common.ParseDateToString(image.Created)
+			size := common.ParseSizeToString(image.Size)
 
 			image := &Image{
 				ID:      id,
@@ -739,18 +657,16 @@ func (i *ImageList) GetImageName() (string, error) {
 }
 
 func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
-	i.NextPanel = i.name
-
 	name, err := i.GetImageName()
 	if err != nil {
-		i.ErrMessage(err.Error(), i.NextPanel)
+		i.ErrMessage(err.Error(), i.name)
 		return nil
 	}
 
-	i.ConfirmMessage("Are you sure you want to remove this image?", func() error {
+	i.ConfirmMessage("Are you sure you want to remove this image?", i.name, func() error {
 		defer i.Refresh(g, v)
 		if err := i.Docker.RemoveImageWithName(name); err != nil {
-			i.ErrMessage(err.Error(), i.NextPanel)
+			i.ErrMessage(err.Error(), i.name)
 			return nil
 		}
 
@@ -761,17 +677,15 @@ func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i *ImageList) RemoveDanglingImages(g *gocui.Gui, v *gocui.View) error {
-	i.NextPanel = i.name
-
 	if len(i.Images) == 0 {
-		i.ErrMessage(common.NoImage.Error(), i.NextPanel)
+		i.ErrMessage(common.NoImage.Error(), i.name)
 		return nil
 	}
 
-	i.ConfirmMessage("Are you sure you want to remove dangling images?", func() error {
+	i.ConfirmMessage("Are you sure you want to remove dangling images?", i.name, func() error {
 		defer i.Refresh(g, v)
 		if err := i.Docker.RemoveDanglingImages(); err != nil {
-			i.ErrMessage(err.Error(), i.NextPanel)
+			i.ErrMessage(err.Error(), i.name)
 			return nil
 		}
 
@@ -782,8 +696,6 @@ func (i *ImageList) RemoveDanglingImages(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (i *ImageList) Filter(g *gocui.Gui, lv *gocui.View) error {
-	i.NextPanel = i.name
-
 	isReset := false
 	closePanel := func(g *gocui.Gui, v *gocui.View) error {
 		if isReset {
@@ -815,8 +727,4 @@ func (i *ImageList) Filter(g *gocui.Gui, lv *gocui.View) error {
 	}
 
 	return nil
-}
-
-func (i *ImageList) ClosePanel(g *gocui.Gui, v *gocui.View) error {
-	return i.Panels[i.ClosePanelName].(*Input).ClosePanel(g, v)
 }

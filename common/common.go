@@ -4,12 +4,15 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"reflect"
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
+	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
 )
 
@@ -94,4 +97,60 @@ func OutputFormatedHeader(v *gocui.View, i interface{}) {
 	}
 
 	OutputFormatedLine(v, i)
+}
+
+func ParseDateToString(unixtime int64) string {
+	t := time.Unix(unixtime, 0)
+	return t.Format("2006/01/02 15:04:05")
+}
+
+func ParseSizeToString(size int64) string {
+	mb := float64(size) / 1024 / 1024
+	return fmt.Sprintf("%.1fMB", mb)
+}
+
+func ParsePortToString(ports []docker.APIPort) string {
+	var port string
+	for _, p := range ports {
+		if p.PublicPort == 0 {
+			port += fmt.Sprintf("%d/%s ", p.PrivatePort, p.Type)
+		} else {
+			port += fmt.Sprintf("%s:%d->%d/%s ", p.IP, p.PublicPort, p.PrivatePort, p.Type)
+		}
+	}
+	return port
+}
+
+func ParseRepoTag(repoTag string) (string, string) {
+	tmp := strings.SplitN(repoTag, ":", 2)
+	return tmp[0], tmp[1]
+}
+
+func ParseLabels(labels map[string]string) string {
+	if len(labels) < 1 {
+		return ""
+	}
+
+	var result string
+	for label, value := range labels {
+		result += fmt.Sprintf("%s=%s ", label, value)
+	}
+
+	return result
+}
+
+func RoundUp(num, places float64) float64 {
+
+	shift := math.Pow(10, places)
+
+	return roundUpInt(num*shift) / shift
+
+}
+
+func roundUpInt(num float64) float64 {
+
+	t := math.Trunc(num)
+
+	return t + math.Copysign(1, num)
+
 }

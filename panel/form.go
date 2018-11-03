@@ -42,24 +42,32 @@ func NewItem(label, text string, lw, fw int, v *Validator) FormItem {
 }
 
 func (f *Form) AddFormItems(items []FormItem) *Form {
-
 	for _, item := range items {
-		f := f.AddInputField(item.label, item.labelw, item.fieldw)
+		i := f.AddInputField(item.label, item.labelw, item.fieldw)
+
 		if item.text != "" {
-			f.SetText(item.text)
+			i.SetText(item.text)
 		}
 
 		if item.validator != nil {
-			f.AddValidator(item.validator.Message, item.validator.Validate)
+			i.AddValidator(item.validator.Message, item.validator.Validate)
 		}
 	}
 
 	return f
 }
 
+func (f *Form) AddInput(label string, labelw, fieldw int) *component.InputField {
+	return f.AddInputField(label, labelw, fieldw).AddHandler(gocui.KeyEsc, f.Close)
+}
+
+func (f *Form) AddButton(label string, handler func(g *gocui.Gui, v *gocui.View) error) *component.Button {
+	return f.Form.AddButton(label, handler).AddHandler(gocui.KeyEsc, f.Close)
+}
+
 func (f *Form) AddButtonFuncs(buttonHandlers []ButtonHandler) *Form {
 	for _, b := range buttonHandlers {
-		f.AddButton(b.label, b.handler)
+		f.Form.AddButton(b.label, b.handler)
 	}
 	return f
 }
@@ -78,17 +86,4 @@ func (f *Form) AddGlobalFunc(h Handler) *Form {
 		c.AddHandlerOnly(h.key, h.handler)
 	}
 	return f
-}
-
-func (f *Form) AddCloseForm(key interface{}, done func()) {
-	closeform := func(g *gocui.Gui, v *gocui.View) error {
-		f.Close()
-		done()
-		return nil
-	}
-
-	f.AddGlobalFunc(Handler{
-		key,
-		closeform,
-	})
 }

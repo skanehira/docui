@@ -210,51 +210,52 @@ func (gui *Gui) PopupDetailPanel(g *gocui.Gui, v *gocui.View) error {
 
 func (gui *Gui) ErrMessage(message string, nextPanel string) {
 	gui.Update(func(g *gocui.Gui) error {
-		gui.NextPanel = nextPanel
-
 		maxX, maxY := gui.Size()
 
-		x := maxX / 6
+		x := maxX / 4
 		y := maxY / 3
-		w := x * 5
+		w := x * 3
 
-		modal := component.NewModal(gui.Gui, x, y, w, y+10).
+		limitw := w - x
+		h := common.RoundUp(float64(len(message)/limitw), 0)
+
+		modal := component.NewModal(gui.Gui, x, y, w, y+5+int(h)).
 			SetText(message)
 
 		closeModal := func(g *gocui.Gui, v *gocui.View) error {
 			modal.Close()
-			gui.SwitchPanel(gui.NextPanel)
+			gui.SwitchPanel(nextPanel)
 			return nil
 		}
 
-		modal.AddButton("OK", gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
-			closeModal(g, v)
-			return nil
-		}).AddHandler(gocui.KeyEsc, closeModal)
+		modal.AddButton("OK", gocui.KeyEnter, closeModal).
+			AddHandler(gocui.KeyEsc, closeModal)
 
 		modal.Draw()
 		return nil
 	})
 }
 
-func (gui *Gui) ConfirmMessage(message string, f func() error) {
+func (gui *Gui) ConfirmMessage(message, next string, f func() error) {
 	maxX, maxY := gui.Size()
-	x := maxX / 5
+	x := maxX / 4
 	y := maxY / 3
-	w := x * 4
+	w := x * 3
 
-	modal := component.NewModal(gui.Gui, x, y, w, y+7).SetText(message)
+	limitw := w - x
+	h := common.RoundUp(float64(len(message)/limitw), 0)
+
+	modal := component.NewModal(gui.Gui, x, y, w, y+5+int(h)).
+		SetText(message)
 
 	closeModal := func(g *gocui.Gui, v *gocui.View) error {
 		modal.Close()
-		gui.SwitchPanel(gui.NextPanel)
+		gui.SwitchPanel(next)
 		return nil
 	}
 
-	modal.AddButton("No", gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
-		closeModal(g, v)
-		return nil
-	}).AddHandler(gocui.KeyEsc, closeModal)
+	modal.AddButton("No", gocui.KeyEnter, closeModal).
+		AddHandler(gocui.KeyEsc, closeModal)
 
 	modal.AddButton("Yes", gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
 		defer closeModal(g, v)
@@ -332,33 +333,6 @@ func (g *Gui) GetKeyFromMap(m map[string]Position) string {
 	}
 
 	return key
-}
-
-func (g *Gui) GetItemsToMap(items Items) (map[string]string, error) {
-
-	data := make(map[string]string)
-
-	for _, item := range items {
-		name := g.GetKeyFromMap(item.Label)
-
-		v, err := g.View(g.GetKeyFromMap(item.Input))
-
-		if err != nil {
-			return data, err
-		}
-
-		value := ReadLine(v, nil)
-
-		if value == "" {
-			if name == "Tag" {
-				value = "latest"
-			}
-		}
-
-		data[name] = value
-	}
-
-	return data, nil
 }
 
 func (gui *Gui) NewFilterPanel(panel Panel, reset, closePanel func(*gocui.Gui, *gocui.View) error) error {

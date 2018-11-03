@@ -16,7 +16,6 @@ type NetworkList struct {
 	Networks       []*Network
 	Data           map[string]interface{}
 	ClosePanelName string
-	Items          Items
 	filter         string
 }
 
@@ -34,7 +33,6 @@ func NewNetworkList(gui *Gui, name string, x, y, w, h int) *NetworkList {
 		name:     name,
 		Position: Position{x, y, w, h},
 		Data:     make(map[string]interface{}),
-		Items:    Items{},
 	}
 
 	return n
@@ -167,8 +165,6 @@ func (n *NetworkList) selected() (*Network, error) {
 }
 
 func (n *NetworkList) Filter(g *gocui.Gui, nv *gocui.View) error {
-	n.NextPanel = n.name
-
 	isReset := false
 	closePanel := func(g *gocui.Gui, v *gocui.View) error {
 		if isReset {
@@ -202,10 +198,6 @@ func (n *NetworkList) Filter(g *gocui.Gui, nv *gocui.View) error {
 	return nil
 }
 
-func (n *NetworkList) ClosePanel(g *gocui.Gui, v *gocui.View) error {
-	return n.Panels[n.ClosePanelName].(*Input).ClosePanel(g, v)
-}
-
 func (n *NetworkList) GetNetworkList(v *gocui.View) {
 	v.Clear()
 	n.Networks = make([]*Network, 0)
@@ -223,7 +215,7 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 		var containers string
 		net, err := n.Docker.NetworkInfo(network.ID)
 		if err != nil {
-			n.ErrMessage(err.Error(), n.NextPanel)
+			n.ErrMessage(err.Error(), n.name)
 			return
 		}
 
@@ -251,17 +243,15 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 }
 
 func (n *NetworkList) Detail(g *gocui.Gui, v *gocui.View) error {
-	n.NextPanel = n.name
-
 	selected, err := n.selected()
 	if err != nil {
-		n.ErrMessage(err.Error(), n.NextPanel)
+		n.ErrMessage(err.Error(), n.name)
 		return nil
 	}
 
 	net, err := n.Docker.NetworkInfo(selected.ID)
 	if err != nil {
-		n.ErrMessage(err.Error(), n.NextPanel)
+		n.ErrMessage(err.Error(), n.name)
 		return nil
 	}
 
@@ -281,18 +271,16 @@ func (n *NetworkList) Detail(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (n *NetworkList) RemoveNetwork(g *gocui.Gui, v *gocui.View) error {
-	n.NextPanel = n.name
-
 	selected, err := n.selected()
 	if err != nil {
-		n.ErrMessage(err.Error(), n.NextPanel)
+		n.ErrMessage(err.Error(), n.name)
 		return nil
 	}
 
-	n.ConfirmMessage("Are you sure you want to remove this network?", func() error {
+	n.ConfirmMessage("Are you sure you want to remove this network?", n.name, func() error {
 		defer n.Refresh(g, v)
 		if err := n.Docker.RemoveNetwork(selected.ID); err != nil {
-			n.ErrMessage(err.Error(), n.NextPanel)
+			n.ErrMessage(err.Error(), n.name)
 			return nil
 		}
 

@@ -9,7 +9,7 @@ func NewValidator(msg string, v func(string) bool) *Validator {
 	return &Validator{msg, v}
 }
 
-var Require = NewValidator("require input", func(text string) bool {
+var Require = NewValidator("required input", func(text string) bool {
 	if text == "" {
 		return false
 	}

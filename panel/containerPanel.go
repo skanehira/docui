@@ -18,7 +18,6 @@ type ContainerList struct {
 	Containers        []*Container
 	Data              map[string]interface{}
 	ClosePanelName    string
-	Items             Items
 	selectedContainer *Container
 	filter            string
 	form              *Form
@@ -39,7 +38,6 @@ func NewContainerList(gui *Gui, name string, x, y, w, h int) *ContainerList {
 		name:     name,
 		Position: Position{x, y, w, h},
 		Data:     make(map[string]interface{}),
-		Items:    Items{},
 	}
 }
 
@@ -174,17 +172,15 @@ func (c *ContainerList) selected() (*Container, error) {
 }
 
 func (c *ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
-	c.NextPanel = c.name
-
 	selected, err := c.selected()
 	if err != nil {
-		c.ErrMessage(err.Error(), c.NextPanel)
+		c.ErrMessage(err.Error(), c.name)
 		return nil
 	}
 
 	container, err := c.Docker.InspectContainer(selected.ID)
 	if err != nil {
-		c.ErrMessage(err.Error(), c.NextPanel)
+		c.ErrMessage(err.Error(), c.name)
 		return nil
 	}
 
@@ -204,20 +200,18 @@ func (c *ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (c *ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
-	c.NextPanel = c.name
-
 	container, err := c.selected()
 	if err != nil {
-		c.ErrMessage(err.Error(), c.NextPanel)
+		c.ErrMessage(err.Error(), c.name)
 		return nil
 	}
 
-	c.ConfirmMessage("Are you sure you want to remove this container?", func() error {
+	c.ConfirmMessage("Are you sure you want to remove this container?", c.name, func() error {
 		options := docker.RemoveContainerOptions{ID: container.ID}
 		defer c.Refresh(g, v)
 
 		if err := c.Docker.RemoveContainer(options); err != nil {
-			c.ErrMessage(err.Error(), c.NextPanel)
+			c.ErrMessage(err.Error(), c.name)
 			return nil
 		}
 
@@ -228,11 +222,9 @@ func (c *ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (c *ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
-	c.NextPanel = c.name
-
 	container, err := c.selected()
 	if err != nil {
-		c.ErrMessage(err.Error(), c.NextPanel)
+		c.ErrMessage(err.Error(), c.name)
 		return nil
 	}
 
@@ -244,11 +236,11 @@ func (c *ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 			defer c.CloseStateMessage()
 
 			if err := c.Docker.StartContainerWithID(container.ID); err != nil {
-				c.ErrMessage(err.Error(), c.NextPanel)
+				c.ErrMessage(err.Error(), c.name)
 				return nil
 			}
 
-			c.SwitchPanel(c.NextPanel)
+			c.SwitchPanel(c.name)
 
 			return nil
 		})
@@ -260,11 +252,9 @@ func (c *ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (c *ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
-	c.NextPanel = c.name
-
 	container, err := c.selected()
 	if err != nil {
-		c.ErrMessage(err.Error(), c.NextPanel)
+		c.ErrMessage(err.Error(), c.name)
 		return nil
 	}
 
@@ -276,11 +266,11 @@ func (c *ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 			defer c.Refresh(g, v)
 
 			if err := c.Docker.StopContainerWithID(container.ID); err != nil {
-				c.ErrMessage(err.Error(), c.NextPanel)
+				c.ErrMessage(err.Error(), c.name)
 				return nil
 			}
 
-			c.SwitchPanel(c.NextPanel)
+			c.SwitchPanel(c.name)
 
 			return nil
 		})
@@ -292,15 +282,11 @@ func (c *ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (c *ContainerList) ExportContainerPanel(g *gocui.Gui, v *gocui.View) error {
-	c.NextPanel = c.name
-
 	container, err := c.selected()
 	if err != nil {
-		c.ErrMessage(err.Error(), c.NextPanel)
+		c.ErrMessage(err.Error(), c.name)
 		return nil
 	}
-
-	c.ClosePanelName = ExportContainerPanel
 
 	// get position
 	maxX, maxY := c.Size()
@@ -312,36 +298,23 @@ func (c *ContainerList) ExportContainerPanel(g *gocui.Gui, v *gocui.View) error 
 	fieldw := w - labelw
 
 	// new form
-	form := NewForm(g, CommitContainerPanel, x, y, w, 0)
+	form := NewForm(g, ExportContainerPanel, x, y, w, 0)
 	c.form = form
 
-	// add fields
-	form.AddInputField("Path", labelw, fieldw).
-		AddValidator(Require.Message, Require.Validate)
+	// add func do after close
+	form.AddCloseFunc(func() error {
+		c.SwitchPanel(c.name)
+		return nil
+	})
 
-	form.AddInputField("Container", labelw, fieldw).
+	// add fields
+	form.AddInput("Path", labelw, fieldw).
+		AddValidator(Require.Message, Require.Validate)
+	form.AddInput("Container", labelw, fieldw).
 		SetText(container.Name).
 		AddValidator(Require.Message, Require.Validate)
-
-	// close form handler
-	closeForm := func(g *gocui.Gui, v *gocui.View) error {
-		form.Close()
-		c.SwitchPanel(c.NextPanel)
-		return nil
-	}
-
-	// add bottuns
-	buttonHandlers := []ButtonHandler{
-		{"OK", c.ExportContainer},
-		{"Cancel", closeForm},
-	}
-	form.AddButtonFuncs(buttonHandlers)
-
-	// add global handler
-	form.AddGlobalFunc(Handler{
-		gocui.KeyEsc,
-		closeForm,
-	})
+	form.AddButton("OK", c.ExportContainer)
+	form.AddButton("Cancel", form.Close)
 
 	// draw form
 	form.Draw()
@@ -350,10 +323,14 @@ func (c *ContainerList) ExportContainerPanel(g *gocui.Gui, v *gocui.View) error 
 }
 
 func (c *ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
+	if !c.form.Validate() {
+		return nil
+	}
+
 	data := c.form.GetFieldText()
 
 	g.Update(func(g *gocui.Gui) error {
-		c.form.Close()
+		c.form.Close(g, v)
 		c.StateMessage("container exporting...")
 
 		g.Update(func(g *gocui.Gui) error {
@@ -361,7 +338,7 @@ func (c *ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 
 			file, err := os.OpenFile(data["Path"], os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
 			if err != nil {
-				c.ErrMessage(err.Error(), c.NextPanel)
+				c.ErrMessage(err.Error(), c.name)
 				return nil
 			}
 			defer file.Close()
@@ -372,11 +349,11 @@ func (c *ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 			}
 
 			if err := c.Docker.ExportContainerWithOptions(options); err != nil {
-				c.ErrMessage(err.Error(), c.NextPanel)
+				c.ErrMessage(err.Error(), c.name)
 				return nil
 			}
 
-			c.SwitchPanel(c.NextPanel)
+			c.SwitchPanel(c.name)
 
 			return nil
 
@@ -388,12 +365,10 @@ func (c *ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (c *ContainerList) CommitContainerForm(g *gocui.Gui, v *gocui.View) error {
-	c.NextPanel = c.name
-
 	// get selected container
 	container, err := c.selected()
 	if err != nil {
-		c.ErrMessage(err.Error(), c.NextPanel)
+		c.ErrMessage(err.Error(), c.name)
 		return nil
 	}
 
@@ -410,35 +385,21 @@ func (c *ContainerList) CommitContainerForm(g *gocui.Gui, v *gocui.View) error {
 	form := NewForm(g, CommitContainerPanel, x, y, w, 0)
 	c.form = form
 
+	// add func do after close
+	form.AddCloseFunc(func() error {
+		c.SwitchPanel(c.name)
+		return nil
+	})
+
 	// add fields
-	form.AddInputField("Repository", labelw, fieldw).
+	form.AddInput("Repository", labelw, fieldw).
 		AddValidator(Require.Message, Require.Validate)
-
-	form.AddInputField("Tag", labelw, fieldw)
-
-	form.AddInputField("Container", labelw, fieldw).
+	form.AddInput("Tag", labelw, fieldw)
+	form.AddInput("Container", labelw, fieldw).
 		SetText(container.Name).
 		AddValidator(Require.Message, Require.Validate)
-
-	// close form handler
-	closeForm := func(g *gocui.Gui, v *gocui.View) error {
-		form.Close()
-		c.SwitchPanel(c.NextPanel)
-		return nil
-	}
-
-	// add bottuns
-	buttonHandlers := []ButtonHandler{
-		{"OK", c.CommitContainer},
-		{"Cancel", closeForm},
-	}
-	form.AddButtonFuncs(buttonHandlers)
-
-	// add global handler
-	form.AddGlobalFunc(Handler{
-		gocui.KeyEsc,
-		closeForm,
-	})
+	form.AddButton("OK", c.CommitContainer)
+	form.AddButton("Cancel", form.Close)
 
 	// draw form
 	form.Draw()
@@ -462,19 +423,19 @@ func (c *ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	g.Update(func(g *gocui.Gui) error {
-		c.form.Close()
+		c.form.Close(g, v)
 		c.StateMessage("container committing...")
 
 		g.Update(func(g *gocui.Gui) error {
 			defer c.CloseStateMessage()
 
 			if err := c.Docker.CommitContainerWithOptions(options); err != nil {
-				c.ErrMessage(err.Error(), c.NextPanel)
+				c.ErrMessage(err.Error(), c.name)
 				return nil
 			}
 
 			c.Panels[ImageListPanel].Refresh(g, v)
-			c.SwitchPanel(c.NextPanel)
+			c.SwitchPanel(c.name)
 
 			return nil
 
@@ -487,15 +448,11 @@ func (c *ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (c *ContainerList) RenameContainerPanel(g *gocui.Gui, v *gocui.View) error {
-	c.NextPanel = c.name
-
 	container, err := c.selected()
 	if err != nil {
-		c.ErrMessage(err.Error(), c.NextPanel)
+		c.ErrMessage(err.Error(), c.name)
 		return nil
 	}
-
-	c.ClosePanelName = RenameContainerPanel
 
 	//get position
 	maxX, maxY := c.Size()
@@ -507,36 +464,23 @@ func (c *ContainerList) RenameContainerPanel(g *gocui.Gui, v *gocui.View) error 
 	fieldw := w - labelw
 
 	// new form
-	form := NewForm(g, CommitContainerPanel, x, y, w, 0)
+	form := NewForm(g, RenameContainerPanel, x, y, w, 0)
 	c.form = form
 
-	// add fields
-	form.AddInputField("NewName", labelw, fieldw).
-		AddValidator(Require.Message, Require.Validate)
+	// add func do after close
+	form.AddCloseFunc(func() error {
+		c.SwitchPanel(c.name)
+		return nil
+	})
 
-	form.AddInputField("Container", labelw, fieldw).
+	// add fields
+	form.AddInput("NewName", labelw, fieldw).
+		AddValidator(Require.Message, Require.Validate)
+	form.AddInput("Container", labelw, fieldw).
 		SetText(container.Name).
 		AddValidator(Require.Message, Require.Validate)
-
-	// close form handler
-	closeForm := func(g *gocui.Gui, v *gocui.View) error {
-		form.Close()
-		c.SwitchPanel(c.NextPanel)
-		return nil
-	}
-
-	// add bottuns
-	buttonHandlers := []ButtonHandler{
-		{"OK", c.RenameContainer},
-		{"Cancel", closeForm},
-	}
-	form.AddButtonFuncs(buttonHandlers)
-
-	// add global handler
-	form.AddGlobalFunc(Handler{
-		gocui.KeyEsc,
-		closeForm,
-	})
+	form.AddButton("OK", c.RenameContainer)
+	form.AddButton("Cancel", form.Close)
 
 	// draw form
 	form.Draw()
@@ -556,19 +500,19 @@ func (c *ContainerList) RenameContainer(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	g.Update(func(g *gocui.Gui) error {
-		c.form.Close()
+		c.form.Close(g, v)
 		c.StateMessage("container renaming...")
 
 		g.Update(func(g *gocui.Gui) error {
 			defer c.CloseStateMessage()
 
 			if err := c.Docker.RenameContainerWithOptions(options); err != nil {
-				c.ErrMessage(err.Error(), c.NextPanel)
+				c.ErrMessage(err.Error(), c.name)
 				return nil
 			}
 
 			c.Refresh(g, v)
-			c.SwitchPanel(c.NextPanel)
+			c.SwitchPanel(c.name)
 
 			return nil
 
@@ -610,8 +554,8 @@ func (c *ContainerList) GetContainerList(v *gocui.View) {
 		id := con.ID[:12]
 		image := con.Image
 		status := con.Status
-		created := ParseDateToString(con.Created)
-		port := ParsePortToString(con.Ports)
+		created := common.ParseDateToString(con.Created)
+		port := common.ParsePortToString(con.Ports)
 
 		container := &Container{
 			ID:      id,
@@ -629,8 +573,6 @@ func (c *ContainerList) GetContainerList(v *gocui.View) {
 }
 
 func (c *ContainerList) Filter(g *gocui.Gui, lv *gocui.View) error {
-	c.NextPanel = c.name
-
 	isReset := false
 	closePanel := func(g *gocui.Gui, v *gocui.View) error {
 		if isReset {
@@ -662,8 +604,4 @@ func (c *ContainerList) Filter(g *gocui.Gui, lv *gocui.View) error {
 	}
 
 	return nil
-}
-
-func (c *ContainerList) ClosePanel(g *gocui.Gui, v *gocui.View) error {
-	return c.Panels[c.ClosePanelName].(*Input).ClosePanel(g, v)
 }
