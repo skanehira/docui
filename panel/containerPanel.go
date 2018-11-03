@@ -212,10 +212,9 @@ func (c *ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	c.ConfirmMessage("Are you sure you want to remove this container? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
-		defer c.Refresh(g, v)
-		defer c.CloseConfirmMessage(g, v)
+	c.ConfirmMessage("Are you sure you want to remove this container?", func() error {
 		options := docker.RemoveContainerOptions{ID: container.ID}
+		defer c.Refresh(g, v)
 
 		if err := c.Docker.RemoveContainer(options); err != nil {
 			c.ErrMessage(err.Error(), c.NextPanel)

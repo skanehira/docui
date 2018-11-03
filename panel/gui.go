@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
 	"github.com/skanehira/docui/docker"
-
-	"github.com/jroimartin/gocui"
+	component "github.com/skanehira/gocui-component"
 )
 
 const (
@@ -248,40 +248,30 @@ func (gui *Gui) CloseMessage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (gui *Gui) ConfirmMessage(message string, f func(g *gocui.Gui, v *gocui.View) error) {
+func (gui *Gui) ConfirmMessage(message string, f func() error) {
 	maxX, maxY := gui.Size()
 	x := maxX / 5
 	y := maxY / 3
-	v, err := gui.SetView(ConfirmMessagePanel, x, y, maxX-x, y+2)
-	if err != nil {
-		if err != gocui.ErrUnknownView {
-			panic(err)
-		}
-		v.Wrap = true
-		v.Title = v.Name()
-		fmt.Fprint(v, message)
-		gui.SwitchPanel(v.Name())
+	w := x * 4
+
+	modal := component.NewModal(gui.Gui, x, y, w, y+7).SetText(message)
+
+	closeModal := func(g *gocui.Gui, v *gocui.View) error {
+		modal.Close()
+		gui.SwitchPanel(gui.NextPanel)
+		return nil
 	}
 
-	if err := gui.SetKeybinding(v.Name(), 'y', gocui.ModNone, f); err != nil {
-		panic(err)
-	}
-	if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, f); err != nil {
-		panic(err)
-	}
-	if err := gui.SetKeybinding(v.Name(), 'n', gocui.ModNone, gui.CloseConfirmMessage); err != nil {
-		panic(err)
-	}
-}
+	modal.AddButton("No", gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
+		closeModal(g, v)
+		return nil
+	}).AddHandler(gocui.KeyEsc, closeModal)
 
-func (gui *Gui) CloseConfirmMessage(g *gocui.Gui, v *gocui.View) error {
-	if err := g.DeleteView(ConfirmMessagePanel); err != nil {
-		panic(err)
-	}
-
-	g.DeleteKeybindings(ConfirmMessagePanel)
-	gui.SwitchPanel(gui.NextPanel)
-	return nil
+	modal.AddButton("Yes", gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
+		defer closeModal(g, v)
+		return f()
+	}).AddHandler(gocui.KeyEsc, closeModal)
+	modal.Draw()
 }
 
 func (gui *Gui) StateMessage(message string) *gocui.View {

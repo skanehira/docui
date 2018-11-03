@@ -289,10 +289,8 @@ func (n *NetworkList) RemoveNetwork(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	n.ConfirmMessage("Are you sure you want to remove this network? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
+	n.ConfirmMessage("Are you sure you want to remove this network?", func() error {
 		defer n.Refresh(g, v)
-		defer n.CloseConfirmMessage(g, v)
-
 		if err := n.Docker.RemoveNetwork(selected.ID); err != nil {
 			n.ErrMessage(err.Error(), n.NextPanel)
 			return nil
@@ -300,5 +298,6 @@ func (n *NetworkList) RemoveNetwork(g *gocui.Gui, v *gocui.View) error {
 
 		return nil
 	})
+
 	return nil
 }

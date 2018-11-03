@@ -430,7 +430,7 @@ func (i *ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
 	y := maxY / 3
 	w := x * 6
 
-	labelw := 11
+	labelw := 6
 	fieldw := w - labelw
 
 	// new form
@@ -608,7 +608,7 @@ func (i *ImageList) LoadImagePanel(g *gocui.Gui, v *gocui.View) error {
 	y := maxY / 3
 	w := x * 6
 
-	labelw := 11
+	labelw := 6
 	fieldw := w - labelw
 
 	// new form
@@ -747,10 +747,8 @@ func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	i.ConfirmMessage("Are you sure you want to remove this image? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
+	i.ConfirmMessage("Are you sure you want to remove this image?", func() error {
 		defer i.Refresh(g, v)
-		defer i.CloseConfirmMessage(g, v)
-
 		if err := i.Docker.RemoveImageWithName(name); err != nil {
 			i.ErrMessage(err.Error(), i.NextPanel)
 			return nil
@@ -770,10 +768,8 @@ func (i *ImageList) RemoveDanglingImages(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	i.ConfirmMessage("Are you sure you want to remove dangling images? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
+	i.ConfirmMessage("Are you sure you want to remove dangling images?", func() error {
 		defer i.Refresh(g, v)
-		defer i.CloseConfirmMessage(g, v)
-
 		if err := i.Docker.RemoveDanglingImages(); err != nil {
 			i.ErrMessage(err.Error(), i.NextPanel)
 			return nil
@@ -781,6 +777,7 @@ func (i *ImageList) RemoveDanglingImages(g *gocui.Gui, v *gocui.View) error {
 
 		return nil
 	})
+
 	return nil
 }
 
@@ -822,12 +819,4 @@ func (i *ImageList) Filter(g *gocui.Gui, lv *gocui.View) error {
 
 func (i *ImageList) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 	return i.Panels[i.ClosePanelName].(*Input).ClosePanel(g, v)
-}
-
-func (i *ImageList) NewSaveImageItems(ix, iy, iw, ih int) Items {
-	names := []string{
-		"Path",
-	}
-
-	return NewItems(names, ix, iy, iw, ih, 6)
 }

@@ -278,10 +278,8 @@ func (vl *VolumeList) RemoveVolume(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	vl.ConfirmMessage("Are you sure you want to remove this volume? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
+	vl.ConfirmMessage("Are you sure you want to remove this volume?", func() error {
 		defer vl.Refresh(g, v)
-		defer vl.CloseConfirmMessage(g, v)
-
 		if err := vl.Docker.RemoveVolumeWithName(selected.Name); err != nil {
 			vl.ErrMessage(err.Error(), vl.NextPanel)
 			return nil
@@ -301,10 +299,8 @@ func (vl *VolumeList) PruneVolumes(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	vl.ConfirmMessage("Are you sure you want to remove unused volumes? (y/n)", func(g *gocui.Gui, v *gocui.View) error {
+	vl.ConfirmMessage("Are you sure you want to remove unused volumes?", func() error {
 		defer vl.Refresh(g, v)
-		defer vl.CloseConfirmMessage(g, v)
-
 		if err := vl.Docker.PruneVolumes(); err != nil {
 			vl.ErrMessage(err.Error(), vl.NextPanel)
 			return nil
@@ -312,7 +308,6 @@ func (vl *VolumeList) PruneVolumes(g *gocui.Gui, v *gocui.View) error {
 
 		return nil
 	})
-
 	return nil
 }
 
