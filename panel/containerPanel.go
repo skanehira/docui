@@ -143,7 +143,7 @@ func (c *ContainerList) SetKeyBinding() {
 	if err := c.SetKeybinding(c.name, 'e', gocui.ModNone, c.ExportContainerPanel); err != nil {
 		panic(err)
 	}
-	if err := c.SetKeybinding(c.name, 'c', gocui.ModNone, c.CommitContainerForm); err != nil {
+	if err := c.SetKeybinding(c.name, 'c', gocui.ModNone, c.CommitContainerPanel); err != nil {
 		panic(err)
 	}
 	if err := c.SetKeybinding(c.name, 'r', gocui.ModNone, c.RenameContainerPanel); err != nil {
@@ -364,7 +364,7 @@ func (c *ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (c *ContainerList) CommitContainerForm(g *gocui.Gui, v *gocui.View) error {
+func (c *ContainerList) CommitContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	// get selected container
 	container, err := c.selected()
 	if err != nil {

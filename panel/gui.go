@@ -201,7 +201,7 @@ func (gui *Gui) PopupDetailPanel(g *gocui.Gui, v *gocui.View) error {
 	gui.NextPanel = g.CurrentView().Name()
 
 	maxX, maxY := g.Size()
-	panel := NewDetail(gui, DetailPanel, maxX/7, 1, maxX-(maxX/7), maxY-4)
+	panel := NewDetail(gui, DetailPanel, 0, 0, maxX-1, maxY-1)
 
 	panel.SetView(g)
 
