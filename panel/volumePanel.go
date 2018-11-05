@@ -226,6 +226,7 @@ func (vl *VolumeList) CreateVolumePanel(g *gocui.Gui, v *gocui.View) error {
 	form.AddInput("Name", labelw, fieldw)
 	form.AddInput("Driver", labelw, fieldw)
 	form.AddInput("Labels", labelw, fieldw)
+	form.AddInput("Options", labelw, fieldw)
 	form.AddButton("Create", vl.CreateVolume)
 	form.AddButton("Cancel", form.Close)
 
