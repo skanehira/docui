@@ -201,7 +201,7 @@ func (gui *Gui) PopupDetailPanel(g *gocui.Gui, v *gocui.View) error {
 	gui.NextPanel = g.CurrentView().Name()
 
 	maxX, maxY := g.Size()
-	panel := NewDetail(gui, DetailPanel, 0, 0, maxX-1, maxY-1)
+	panel := NewDetail(gui, DetailPanel, 0, 0, maxX-1, maxY-3)
 
 	panel.SetView(g)
 
@@ -222,14 +222,14 @@ func (gui *Gui) ErrMessage(message string, nextPanel string) {
 		modal := component.NewModal(gui.Gui, x, y, w, y+5+int(h)).
 			SetText(message)
 
-		closeModal := func(g *gocui.Gui, v *gocui.View) error {
+		cancelAction := func(g *gocui.Gui, v *gocui.View) error {
 			modal.Close()
 			gui.SwitchPanel(nextPanel)
 			return nil
 		}
 
-		modal.AddButton("OK", gocui.KeyEnter, closeModal).
-			AddHandler(gocui.KeyEsc, closeModal)
+		modal.AddButton("OK", gocui.KeyEnter, cancelAction).
+			AddHandler(gocui.KeyEsc, cancelAction)
 
 		modal.Draw()
 		return nil
@@ -248,19 +248,27 @@ func (gui *Gui) ConfirmMessage(message, next string, f func() error) {
 	modal := component.NewModal(gui.Gui, x, y, w, y+5+int(h)).
 		SetText(message)
 
-	closeModal := func(g *gocui.Gui, v *gocui.View) error {
+	cancelAction := func(g *gocui.Gui, v *gocui.View) error {
 		modal.Close()
 		gui.SwitchPanel(next)
 		return nil
 	}
 
-	modal.AddButton("No", gocui.KeyEnter, closeModal).
-		AddHandler(gocui.KeyEsc, closeModal)
-
-	modal.AddButton("Yes", gocui.KeyEnter, func(g *gocui.Gui, v *gocui.View) error {
-		defer closeModal(g, v)
+	doAction := func(g *gocui.Gui, v *gocui.View) error {
+		defer cancelAction(g, v)
 		return f()
-	}).AddHandler(gocui.KeyEsc, closeModal)
+	}
+
+	modal.AddButton("No", gocui.KeyEnter, cancelAction).
+		AddHandler(gocui.KeyEsc, cancelAction).
+		AddHandler('y', doAction).
+		AddHandler('n', cancelAction)
+
+	modal.AddButton("Yes", gocui.KeyEnter, doAction).
+		AddHandler(gocui.KeyEsc, cancelAction).
+		AddHandler('y', doAction).
+		AddHandler('n', cancelAction)
+
 	modal.Draw()
 }
 
