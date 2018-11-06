@@ -236,7 +236,7 @@ func (vl *VolumeList) CreateVolumePanel(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (vl *VolumeList) CreateVolume(g *gocui.Gui, v *gocui.View) error {
-	data := vl.form.GetFieldText()
+	data := vl.form.GetFieldTexts()
 
 	options := vl.Docker.NewCreateVolumeOptions(data)
 

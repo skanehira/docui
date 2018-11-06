@@ -327,7 +327,7 @@ func (c *ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	data := c.form.GetFieldText()
+	data := c.form.GetFieldTexts()
 
 	g.Update(func(g *gocui.Gui) error {
 		c.form.Close(g, v)
@@ -410,7 +410,7 @@ func (c *ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 	if !c.form.Validate() {
 		return nil
 	}
-	data := c.form.GetFieldText()
+	data := c.form.GetFieldTexts()
 
 	if data["Tag"] == "" {
 		data["Tag"] = "latest"
@@ -492,7 +492,7 @@ func (c *ContainerList) RenameContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	data := c.form.GetFieldText()
+	data := c.form.GetFieldTexts()
 
 	options := docker.RenameContainerOptions{
 		ID:   data["Container"],

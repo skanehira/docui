@@ -244,9 +244,7 @@ func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	data := i.form.GetFieldText()
-	isAttach := i.form.GetCheckBoxState()["Attach"]
-	options, err := i.Docker.NewContainerOptions(data, isAttach)
+	options, err := i.Docker.NewContainerOptions(i.form.GetFieldTexts(), i.form.GetCheckBoxState("Attach"))
 
 	if err != nil {
 		i.form.Close(g, v)
@@ -312,7 +310,7 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 	if !i.form.Validate() {
 		return nil
 	}
-	item := strings.SplitN(i.form.GetFieldText()["Image"], ":", 2)
+	item := strings.SplitN(i.form.GetFieldTexts()["Image"], ":", 2)
 
 	name := item[0]
 	var tag string
@@ -425,7 +423,7 @@ func (i *ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 	if !i.form.Validate() {
 		return nil
 	}
-	data := i.form.GetFieldText()
+	data := i.form.GetFieldTexts()
 
 	g.Update(func(g *gocui.Gui) error {
 		i.form.Close(g, v)
@@ -501,7 +499,7 @@ func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	data := i.form.GetFieldText()
+	data := i.form.GetFieldTexts()
 	options := docker.ImportImageOptions{
 		Repository: data["Repository"],
 		Source:     data["Path"],
@@ -567,7 +565,7 @@ func (i *ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	path := i.form.GetFieldText()["Path"]
+	path := i.form.GetFieldTexts()["Path"]
 
 	g.Update(func(g *gocui.Gui) error {
 		i.form.Close(g, v)
