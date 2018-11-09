@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"math"
 	"os"
 	"reflect"
 	"sort"
@@ -137,20 +136,4 @@ func ParseLabels(labels map[string]string) string {
 	}
 
 	return result
-}
-
-func RoundUp(num, places float64) float64 {
-
-	shift := math.Pow(10, places)
-
-	return roundUpInt(num*shift) / shift
-
-}
-
-func roundUpInt(num float64) float64 {
-
-	t := math.Trunc(num)
-
-	return t + math.Copysign(1, num)
-
 }

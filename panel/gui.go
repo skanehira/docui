@@ -49,6 +49,7 @@ type Gui struct {
 	PanelNames []string
 	NextPanel  string
 	active     int
+	modal      *component.Modal
 }
 
 type Panel interface {
@@ -210,17 +211,7 @@ func (gui *Gui) PopupDetailPanel(g *gocui.Gui, v *gocui.View) error {
 
 func (gui *Gui) ErrMessage(message string, nextPanel string) {
 	gui.Update(func(g *gocui.Gui) error {
-		maxX, maxY := gui.Size()
-
-		x := maxX / 4
-		y := maxY / 3
-		w := x * 3
-
-		limitw := w - x
-		h := common.RoundUp(float64(len(message)/limitw), 0)
-
-		modal := component.NewModal(gui.Gui, x, y, w, y+5+int(h)).
-			SetText(message)
+		modal := gui.NewModal(message)
 
 		cancelAction := func(g *gocui.Gui, v *gocui.View) error {
 			modal.Close()
@@ -237,16 +228,7 @@ func (gui *Gui) ErrMessage(message string, nextPanel string) {
 }
 
 func (gui *Gui) ConfirmMessage(message, next string, f func() error) {
-	maxX, maxY := gui.Size()
-	x := maxX / 4
-	y := maxY / 3
-	w := x * 3
-
-	limitw := w - x
-	h := common.RoundUp(float64(len(message)/limitw), 0)
-
-	modal := component.NewModal(gui.Gui, x, y, w, y+5+int(h)).
-		SetText(message)
+	modal := gui.NewModal(message)
 
 	cancelAction := func(g *gocui.Gui, v *gocui.View) error {
 		modal.Close()
@@ -272,29 +254,26 @@ func (gui *Gui) ConfirmMessage(message, next string, f func() error) {
 	modal.Draw()
 }
 
-func (gui *Gui) StateMessage(message string) *gocui.View {
-	maxX, maxY := gui.Size()
-	x := maxX / 3
-	y := maxY / 3
-	v, err := gui.SetView(StateMessagePanel, x, y, maxX-x, y+2)
-	if err != nil {
-		if err != gocui.ErrUnknownView {
-			panic(err)
-		}
-		v.Wrap = true
-		v.Title = v.Name()
-		fmt.Fprint(v, message)
-
-		gui.SwitchPanel(v.Name())
-	}
-
-	return v
+func (gui *Gui) StateMessage(message string) {
+	gui.NewModal(message)
 }
 
 func (gui *Gui) CloseStateMessage() {
-	if err := gui.DeleteView(StateMessagePanel); err != nil {
-		panic(err)
-	}
+	gui.modal.Close()
+}
+
+func (gui *Gui) NewModal(message string) *component.Modal {
+	maxX, maxY := gui.Size()
+	x := maxX / 5
+	y := maxY / 3
+	w := x * 4
+
+	modal := component.NewModal(gui.Gui, x, y, w).
+		SetText(message)
+
+	modal.Draw()
+	gui.modal = modal
+	return modal
 }
 
 func (gui *Gui) RefreshAllPanel() {
