@@ -83,9 +83,6 @@ func (d *Docker) NewContainerOptions(config map[string]string, isAttach bool) (d
 	image, err := d.InspectImage(options.Config.Image)
 
 	if user := config["User"]; user != "" {
-		if image.Config.User != user && user != "root" {
-			return options, fmt.Errorf("no specified user in image")
-		}
 		options.Config.User = user
 	}
 
