@@ -1,7 +1,7 @@
 # docui - GUI Docker Client With Go
 
 ## About docui
-docui is gui docker client.  
+docui is cui docker client.  
 docui can do thises.
 
 - image
