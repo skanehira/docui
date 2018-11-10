@@ -80,8 +80,6 @@ func newNavi() map[string]string {
 		CommitContainerPanel:   "Ctrl+j/k: change input, Esc/Ctrl+w: close panel, Enter: commit container",
 		SearchImagePanel:       "Esc/Ctrl+w: close panel, Enter: serach image",
 		SearchImageResultPanel: "j/k: select image, Esc/Ctrl+w: close panel, Enter: pull image",
-		ErrMessagePanel:        "Enter: close",
-		ConfirmMessagePanel:    "y/Enter: confirm, n: cancel",
 		VolumeListPanel:        "j/k: select volume, c: create volume, d: remove volume, p: prune volumes, Enter/o: inspect volume, Ctrl+r: refresh volume list",
 		CreateVolumePanel:      "Esc/Ctrl+w: close panel, Enter: create volume",
 		NetworkListPanel:       "j/k: cursor down/up, d: remove network, o/Enter: inspect network",

@@ -13,10 +13,9 @@ type NetworkList struct {
 	*Gui
 	name string
 	Position
-	Networks       []*Network
-	Data           map[string]interface{}
-	ClosePanelName string
-	filter         string
+	Networks []*Network
+	Data     map[string]interface{}
+	filter   string
 }
 
 type Network struct {

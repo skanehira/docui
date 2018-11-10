@@ -15,12 +15,10 @@ type ImageList struct {
 	*Gui
 	name string
 	Position
-	Images         []*Image
-	Data           map[string]interface{}
-	ClosePanelName string
-	selectedImage  *Image
-	filter         string
-	form           *Form
+	Images []*Image
+	Data   map[string]interface{}
+	filter string
+	form   *Form
 }
 
 type Image struct {

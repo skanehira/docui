@@ -15,12 +15,10 @@ type ContainerList struct {
 	*Gui
 	name string
 	Position
-	Containers        []*Container
-	Data              map[string]interface{}
-	ClosePanelName    string
-	selectedContainer *Container
-	filter            string
-	form              *Form
+	Containers []*Container
+	Data       map[string]interface{}
+	filter     string
+	form       *Form
 }
 
 type Container struct {

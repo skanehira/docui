@@ -11,7 +11,6 @@ type SearchImage struct {
 	*Gui
 	Position
 	name        string
-	input       string
 	resultPanel *SearchImageResult
 }
 

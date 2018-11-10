@@ -12,12 +12,11 @@ import (
 type VolumeList struct {
 	*Gui
 	Position
-	name           string
-	Volumes        []*Volume
-	Data           map[string]interface{}
-	ClosePanelName string
-	filter         string
-	form           *Form
+	name    string
+	Volumes []*Volume
+	Data    map[string]interface{}
+	filter  string
+	form    *Form
 }
 
 type Volume struct {
