@@ -82,7 +82,7 @@ $ bash build.sh
 Refer to the [keybinding](https://github.com/skanehira/docui#Keybindings) for panel operation.  
 I will explain the items of each panel here.
 
-## pull imagee panel
+## pull image panel
 ![](https://github.com/skanehira/docui/blob/images/images/image_pull.png)
 
 - Name  
@@ -141,10 +141,13 @@ It must be absolute path.
 Selected image id.
 
 - Attach  
-If you want to attach contaienr, please input `y`.
+If you want to attach contaienr, please Enter.
+
+- User  
+If you want to attach contaienr, please input user name.
 
 - Env  
-The environment variable setting value can be defined by variables like `$ PATH`.
+The environment variable setting value can be defined by variables like `$PATH`.
 In that case, we will obtain the value from the OS environment variable.
 If you want to add multiple environment variables, please input as below.
 

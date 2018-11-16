@@ -23,7 +23,7 @@ docui can do thises.
     - remove
     - inspect/filtering
 
-![](https://github.com/skanehira/docui/blob/images/images/demo.gif)
+[![asciicast](https://asciinema.org/a/212109.svg)](https://asciinema.org/a/212109)
 
 ## Required Tools
 - Go Ver.1.11
@@ -62,7 +62,6 @@ $ bash build.sh
 | all              | change panel           | <kbd>Tab</kbd>                  |
 | all              | quit                   | <kbd>Ctrl</kbd> + <kbd>q</kbd>  |
 | all              | quit                   | <kbd>q</kbd>                    |
-| all              | close panel            | <kbd>Esc</kbd>                  |
 | image list       | pull image             | <kbd>p</kbd>                    |
 | image list       | search images          | <kbd>Ctrl</kbd> + <kbd>s</kbd>  |
 | image list       | remove image           | <kbd>d</kbd>                    |
@@ -98,11 +97,10 @@ $ bash build.sh
 | network list     | next netowrk           | <kbd>j</kbd>                    |
 | network list     | previous network       | <kbd>k</kbd>                    |
 | pull image       | pull image             | <kbd>Enter</kbd>                |
-| pull image       | close panel            | <kbd>Enter</kbd>                |
-| create container | next input box         | <kbd>Ctrl</kbd> + <kbd>j</kbd>  |
-| create container | previous input box     | <kbd>Ctrl</kbd> + <kbd>k</kbd>  |
-| create container | close panel            | <kbd>Enter</kbd>                |
-| create container | create container       | <kbd>Enter</kbd>                |
+| pull image       | close panel            | <kbd>Esc</kbd>                  |
+| create container | next input box         | <kbd>↓</kbd>  / <kbd>Tab</kbd>  |
+| create container | previous input box     | <kbd>↑</kbd>                    |
+| create container | close panel            | <kbd>Esc</kbd>                  |
 | detail           | cursor dwon            | <kbd>j</kbd>                    |
 | detail           | cursor up              | <kbd>k</kbd>                    |
 | detail           | page dwon              | <kbd>d</kbd>                    |
@@ -113,10 +111,9 @@ $ bash build.sh
 | images           | previous image         | <kbd>k</kbd>                    |
 | images           | pull image             | <kbd>Enter</kbd>                |
 | images           | close panel            | <kbd>Esc</kbd>                  |
-| create volume    | create volume          | <kbd>Enter</kbd>                |
 | create volume    | close panel            | <kbd>Esc</kbd>                  |
-| create volume    | next input box         | <kbd>Ctrl</kbd> + <kbd>j</kbd>  |
-| create volume    | previous input box     | <kbd>Ctrl</kbd> + <kbd>k</kbd>  |
+| create volume    | next input box         | <kbd>↓</kbd> / <kbd>Tab</kbd>   |
+| create volume    | previous input box     | <kbd>↑</kbd>                    |
 
 
 ## How to use
