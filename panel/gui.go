@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
 	"github.com/skanehira/docui/docker"
-
-	"github.com/jroimartin/gocui"
+	component "github.com/skanehira/gocui-component"
 )
 
 const (
@@ -18,15 +18,12 @@ const (
 	ContainerListHeaderPanel     = "container list"
 	DetailPanel                  = "detail"
 	CreateContainerPanel         = "create container"
-	ErrMessagePanel              = "error message"
 	SaveImagePanel               = "save image"
 	ImportImagePanel             = "import image"
 	LoadImagePanel               = "load image"
 	ExportContainerPanel         = "export container"
 	CommitContainerPanel         = "commit container"
 	RenameContainerPanel         = "rename container"
-	ConfirmMessagePanel          = "confirm"
-	StateMessagePanel            = "state"
 	SearchImagePanel             = "search images"
 	SearchImageResultPanel       = "images scroll"
 	SearchImageResultHeaderPanel = "images"
@@ -49,6 +46,7 @@ type Gui struct {
 	PanelNames []string
 	NextPanel  string
 	active     int
+	modal      *component.Modal
 }
 
 type Panel interface {
@@ -201,7 +199,7 @@ func (gui *Gui) PopupDetailPanel(g *gocui.Gui, v *gocui.View) error {
 	gui.NextPanel = g.CurrentView().Name()
 
 	maxX, maxY := g.Size()
-	panel := NewDetail(gui, DetailPanel, maxX/7, 1, maxX-(maxX/7), maxY-4)
+	panel := NewDetail(gui, DetailPanel, 0, 0, maxX-1, maxY-3)
 
 	panel.SetView(g)
 
@@ -210,103 +208,69 @@ func (gui *Gui) PopupDetailPanel(g *gocui.Gui, v *gocui.View) error {
 
 func (gui *Gui) ErrMessage(message string, nextPanel string) {
 	gui.Update(func(g *gocui.Gui) error {
-		gui.NextPanel = nextPanel
-		maxX, maxY := gui.Size()
+		modal := gui.NewModal(message)
 
-		x := maxX / 5
-		y := maxY / 3
-		v, err := gui.SetView(ErrMessagePanel, x, y, maxX-x, y+4)
-		if err != nil {
-			if err != gocui.ErrUnknownView {
-				panic(err)
-			}
-			v.Wrap = true
-			v.Title = v.Name()
-			fmt.Fprint(v, message)
-			gui.SwitchPanel(v.Name())
+		cancelAction := func(g *gocui.Gui, v *gocui.View) error {
+			modal.Close()
+			gui.SwitchPanel(nextPanel)
+			return nil
 		}
 
-		if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, gui.CloseMessage); err != nil {
-			panic(err)
-		}
-		if err := gui.SetKeybinding(v.Name(), 'j', gocui.ModNone, CursorDown); err != nil {
-			panic(err)
-		}
-		if err := gui.SetKeybinding(v.Name(), 'k', gocui.ModNone, CursorUp); err != nil {
-			panic(err)
-		}
+		modal.AddButton("OK", gocui.KeyEnter, cancelAction).
+			AddHandler(gocui.KeyEsc, cancelAction)
+
+		modal.Draw()
 		return nil
 	})
 }
 
-func (gui *Gui) CloseMessage(g *gocui.Gui, v *gocui.View) error {
-	if err := g.DeleteView(v.Name()); err != nil {
-		panic(err)
+func (gui *Gui) ConfirmMessage(message, next string, f func() error) {
+	modal := gui.NewModal(message)
+
+	cancelAction := func(g *gocui.Gui, v *gocui.View) error {
+		modal.Close()
+		gui.SwitchPanel(next)
+		return nil
 	}
-	g.DeleteKeybindings(v.Name())
-	gui.RefreshAllPanel()
-	return nil
+
+	doAction := func(g *gocui.Gui, v *gocui.View) error {
+		defer cancelAction(g, v)
+		return f()
+	}
+
+	modal.AddButton("No", gocui.KeyEnter, cancelAction).
+		AddHandler(gocui.KeyEsc, cancelAction).
+		AddHandler('y', doAction).
+		AddHandler('n', cancelAction)
+
+	modal.AddButton("Yes", gocui.KeyEnter, doAction).
+		AddHandler(gocui.KeyEsc, cancelAction).
+		AddHandler('y', doAction).
+		AddHandler('n', cancelAction)
+
+	modal.Draw()
 }
 
-func (gui *Gui) ConfirmMessage(message string, f func(g *gocui.Gui, v *gocui.View) error) {
-	maxX, maxY := gui.Size()
-	x := maxX / 5
-	y := maxY / 3
-	v, err := gui.SetView(ConfirmMessagePanel, x, y, maxX-x, y+2)
-	if err != nil {
-		if err != gocui.ErrUnknownView {
-			panic(err)
-		}
-		v.Wrap = true
-		v.Title = v.Name()
-		fmt.Fprint(v, message)
-		gui.SwitchPanel(v.Name())
-	}
-
-	if err := gui.SetKeybinding(v.Name(), 'y', gocui.ModNone, f); err != nil {
-		panic(err)
-	}
-	if err := gui.SetKeybinding(v.Name(), gocui.KeyEnter, gocui.ModNone, f); err != nil {
-		panic(err)
-	}
-	if err := gui.SetKeybinding(v.Name(), 'n', gocui.ModNone, gui.CloseConfirmMessage); err != nil {
-		panic(err)
-	}
-}
-
-func (gui *Gui) CloseConfirmMessage(g *gocui.Gui, v *gocui.View) error {
-	if err := g.DeleteView(ConfirmMessagePanel); err != nil {
-		panic(err)
-	}
-
-	g.DeleteKeybindings(ConfirmMessagePanel)
-	gui.SwitchPanel(gui.NextPanel)
-	return nil
-}
-
-func (gui *Gui) StateMessage(message string) *gocui.View {
-	maxX, maxY := gui.Size()
-	x := maxX / 3
-	y := maxY / 3
-	v, err := gui.SetView(StateMessagePanel, x, y, maxX-x, y+2)
-	if err != nil {
-		if err != gocui.ErrUnknownView {
-			panic(err)
-		}
-		v.Wrap = true
-		v.Title = v.Name()
-		fmt.Fprint(v, message)
-
-		gui.SwitchPanel(v.Name())
-	}
-
-	return v
+func (gui *Gui) StateMessage(message string) {
+	gui.NewModal(message)
 }
 
 func (gui *Gui) CloseStateMessage() {
-	if err := gui.DeleteView(StateMessagePanel); err != nil {
-		panic(err)
-	}
+	gui.modal.Close()
+}
+
+func (gui *Gui) NewModal(message string) *component.Modal {
+	maxX, maxY := gui.Size()
+	x := maxX / 5
+	y := maxY / 3
+	w := x * 4
+
+	modal := component.NewModal(gui.Gui, x, y, w).
+		SetText(message)
+
+	modal.Draw()
+	gui.modal = modal
+	return modal
 }
 
 func (gui *Gui) RefreshAllPanel() {
@@ -344,42 +308,6 @@ func (gui *Gui) IsSetView(name string) bool {
 func (gui *Gui) SetNaviWithPanelName(name string) *gocui.View {
 	navi := gui.Panels[NavigatePanel].(Navigate)
 	return navi.SetNavigate(name)
-}
-
-func (gui *Gui) GetKeyFromMap(m map[string]Position) string {
-	var key string
-	for k, _ := range m {
-		key = k
-	}
-
-	return key
-}
-
-func (gui *Gui) GetItemsToMap(items Items) (map[string]string, error) {
-
-	data := make(map[string]string)
-
-	for _, item := range items {
-		name := gui.GetKeyFromMap(item.Label)
-
-		v, err := gui.View(gui.GetKeyFromMap(item.Input))
-
-		if err != nil {
-			return data, err
-		}
-
-		value := ReadLine(v, nil)
-
-		if value == "" {
-			if name == "Tag" {
-				value = "latest"
-			}
-		}
-
-		data[name] = value
-	}
-
-	return data, nil
 }
 
 func (gui *Gui) NewFilterPanel(panel Panel, reset, closePanel func(*gocui.Gui, *gocui.View) error) error {
