@@ -1,4 +1,4 @@
-# docui - GUI Docker Client With Go
+# docui - CUI Docker Client With Go
 
 ## About docui
 docui is cui docker client.  
