@@ -163,7 +163,7 @@ func (i *ImageList) SetKeyBinding() {
 	if err := i.SetKeybinding(i.name, gocui.KeyCtrlL, gocui.ModNone, i.LoadImagePanel); err != nil {
 		panic(err)
 	}
-	if err := i.SetKeybinding(i.name, gocui.KeyCtrlS, gocui.ModNone, i.SearchImagePanel); err != nil {
+	if err := i.SetKeybinding(i.name, gocui.KeyCtrlF, gocui.ModNone, i.SearchImagePanel); err != nil {
 		panic(err)
 	}
 	if err := i.SetKeybinding(i.name, gocui.KeyCtrlR, gocui.ModNone, i.Refresh); err != nil {

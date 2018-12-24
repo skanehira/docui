@@ -63,7 +63,7 @@ $ bash build.sh
 | all              | quit                   | <kbd>Ctrl</kbd> + <kbd>q</kbd>  |
 | all              | quit                   | <kbd>q</kbd>                    |
 | image list       | pull image             | <kbd>p</kbd>                    |
-| image list       | search images          | <kbd>Ctrl</kbd> + <kbd>s</kbd>  |
+| image list       | search images          | <kbd>Ctrl</kbd> + <kbd>f</kbd>  |
 | image list       | remove image           | <kbd>d</kbd>                    |
 | image list       | create container       | <kbd>c</kbd>                    |
 | image list       | inspect image          | <kbd>Enter</kbd> / <kbd>o</kbd> |
