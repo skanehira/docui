@@ -68,7 +68,6 @@ func New(mode gocui.OutputMode) *Gui {
 	}
 
 	g.Highlight = true
-	g.Cursor = true
 	g.SelFgColor = gocui.AttrBold
 	g.InputEsc = true
 

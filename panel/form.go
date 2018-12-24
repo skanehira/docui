@@ -26,9 +26,16 @@ type Form struct {
 }
 
 func NewForm(gui *gocui.Gui, name string, x, y, w, h int) *Form {
-	return &Form{
+	form := &Form{
 		Form: component.NewForm(gui, name, x, y, w, h),
 	}
+
+	form.AddCloseFunc(func() error {
+		gui.Cursor = false
+		return nil
+	})
+
+	return form
 }
 
 func NewItem(label, text string, lw, fw int, v *Validator) FormItem {
