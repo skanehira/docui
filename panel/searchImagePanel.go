@@ -89,7 +89,7 @@ func (s *SearchImage) SwitchToResult(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
-	name := ReadLine(v, nil)
+	name := ReadViewBuffer(v)
 
 	if name != "" {
 		g.Update(func(g *gocui.Gui) error {

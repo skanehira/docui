@@ -59,7 +59,7 @@ func (c *ContainerList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Mo
 		return
 	}
 
-	c.filter = ReadLine(v, nil)
+	c.filter = ReadViewBuffer(v)
 
 	if v, err := c.View(c.name); err == nil {
 		c.GetContainerList(v)
@@ -571,7 +571,7 @@ func (c *ContainerList) Filter(g *gocui.Gui, lv *gocui.View) error {
 			c.filter = ""
 		} else {
 			lv.SetCursor(0, 0)
-			c.filter = ReadLine(v, nil)
+			c.filter = ReadViewBuffer(v)
 		}
 		if v, err := c.View(c.name); err == nil {
 			c.GetContainerList(v)

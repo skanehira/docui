@@ -96,7 +96,13 @@ func (s *SearchImageResult) SetKeyBinding() {
 	if err := s.SetKeybinding(s.name, 'j', gocui.ModNone, CursorDown); err != nil {
 		panic(err)
 	}
+	if err := s.SetKeybinding(s.name, gocui.KeyArrowDown, gocui.ModNone, CursorDown); err != nil {
+		panic(err)
+	}
 	if err := s.SetKeybinding(s.name, 'k', gocui.ModNone, CursorUp); err != nil {
+		panic(err)
+	}
+	if err := s.SetKeybinding(s.name, gocui.KeyArrowUp, gocui.ModNone, CursorUp); err != nil {
 		panic(err)
 	}
 }

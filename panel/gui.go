@@ -99,7 +99,13 @@ func (gui *Gui) SetKeyBindingToPanel(panel string) {
 	if err := gui.SetKeybinding(panel, 'h', gocui.ModNone, gui.prePanel); err != nil {
 		panic(err)
 	}
+	if err := gui.SetKeybinding(panel, gocui.KeyArrowLeft, gocui.ModNone, gui.prePanel); err != nil {
+		panic(err)
+	}
 	if err := gui.SetKeybinding(panel, 'l', gocui.ModNone, gui.nextPanel); err != nil {
+		panic(err)
+	}
+	if err := gui.SetKeybinding(panel, gocui.KeyArrowRight, gocui.ModNone, gui.nextPanel); err != nil {
 		panic(err)
 	}
 	if err := gui.SetKeybinding(panel, gocui.KeyTab, gocui.ModNone, gui.nextPanel); err != nil {
@@ -369,7 +375,7 @@ func CursorDown(g *gocui.Gui, v *gocui.View) error {
 		cx, cy := v.Cursor()
 		nexty := cy + 1
 
-		line := ReadLine(v, &nexty)
+		line := ReadLineY(v, nexty)
 		if line == "" {
 			return nil
 		}
@@ -430,17 +436,16 @@ func PageUp(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func ReadLine(v *gocui.View, y *int) string {
-	if y == nil {
-		_, ny := v.Cursor()
-		y = &ny
-	}
-
-	str, err := v.Line(*y)
+func ReadLineY(v *gocui.View, y int) string {
+	str, err := v.Line(y)
 
 	if err != nil {
 		return ""
 	}
 
 	return strings.Trim(str, " ")
+}
+
+func ReadViewBuffer(v *gocui.View) string {
+	return strings.Replace(v.ViewBuffer(), "\n", "", -1)
 }

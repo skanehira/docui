@@ -57,7 +57,7 @@ func (n *NetworkList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modi
 		return
 	}
 
-	n.filter = ReadLine(v, nil)
+	n.filter = ReadViewBuffer(v)
 
 	if v, err := n.View(n.name); err == nil {
 		n.GetNetworkList(v)
@@ -164,7 +164,7 @@ func (n *NetworkList) Filter(g *gocui.Gui, nv *gocui.View) error {
 			n.filter = ""
 		} else {
 			nv.SetCursor(0, 0)
-			n.filter = ReadLine(v, nil)
+			n.filter = ReadViewBuffer(v)
 		}
 		if v, err := n.View(n.name); err == nil {
 			n.GetNetworkList(v)

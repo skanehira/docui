@@ -57,7 +57,7 @@ func (vl *VolumeList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modi
 		return
 	}
 
-	vl.filter = ReadLine(v, nil)
+	vl.filter = ReadViewBuffer(v)
 
 	if v, err := vl.View(vl.name); err == nil {
 		vl.GetVolumeList(v)
@@ -337,7 +337,7 @@ func (vl *VolumeList) Filter(g *gocui.Gui, lv *gocui.View) error {
 			vl.filter = ""
 		} else {
 			lv.SetCursor(0, 0)
-			vl.filter = ReadLine(v, nil)
+			vl.filter = ReadViewBuffer(v)
 		}
 		if v, err := vl.View(vl.name); err == nil {
 			vl.GetVolumeList(v)

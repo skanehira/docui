@@ -62,6 +62,8 @@ $ bash build.sh
 | all              | change panel           | <kbd>Tab</kbd>                  |
 | all              | quit                   | <kbd>Ctrl</kbd> + <kbd>q</kbd>  |
 | all              | quit                   | <kbd>q</kbd>                    |
+| list panels      | next entry             | <kbd>j</kbd> / <kbd>↓</kbd>     |
+| list  panels     | previous entry         | <kbd>k</kbd> / <kbd>↑</kbd>     |
 | image list       | pull image             | <kbd>p</kbd>                    |
 | image list       | search images          | <kbd>Ctrl</kbd> + <kbd>f</kbd>  |
 | image list       | remove image           | <kbd>d</kbd>                    |
@@ -70,15 +72,11 @@ $ bash build.sh
 | image list       | save image             | <kbd>s</kbd>                    |
 | image list       | import image           | <kbd>i</kbd>                    |
 | image list       | load image             | <kbd>Ctrl</kbd> + <kbd>l</kbd>  |
-| image list       | next image             | <kbd>j</kbd>                    |
-| image list       | previous image         | <kbd>k</kbd>                    |
 | image list       | remove dangling images | <kbd>Ctrl</kbd> + <kbd>d</kbd>  |
 | image list       | refresh image list     | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
 | image list       | filter image           | <kbd>f</kbd>                    |
 | container list   | inspect container      | <kbd>Enter</kbd> / <kbd>o</kbd> |
 | container list   | remove container       | <kbd>d</kbd>                    |
-| container list   | next container         | <kbd>j</kbd>                    |
-| container list   | previous container     | <kbd>k</kbd>                    |
 | container list   | start container        | <kbd>u</kbd>                    |
 | container list   | stop container         | <kbd>s</kbd>                    |
 | container list   | export container       | <kbd>e</kbd>                    |
@@ -94,8 +92,6 @@ $ bash build.sh
 | volume list      | filter image           | <kbd>f</kbd>                    |
 | network list     | inspect network        | <kbd>Enter</kbd> / <kbd>o</kbd> |
 | network list     | remove network         | <kbd>d</kbd>                    |
-| network list     | next netowrk           | <kbd>j</kbd>                    |
-| network list     | previous network       | <kbd>k</kbd>                    |
 | pull image       | pull image             | <kbd>Enter</kbd>                |
 | pull image       | close panel            | <kbd>Esc</kbd>                  |
 | create container | next input box         | <kbd>↓</kbd>  / <kbd>Tab</kbd>  |
@@ -107,8 +103,8 @@ $ bash build.sh
 | detail           | page up                | <kbd>u</kbd>                    |
 | search images    | search image           | <kbd>Enter</kbd>                |
 | search images    | close panel            | <kbd>Esc</kbd>                  |
-| images           | next image             | <kbd>j</kbd>                    |
-| images           | previous image         | <kbd>k</kbd>                    |
+| images           | next image             | <kbd>j</kbd> / <kbd>↓</kbd>     |
+| images           | previous image         | <kbd>k</kbd> / <kbd>↑</kbd>     |
 | images           | pull image             | <kbd>Enter</kbd>                |
 | images           | close panel            | <kbd>Esc</kbd>                  |
 | create volume    | close panel            | <kbd>Esc</kbd>                  |

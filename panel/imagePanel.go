@@ -60,7 +60,7 @@ func (i *ImageList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifi
 		return
 	}
 
-	i.filter = ReadLine(v, nil)
+	i.filter = ReadViewBuffer(v)
 
 	if v, err := i.View(i.name); err == nil {
 		i.GetImageList(v)
@@ -692,7 +692,7 @@ func (i *ImageList) Filter(g *gocui.Gui, lv *gocui.View) error {
 			i.filter = ""
 		} else {
 			lv.SetCursor(0, 0)
-			i.filter = ReadLine(v, nil)
+			i.filter = ReadViewBuffer(v)
 		}
 		if v, err := i.View(i.name); err == nil {
 			i.GetImageList(v)
