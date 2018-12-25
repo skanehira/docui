@@ -112,12 +112,6 @@ func (vl *VolumeList) SetView(g *gocui.Gui) error {
 func (vl *VolumeList) SetKeyBinding() {
 	vl.SetKeyBindingToPanel(vl.name)
 
-	if err := vl.SetKeybinding(vl.name, 'j', gocui.ModNone, CursorDown); err != nil {
-		panic(err)
-	}
-	if err := vl.SetKeybinding(vl.name, 'k', gocui.ModNone, CursorUp); err != nil {
-		panic(err)
-	}
 	if err := vl.SetKeybinding(vl.name, 'c', gocui.ModNone, vl.CreateVolumePanel); err != nil {
 		panic(err)
 	}

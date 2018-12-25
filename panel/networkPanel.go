@@ -125,12 +125,6 @@ func (n *NetworkList) Refresh(g *gocui.Gui, v *gocui.View) error {
 func (n *NetworkList) SetKeyBinding() {
 	n.SetKeyBindingToPanel(n.name)
 
-	if err := n.SetKeybinding(n.name, 'j', gocui.ModNone, CursorDown); err != nil {
-		panic(err)
-	}
-	if err := n.SetKeybinding(n.name, 'k', gocui.ModNone, CursorUp); err != nil {
-		panic(err)
-	}
 	if err := n.SetKeybinding(n.name, gocui.KeyCtrlR, gocui.ModNone, n.Refresh); err != nil {
 		panic(err)
 	}

@@ -117,12 +117,6 @@ func (c *ContainerList) SetView(g *gocui.Gui) error {
 func (c *ContainerList) SetKeyBinding() {
 	c.SetKeyBindingToPanel(c.name)
 
-	if err := c.SetKeybinding(c.name, 'j', gocui.ModNone, CursorDown); err != nil {
-		panic(err)
-	}
-	if err := c.SetKeybinding(c.name, 'k', gocui.ModNone, CursorUp); err != nil {
-		panic(err)
-	}
 	if err := c.SetKeybinding(c.name, gocui.KeyEnter, gocui.ModNone, c.DetailContainer); err != nil {
 		panic(err)
 	}

@@ -130,12 +130,6 @@ func (i *ImageList) Refresh(g *gocui.Gui, v *gocui.View) error {
 func (i *ImageList) SetKeyBinding() {
 	i.SetKeyBindingToPanel(i.name)
 
-	if err := i.SetKeybinding(i.name, 'j', gocui.ModNone, CursorDown); err != nil {
-		panic(err)
-	}
-	if err := i.SetKeybinding(i.name, 'k', gocui.ModNone, CursorUp); err != nil {
-		panic(err)
-	}
 	if err := i.SetKeybinding(i.name, gocui.KeyEnter, gocui.ModNone, i.DetailImage); err != nil {
 		panic(err)
 	}

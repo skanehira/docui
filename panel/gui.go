@@ -108,6 +108,18 @@ func (gui *Gui) SetKeyBindingToPanel(panel string) {
 	if err := gui.SetKeybinding(panel, gocui.KeyCtrlO, gocui.ModNone, gui.DockerInfo); err != nil {
 		panic(err)
 	}
+	if err := gui.SetKeybinding(panel, 'j', gocui.ModNone, CursorDown); err != nil {
+		panic(err)
+	}
+	if err := gui.SetKeybinding(panel, gocui.KeyArrowDown, gocui.ModNone, CursorDown); err != nil {
+		panic(err)
+	}
+	if err := gui.SetKeybinding(panel, 'k', gocui.ModNone, CursorUp); err != nil {
+		panic(err)
+	}
+	if err := gui.SetKeybinding(panel, gocui.KeyArrowUp, gocui.ModNone, CursorUp); err != nil {
+		panic(err)
+	}
 }
 
 func (gui *Gui) SetGlobalKeyBinding() {
