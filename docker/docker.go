@@ -127,15 +127,16 @@ func (d *Docker) NewContainerOptions(config map[string]string, isAttach bool) (d
 	}
 	if hostVolume == "" && volume != "" {
 		return options, fmt.Errorf("no specified HostVoluem")
-
 	}
 
-	options.HostConfig.Mounts = []docker.HostMount{
-		docker.HostMount{
-			Target: volume,
-			Source: hostVolume,
-			Type:   config["VolumeType"],
-		},
+	if hostVolume != "" && volume != "" {
+		options.HostConfig.Mounts = []docker.HostMount{
+			docker.HostMount{
+				Target: volume,
+				Source: hostVolume,
+				Type:   config["VolumeType"],
+			},
+		}
 	}
 
 	options.Config.AttachStdout = true
