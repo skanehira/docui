@@ -119,16 +119,23 @@ func (d *Docker) NewContainerOptions(config map[string]string, isAttach bool) (d
 		}
 	}
 
-	if hostVolume := config["HostVolume"]; hostVolume != "" {
-		if volume := config["Volume"]; volume != "" {
-			options.HostConfig.Mounts = []docker.HostMount{
-				docker.HostMount{
-					Target: volume,
-					Source: hostVolume,
-					Type:   "bind",
-				},
-			}
-		}
+	hostVolume := config["HostVolume"]
+	volume := config["Volume"]
+
+	if hostVolume != "" && volume == "" {
+		return options, fmt.Errorf("no specified Volume")
+	}
+	if hostVolume == "" && volume != "" {
+		return options, fmt.Errorf("no specified HostVoluem")
+
+	}
+
+	options.HostConfig.Mounts = []docker.HostMount{
+		docker.HostMount{
+			Target: volume,
+			Source: hostVolume,
+			Type:   config["VolumeType"],
+		},
 	}
 
 	options.Config.AttachStdout = true

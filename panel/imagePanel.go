@@ -11,6 +11,11 @@ import (
 	"github.com/skanehira/docui/common"
 )
 
+const (
+	VolumeTypeBind   = "bind"
+	VolumeTypeVolume = "volume"
+)
+
 type ImageList struct {
 	*Gui
 	name string
@@ -214,6 +219,8 @@ func (i *ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	form.AddInput("Name", labelw, fieldw)
 	form.AddInput("HostPort", labelw, fieldw)
 	form.AddInput("Port", labelw, fieldw)
+	form.AddSelectOption("VolumeType", labelw, fieldw).
+		AddOptions([]string{VolumeTypeBind, VolumeTypeVolume}...)
 	form.AddInput("HostVolume", labelw, fieldw)
 	form.AddInput("Volume", labelw, fieldw)
 	form.AddInput("Image", labelw, fieldw).
@@ -236,7 +243,10 @@ func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	options, err := i.Docker.NewContainerOptions(i.form.GetFieldTexts(), i.form.GetCheckBoxState("Attach"))
+	data := i.form.GetFieldTexts()
+	data["VolumeType"] = i.form.GetSelectedOpt("VolumeType")
+
+	options, err := i.Docker.NewContainerOptions(data, i.form.GetCheckBoxState("Attach"))
 
 	if err != nil {
 		i.form.Close(g, v)

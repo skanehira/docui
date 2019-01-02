@@ -83,7 +83,6 @@ Refer to the [keybinding](https://github.com/skanehira/docui#Keybindings) for pa
 I will explain the items of each panel here.
 
 ## pull image panel
-![](https://github.com/skanehira/docui/blob/images/images/image_pull.png)
 
 - Name  
 Please enter the docker image name you want to pull.  
@@ -94,32 +93,26 @@ mysql:5.7
 ```
 
 ## search images panel
-![](https://github.com/skanehira/docui/blob/images/images/image_search.png)
 
 Please enter the image name on the Docker Hub you want to search.  
 This operation works like `docker search`
 
 ## save image panel
-![](https://github.com/skanehira/docui/blob/images/images/image_save.png)
 
 Please enter the file path to save the selected image.  
 It must be absolute path or relative path.
 
 ## import image panel
-![](https://github.com/skanehira/docui/blob/images/images/image_import.png)
 
 Please enter the path of the image you want to import.  
 It must be absolute path or relative path.
 
 ## load image panel
-![](https://github.com/skanehira/docui/blob/images/images/image_load.png)
 
 Please enter the path of the image you want to load.   
 It must be absolute path or relative path.
 
 ## create container panel
-![](https://github.com/skanehira/docui/blob/images/images/container_create.png)
-
 - Name  
 Container name.
 
@@ -129,9 +122,16 @@ Port of container to be mapping.
 - Port  
 Port of the host OS to be mapped.
 
+- VolumeType  
+Specify VolumeType bind or volume.
+
 - HostVolume  
-Path of the host OS that you want to mount.
-It must be absolute path.
+If VolumeType is bind, path of the host OS that you want to mount.
+It's must be absolute path.
+It's similar docker command `docker -v /to/host/path:/to/container/path`.
+
+If VolumeType is volume, specify the docker volume.
+It's similar docker command `docker -v docekr/volume:/to/container/path`.
 
 - Volume  
 Path of the container that you want to mount.
@@ -164,14 +164,10 @@ please input as below.
 ```
 
 ## export container panel
-![](https://github.com/skanehira/docui/blob/images/images/container_export.png)
-
 Please enter the file path to save the selected container.  
 It must be absolute path or relative path.
 
 ## commit container panel
-![](https://github.com/skanehira/docui/blob/images/images/container_commit.png)
-
 - Container  
 Selected container id.  
 
@@ -182,8 +178,6 @@ Please enter the image name of the committed container.
 If tag is empty it will be latest.
 
 ## create volume panel
-![](https://github.com/skanehira/docui/blob/images/images/volume_create.png)
-
 - Name  
 Specify volume name.
 

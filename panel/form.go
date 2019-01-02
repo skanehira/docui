@@ -68,6 +68,12 @@ func (f *Form) AddInput(label string, labelw, fieldw int) *component.InputField 
 	return f.AddInputField(label, labelw, fieldw).AddHandler(gocui.KeyEsc, f.Close)
 }
 
+func (f *Form) AddSelectOption(label string, labelw, listw int) *component.Select {
+	selectOption := f.AddSelect(label, labelw, listw)
+	selectOption.AddHandler(gocui.KeyEsc, f.Close)
+	return selectOption
+}
+
 func (f *Form) AddButton(label string, handler func(g *gocui.Gui, v *gocui.View) error) *component.Button {
 	return f.Form.AddButton(label, handler).AddHandler(gocui.KeyEsc, f.Close)
 }
