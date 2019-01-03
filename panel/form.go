@@ -38,32 +38,6 @@ func NewForm(gui *gocui.Gui, name string, x, y, w, h int) *Form {
 	return form
 }
 
-func NewItem(label, text string, lw, fw int, v *Validator) FormItem {
-	return FormItem{
-		label:     label,
-		text:      text,
-		labelw:    lw,
-		fieldw:    fw,
-		validator: v,
-	}
-}
-
-func (f *Form) AddFormItems(items []FormItem) *Form {
-	for _, item := range items {
-		i := f.AddInputField(item.label, item.labelw, item.fieldw)
-
-		if item.text != "" {
-			i.SetText(item.text)
-		}
-
-		if item.validator != nil {
-			i.AddValidate(item.validator.Message, item.validator.Validate)
-		}
-	}
-
-	return f
-}
-
 func (f *Form) AddInput(label string, labelw, fieldw int) *component.InputField {
 	return f.AddInputField(label, labelw, fieldw).AddHandler(gocui.KeyEsc, f.Close)
 }
