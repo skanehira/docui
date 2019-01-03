@@ -217,15 +217,50 @@ func (i *ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 
 	// add fields
 	form.AddInput("Name", labelw, fieldw)
-	form.AddInput("HostPort", labelw, fieldw)
-	form.AddInput("Port", labelw, fieldw)
+	form.AddInput("HostPort", labelw, fieldw).
+		AddValidate("no specified HostPort", func(value string) bool {
+			port := form.GetFieldText("Port")
+			if value == "" && port != "" {
+				return false
+			}
+			return true
+		})
+
+	form.AddInput("Port", labelw, fieldw).
+		AddValidate("no specified Port", func(value string) bool {
+			hostPort := form.GetFieldText("HostPort")
+			if value == "" && hostPort != "" {
+				return false
+			}
+			return true
+		})
+
 	form.AddSelectOption("VolumeType", labelw, fieldw).
 		AddOptions([]string{VolumeTypeBind, VolumeTypeVolume}...)
-	form.AddInput("HostVolume", labelw, fieldw)
-	form.AddInput("Volume", labelw, fieldw)
+
+	form.AddInput("HostVolume", labelw, fieldw).
+		AddValidate("no specified HostVolume", func(value string) bool {
+			volume := form.GetFieldText("Volume")
+			if value == "" && volume != "" {
+				return false
+			}
+			return true
+		})
+	form.AddInput("Volume", labelw, fieldw).
+		AddValidate("no specified Volume", func(value string) bool {
+			hostVolume := form.GetFieldText("HostVolume")
+			if hostVolume != "" && value == "" {
+				return false
+			}
+			return true
+		})
+
 	form.AddInput("Image", labelw, fieldw).
 		SetText(name).
-		AddValidate(Require.Message, Require.Validate)
+		AddValidate("no specified Image", func(value string) bool {
+			return value != ""
+		})
+
 	form.AddInput("User", labelw, fieldw)
 	form.AddCheckBox("Attach", labelw)
 	form.AddInput("Env", labelw, fieldw)
@@ -299,7 +334,7 @@ func (i *ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	// add fields
 	form.AddInput("Image", labelw, fieldw).
-		AddValidate(Require.Message, Require.Validate)
+		AddValidate(Require.Message+"Image", Require.Validate)
 	form.AddButton("Pull", i.PullImage)
 	form.AddButton("Cancel", form.Close)
 
@@ -408,9 +443,9 @@ func (i *ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	// add fields
 	form.AddInput("Path", labelw, fieldw).
-		AddValidate(Require.Message, Require.Validate)
+		AddValidate(Require.Message+"Path", Require.Validate)
 	form.AddInput("Image", labelw, fieldw).
-		AddValidate(Require.Message, Require.Validate).
+		AddValidate(Require.Message+"Image", Require.Validate).
 		SetText(name)
 	form.AddButton("Save", i.SaveImage)
 	form.AddButton("Cancel", form.Close)
@@ -483,9 +518,9 @@ func (i *ImageList) ImportImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	// add fields
 	form.AddInput("Repository", labelw, fieldw).
-		AddValidate(Require.Message, Require.Validate)
+		AddValidate(Require.Message+"Repository", Require.Validate)
 	form.AddInput("Path", labelw, fieldw).
-		AddValidate(Require.Message, Require.Validate)
+		AddValidate(Require.Message+"Path", Require.Validate)
 	form.AddInput("Tag", labelw, fieldw)
 	form.AddButton("Import", i.ImportImage)
 	form.AddButton("Cancel", form.Close)
@@ -553,7 +588,7 @@ func (i *ImageList) LoadImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	// add fields
 	form.AddInput("Path", labelw, fieldw).
-		AddValidate(Require.Message, Require.Validate)
+		AddValidate(Require.Message+"Path", Require.Validate)
 	form.AddButton("Load", i.LoadImage)
 	form.AddButton("Cancel", form.Close)
 

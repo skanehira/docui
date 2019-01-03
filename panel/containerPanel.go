@@ -301,10 +301,10 @@ func (c *ContainerList) ExportContainerPanel(g *gocui.Gui, v *gocui.View) error 
 
 	// add fields
 	form.AddInput("Path", labelw, fieldw).
-		AddValidate(Require.Message, Require.Validate)
+		AddValidate(Require.Message+"Path", Require.Validate)
 	form.AddInput("Container", labelw, fieldw).
 		SetText(container.Name).
-		AddValidate(Require.Message, Require.Validate)
+		AddValidate(Require.Message+"Container", Require.Validate)
 	form.AddButton("OK", c.ExportContainer)
 	form.AddButton("Cancel", form.Close)
 
@@ -385,11 +385,11 @@ func (c *ContainerList) CommitContainerPanel(g *gocui.Gui, v *gocui.View) error 
 
 	// add fields
 	form.AddInput("Repository", labelw, fieldw).
-		AddValidate(Require.Message, Require.Validate)
+		AddValidate(Require.Message+"Repository", Require.Validate)
 	form.AddInput("Tag", labelw, fieldw)
 	form.AddInput("Container", labelw, fieldw).
 		SetText(container.Name).
-		AddValidate(Require.Message, Require.Validate)
+		AddValidate(Require.Message+"Container", Require.Validate)
 	form.AddButton("OK", c.CommitContainer)
 	form.AddButton("Cancel", form.Close)
 
@@ -467,10 +467,10 @@ func (c *ContainerList) RenameContainerPanel(g *gocui.Gui, v *gocui.View) error 
 
 	// add fields
 	form.AddInput("NewName", labelw, fieldw).
-		AddValidate(Require.Message, Require.Validate)
+		AddValidate(Require.Message+"NewName", Require.Validate)
 	form.AddInput("Container", labelw, fieldw).
 		SetText(container.Name).
-		AddValidate(Require.Message, Require.Validate)
+		AddValidate(Require.Message+"Container", Require.Validate)
 	form.AddButton("OK", c.RenameContainer)
 	form.AddButton("Cancel", form.Close)
 
