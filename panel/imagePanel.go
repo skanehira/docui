@@ -225,7 +225,7 @@ func (i *ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	form.AddInput("Volume", labelw, fieldw)
 	form.AddInput("Image", labelw, fieldw).
 		SetText(name).
-		AddValidator(Require.Message, Require.Validate)
+		AddValidate(Require.Message, Require.Validate)
 	form.AddInput("User", labelw, fieldw)
 	form.AddCheckBox("Attach", labelw)
 	form.AddInput("Env", labelw, fieldw)
@@ -299,7 +299,7 @@ func (i *ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	// add fields
 	form.AddInput("Image", labelw, fieldw).
-		AddValidator(Require.Message, Require.Validate)
+		AddValidate(Require.Message, Require.Validate)
 	form.AddButton("Pull", i.PullImage)
 	form.AddButton("Cancel", form.Close)
 
@@ -408,9 +408,9 @@ func (i *ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	// add fields
 	form.AddInput("Path", labelw, fieldw).
-		AddValidator(Require.Message, Require.Validate)
+		AddValidate(Require.Message, Require.Validate)
 	form.AddInput("Image", labelw, fieldw).
-		AddValidator(Require.Message, Require.Validate).
+		AddValidate(Require.Message, Require.Validate).
 		SetText(name)
 	form.AddButton("Save", i.SaveImage)
 	form.AddButton("Cancel", form.Close)
@@ -483,9 +483,9 @@ func (i *ImageList) ImportImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	// add fields
 	form.AddInput("Repository", labelw, fieldw).
-		AddValidator(Require.Message, Require.Validate)
+		AddValidate(Require.Message, Require.Validate)
 	form.AddInput("Path", labelw, fieldw).
-		AddValidator(Require.Message, Require.Validate)
+		AddValidate(Require.Message, Require.Validate)
 	form.AddInput("Tag", labelw, fieldw)
 	form.AddButton("Import", i.ImportImage)
 	form.AddButton("Cancel", form.Close)
@@ -553,7 +553,7 @@ func (i *ImageList) LoadImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 	// add fields
 	form.AddInput("Path", labelw, fieldw).
-		AddValidator(Require.Message, Require.Validate)
+		AddValidate(Require.Message, Require.Validate)
 	form.AddButton("Load", i.LoadImage)
 	form.AddButton("Cancel", form.Close)
 

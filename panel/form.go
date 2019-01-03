@@ -57,7 +57,7 @@ func (f *Form) AddFormItems(items []FormItem) *Form {
 		}
 
 		if item.validator != nil {
-			i.AddValidator(item.validator.Message, item.validator.Validate)
+			i.AddValidate(item.validator.Message, item.validator.Validate)
 		}
 	}
 
