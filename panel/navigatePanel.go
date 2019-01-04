@@ -68,9 +68,9 @@ func (n Navigate) SetNavigate(name string) *gocui.View {
 
 func newNavi() map[string]string {
 	return map[string]string{
-		ImageListPanel:         "j/k: select image, p: pull image, i: import image, s: save image\nCtrl+l: load image, ctrl+f: search image, d: remove image, Ctrl+d: remove dagling images, c: create container, Enter/o: inspect image, Ctrl+r: refresh images iist",
+		ImageListPanel:         "j/k: select image, p: pull image, i: import image, s: save image, Ctrl+l: load image, ctrl+f: search image, f: filter\nd: remove image, Ctrl+d: remove dagling images, c: create container, Enter/o: inspect image, Ctrl+r: refresh images iist",
 		PullImagePanel:         "Esc/Ctrl+w: close panel, Enter: pull image",
-		ContainerListPanel:     "j/k: select container, e: export container, c: commit container\nu: start container, s: stop container, d: remove container, Enter/o: inspect container, Ctrl+r: refresh container list",
+		ContainerListPanel:     "j/k: select container, e: export container, c: commit container, f: filter\nu: start container, s: stop container, d: remove container, Enter/o: inspect container, Ctrl+r: refresh container list",
 		DetailPanel:            "j/k: cursor down/up, d/u: page down/up",
 		CreateContainerPanel:   "Ctrl+j/k: change input, Esc/Ctrl+w: close panel, Enter: create container",
 		SaveImagePanel:         "Esc/Ctrl+w: close panel, Enter: save image",
@@ -80,9 +80,9 @@ func newNavi() map[string]string {
 		CommitContainerPanel:   "Ctrl+j/k: change input, Esc/Ctrl+w: close panel, Enter: commit container",
 		SearchImagePanel:       "Esc/Ctrl+w: close panel, Enter: serach image",
 		SearchImageResultPanel: "j/k: select image, Esc/Ctrl+w: close panel, Enter: pull image",
-		VolumeListPanel:        "j/k: select volume, c: create volume, d: remove volume, p: prune volumes, Enter/o: inspect volume, Ctrl+r: refresh volume list",
+		VolumeListPanel:        "j/k: select volume, c: create volume, d: remove volume, p: prune volumes\nf: filter, Enter/o: inspect volume, Ctrl+r: refresh volume list",
 		CreateVolumePanel:      "Esc/Ctrl+w: close panel, Enter: create volume",
-		NetworkListPanel:       "j/k: cursor down/up, d: remove network, o/Enter: inspect network",
+		NetworkListPanel:       "j/k: cursor down/up, d: remove network, o/Enter: inspect network, f: filter",
 	}
 
 }
