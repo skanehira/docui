@@ -70,15 +70,8 @@ func (d *Docker) NewContainerOptions(config map[string]string, isAttach bool) (d
 		HostConfig: new(docker.HostConfig),
 	}
 
-	if image := config["Image"]; image != "" {
-		options.Config.Image = image
-	} else {
-		return options, fmt.Errorf("no specified image")
-	}
-
-	if name := config["Name"]; name != "" {
-		options.Name = name
-	}
+	options.Config.Image = config["Image"]
+	options.Name = config["Name"]
 
 	image, err := d.InspectImage(options.Config.Image)
 
@@ -92,16 +85,16 @@ func (d *Docker) NewContainerOptions(config map[string]string, isAttach bool) (d
 
 	options.Config.Env = image.Config.Env
 
-	if port := config["Port"]; port != "" {
-		if hostPort := config["HostPort"]; hostPort != "" {
-			options.HostConfig.PortBindings = map[docker.Port][]docker.PortBinding{
-				docker.Port(port + "/tcp"): []docker.PortBinding{
-					docker.PortBinding{
-						HostIP:   "0.0.0.0",
-						HostPort: hostPort,
-					},
+	port := config["Port"]
+	hostPort := config["HostPort"]
+	if port != "" && hostPort != "" {
+		options.HostConfig.PortBindings = map[docker.Port][]docker.PortBinding{
+			docker.Port(port + "/tcp"): []docker.PortBinding{
+				docker.PortBinding{
+					HostIP:   "0.0.0.0",
+					HostPort: hostPort,
 				},
-			}
+			},
 		}
 	}
 
@@ -121,14 +114,6 @@ func (d *Docker) NewContainerOptions(config map[string]string, isAttach bool) (d
 
 	hostVolume := config["HostVolume"]
 	volume := config["Volume"]
-
-	if hostVolume != "" && volume == "" {
-		return options, fmt.Errorf("no specified Volume")
-	}
-	if hostVolume == "" && volume != "" {
-		return options, fmt.Errorf("no specified HostVoluem")
-	}
-
 	if hostVolume != "" && volume != "" {
 		options.HostConfig.Mounts = []docker.HostMount{
 			docker.HostMount{
