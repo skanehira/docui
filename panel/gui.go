@@ -37,6 +37,8 @@ const (
 	FilterPanel                  = "filter"
 	NetworkListPanel             = "network list scroll"
 	NetworkListHeaderPanel       = "network list"
+	TaskListHeaderPanel          = "task list"
+	TaskListPanel                = "task list scroll"
 )
 
 type Gui struct {
@@ -179,12 +181,13 @@ func (gui *Gui) quit(g *gocui.Gui, v *gocui.View) error {
 
 func (gui *Gui) init() {
 	maxX, maxY := gui.Size()
-	topY := maxY / 4
+	topY := maxY / 5
 
-	gui.StorePanels(NewImageList(gui, ImageListPanel, 0, 0, maxX-1, topY-1))
-	gui.StorePanels(NewContainerList(gui, ContainerListPanel, 0, topY, maxX-1, topY*2-1))
-	gui.StorePanels(NewVolumeList(gui, VolumeListPanel, 0, topY*2, maxX-1, topY*3-1))
-	gui.StorePanels(NewNetworkList(gui, NetworkListPanel, 0, topY*3, maxX-1, maxY-3))
+	gui.StorePanels(NewTaskList(gui, TaskListPanel, 0, 0, maxX-1, topY-4))
+	gui.StorePanels(NewImageList(gui, ImageListPanel, 0, topY-3, maxX-1, topY*2-4))
+	gui.StorePanels(NewContainerList(gui, ContainerListPanel, 0, topY*2-3, maxX-1, topY*3-4))
+	gui.StorePanels(NewVolumeList(gui, VolumeListPanel, 0, topY*3-3, maxX-1, topY*4-4))
+	gui.StorePanels(NewNetworkList(gui, NetworkListPanel, 0, topY*4-3, maxX-1, maxY-3))
 	gui.StorePanels(NewNavigate(gui, NavigatePanel, 0, maxY-3, maxX-1, maxY))
 
 	for _, panel := range gui.Panels {
