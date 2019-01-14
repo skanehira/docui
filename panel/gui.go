@@ -207,6 +207,7 @@ func (gui *Gui) StorePanels(panel Panel) {
 		DetailPanel:        true,
 		VolumeListPanel:    true,
 		NetworkListPanel:   true,
+		TaskListPanel:      true,
 	}
 
 	if storeTarget[panel.Name()] {
@@ -313,6 +314,12 @@ func (gui *Gui) SwitchPanel(next string) *gocui.View {
 		panic(err)
 	}
 
+	for i, panel := range gui.PanelNames {
+		if panel == next {
+			gui.active = i
+		}
+	}
+
 	gui.SetNaviWithPanelName(next)
 	return v
 }
@@ -359,6 +366,10 @@ func (gui *Gui) NewFilterPanel(panel Panel, reset, closePanel func(*gocui.Gui, *
 	}
 
 	return nil
+}
+
+func (gui *Gui) AddTask(taskName string, f func() error) {
+	go gui.Panels[TaskListPanel].(*TaskList).StartTask(NewTask(taskName, f))
 }
 
 func SetCurrentPanel(g *gocui.Gui, name string) (*gocui.View, error) {

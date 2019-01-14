@@ -1,21 +1,61 @@
 package panel
 
 import (
+	"strconv"
+	"time"
+
 	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
 )
+
+type TaskName string
+
+var (
+	PullImage       TaskName = "Pull Image"
+	CreateContainer TaskName = "Create Container"
+	// TODO add another task name
+)
+
+func (t TaskName) String() string {
+	return string(t)
+}
+
+type TaskStatus string
+
+var (
+	Success   TaskStatus = "Success"
+	Executing TaskStatus = "Executing"
+	Error     TaskStatus = "Error"
+)
+
+func (t TaskStatus) String() string {
+	return string(t)
+}
 
 type TaskList struct {
 	*Gui
 	name string
 	Position
-	Tasks []Task
+	Tasks    chan *Task
+	ViewTask map[string]*Task
+	view     *gocui.View
 }
 
 type Task struct {
-	Name    string `tag:"NAME" len:"min:0.3 max:0.3"`
+	ID      string
+	Task    string `tag:"TASK" len:"min:0.3 max:0.3"`
 	Status  string `tag:"STATUS" len:"min:0.3 max:0.3"`
 	Created string `tag:"CREATED" len:"min:0.3 max:0.3"`
+	Func    func() error
+}
+
+func NewTask(task string, function func() error) *Task {
+	return &Task{
+		Task:    task,
+		Status:  Executing.String(),
+		Created: time.Now().Format("2006/01/02 15:04:05"),
+		Func:    function,
+	}
 }
 
 func NewTaskList(gui *Gui, name string, x, y, w, h int) *TaskList {
@@ -28,6 +68,8 @@ func NewTaskList(gui *Gui, name string, x, y, w, h int) *TaskList {
 			w: w,
 			h: h,
 		},
+		Tasks:    make(chan *Task),
+		ViewTask: make(map[string]*Task, 0),
 	}
 }
 
@@ -58,9 +100,13 @@ func (t *TaskList) SetView(g *gocui.Gui) error {
 		v.SelFgColor = gocui.ColorBlack | gocui.AttrBold
 		v.SetOrigin(0, 0)
 		v.SetCursor(0, 0)
+
+		t.view = v
 	}
 
 	t.SetKeyBinding()
+
+	go t.MonitorTaskList(t.Tasks)
 
 	return nil
 }
@@ -93,4 +139,53 @@ func (t *TaskList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifie
 
 func (t *TaskList) SetKeyBinding() {
 	t.SetKeyBindingToPanel(t.name)
+	// TODO add detail and cancel key mapping
+}
+
+func (t *TaskList) MonitorTaskList(task chan *Task) {
+	for {
+		select {
+		case task := <-task:
+			if err := task.Func(); err != nil {
+				task.Status = Error.String()
+			} else {
+				task.Status = Success.String()
+			}
+
+			t.UpdateTask(task)
+		}
+
+	}
+}
+
+func (t *TaskList) StartTask(task *Task) {
+	task.ID = strconv.Itoa(len(t.ViewTask) + 1)
+
+	t.ViewTask[task.ID] = task
+	t.UpdateTask(task)
+	t.Tasks <- task
+}
+
+func (t *TaskList) UpdateTask(task *Task) {
+	viewTask, ok := t.ViewTask[task.ID]
+
+	if ok {
+		viewTask.Status = task.Status
+		t.ViewTask[task.ID] = viewTask
+	}
+
+	t.Update(func(g *gocui.Gui) error {
+		t.view.Clear()
+		for _, task := range t.ViewTask {
+			common.OutputFormatedLine(t.view, task)
+		}
+
+		return nil
+	})
+}
+
+func (t *TaskList) CancelTask(id string) error {
+	// TODO cancel task
+
+	return nil
 }
