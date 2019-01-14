@@ -361,7 +361,6 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 	i.form.Close(g, v)
 
 	f := func() error {
-
 		options := docker.PullImageOptions{
 			Repository: name,
 			Tag:        tag,
@@ -377,33 +376,6 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	i.AddTask(PullImage.String(), f)
-
-	//	g.Update(func(g *gocui.Gui) error {
-	//		i.form.Close(g, v)
-	//		i.StateMessage("image pulling...")
-	//
-	//		g.Update(func(g *gocui.Gui) error {
-	//			defer i.CloseStateMessage()
-	//
-	//			options := docker.PullImageOptions{
-	//				Repository: name,
-	//				Tag:        tag,
-	//			}
-	//
-	//			if err := i.Docker.PullImageWithOptions(options); err != nil {
-	//				i.ErrMessage(err.Error(), i.name)
-	//				return nil
-	//			}
-	//
-	//			i.Refresh(g, v)
-	//			i.SwitchPanel(i.name)
-	//
-	//			return nil
-	//
-	//		})
-	//
-	//		return nil
-	//	})
 
 	return nil
 }

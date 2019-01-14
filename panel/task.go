@@ -37,7 +37,7 @@ type TaskList struct {
 	name string
 	Position
 	Tasks    chan *Task
-	ViewTask map[string]*Task
+	ViewTask []*Task
 	view     *gocui.View
 }
 
@@ -68,8 +68,7 @@ func NewTaskList(gui *Gui, name string, x, y, w, h int) *TaskList {
 			w: w,
 			h: h,
 		},
-		Tasks:    make(chan *Task),
-		ViewTask: make(map[string]*Task, 0),
+		Tasks: make(chan *Task),
 	}
 }
 
@@ -147,31 +146,32 @@ func (t *TaskList) MonitorTaskList(task chan *Task) {
 		select {
 		case task := <-task:
 			if err := task.Func(); err != nil {
-				task.Status = Error.String()
+				task.Status = err.Error()
 			} else {
 				task.Status = Success.String()
 			}
 
 			t.UpdateTask(task)
 		}
-
 	}
 }
 
 func (t *TaskList) StartTask(task *Task) {
-	task.ID = strconv.Itoa(len(t.ViewTask) + 1)
+	task.ID = strconv.Itoa(len(t.ViewTask))
 
-	t.ViewTask[task.ID] = task
+	t.ViewTask = append(t.ViewTask, task)
+
+	// status update executing
 	t.UpdateTask(task)
+
 	t.Tasks <- task
 }
 
 func (t *TaskList) UpdateTask(task *Task) {
-	viewTask, ok := t.ViewTask[task.ID]
-
-	if ok {
-		viewTask.Status = task.Status
-		t.ViewTask[task.ID] = viewTask
+	for _, vtask := range t.ViewTask {
+		if vtask.ID == task.ID {
+			vtask.Status = task.Status
+		}
 	}
 
 	t.Update(func(g *gocui.Gui) error {
