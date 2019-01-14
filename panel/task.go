@@ -2,7 +2,6 @@ package panel
 
 import (
 	"strconv"
-	"time"
 
 	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
@@ -53,7 +52,7 @@ func NewTask(task string, function func() error) *Task {
 	return &Task{
 		Task:    task,
 		Status:  Executing.String(),
-		Created: time.Now().Format("2006/01/02 15:04:05"),
+		Created: common.DateNow(),
 		Func:    function,
 	}
 }
