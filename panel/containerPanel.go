@@ -220,24 +220,11 @@ func (c *ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	g.Update(func(g *gocui.Gui) error {
-		c.StateMessage("container starting...")
-
-		g.Update(func(g *gocui.Gui) error {
-			defer c.Refresh(g, v)
-			defer c.CloseStateMessage()
-
-			if err := c.Docker.StartContainerWithID(container.ID); err != nil {
-				c.ErrMessage(err.Error(), c.name)
-				return nil
-			}
-
-			c.SwitchPanel(c.name)
-
-			return nil
-		})
-
-		return nil
+	c.AddTask(fmt.Sprintf("Start container %s", container.Name), func() error {
+		if err := c.Docker.StartContainerWithID(container.ID); err != nil {
+			return err
+		}
+		return c.Refresh(g, v)
 	})
 
 	return nil
@@ -250,24 +237,11 @@ func (c *ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	g.Update(func(g *gocui.Gui) error {
-		c.StateMessage("container stopping...")
-
-		g.Update(func(g *gocui.Gui) error {
-			defer c.CloseStateMessage()
-			defer c.Refresh(g, v)
-
-			if err := c.Docker.StopContainerWithID(container.ID); err != nil {
-				c.ErrMessage(err.Error(), c.name)
-				return nil
-			}
-
-			c.SwitchPanel(c.name)
-
-			return nil
-		})
-
-		return nil
+	c.AddTask(fmt.Sprintf("Stop container %s", container.Name), func() error {
+		if err := c.Docker.StopContainerWithID(container.ID); err != nil {
+			return err
+		}
+		return c.Refresh(g, v)
 	})
 
 	return nil
@@ -320,37 +294,23 @@ func (c *ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	data := c.form.GetFieldTexts()
+	container := data["Container"]
+	path := data["Path"]
 
-	g.Update(func(g *gocui.Gui) error {
-		c.form.Close(g, v)
-		c.StateMessage("container exporting...")
+	c.form.Close(g, v)
 
-		g.Update(func(g *gocui.Gui) error {
-			defer c.CloseStateMessage()
+	c.AddTask(fmt.Sprintf("Export container %s to %s", container, path), func() error {
+		file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
 
-			file, err := os.OpenFile(data["Path"], os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
-			if err != nil {
-				c.ErrMessage(err.Error(), c.name)
-				return nil
-			}
-			defer file.Close()
-
-			options := docker.ExportContainerOptions{
-				ID:           data["Container"],
-				OutputStream: file,
-			}
-
-			if err := c.Docker.ExportContainerWithOptions(options); err != nil {
-				c.ErrMessage(err.Error(), c.name)
-				return nil
-			}
-
-			c.SwitchPanel(c.name)
-
-			return nil
-
-		})
-		return nil
+		options := docker.ExportContainerOptions{
+			ID:           container,
+			OutputStream: file,
+		}
+		return c.Docker.ExportContainerWithOptions(options)
 	})
 
 	return nil
@@ -408,32 +368,23 @@ func (c *ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 		data["Tag"] = "latest"
 	}
 
+	container := data["Container"]
+	repository := data["Repository"]
+	tag := data["Tag"]
+
 	options := docker.CommitContainerOptions{
-		Container:  data["Container"],
-		Repository: data["Repository"],
-		Tag:        data["Tag"],
+		Container:  container,
+		Repository: repository,
+		Tag:        tag,
 	}
 
-	g.Update(func(g *gocui.Gui) error {
-		c.form.Close(g, v)
-		c.StateMessage("container committing...")
+	c.form.Close(g, v)
 
-		g.Update(func(g *gocui.Gui) error {
-			defer c.CloseStateMessage()
-
-			if err := c.Docker.CommitContainerWithOptions(options); err != nil {
-				c.ErrMessage(err.Error(), c.name)
-				return nil
-			}
-
-			c.Panels[ImageListPanel].Refresh(g, v)
-			c.SwitchPanel(c.name)
-
-			return nil
-
-		})
-
-		return nil
+	c.AddTask(fmt.Sprintf("Commit container %s to %s", container, repository+":"+tag), func() error {
+		if err := c.Docker.CommitContainerWithOptions(options); err != nil {
+			return err
+		}
+		return c.Refresh(g, v)
 	})
 
 	return nil
@@ -485,32 +436,21 @@ func (c *ContainerList) RenameContainer(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	data := c.form.GetFieldTexts()
+	oldName := data["Container"]
+	name := data["NewName"]
 
 	options := docker.RenameContainerOptions{
-		ID:   data["Container"],
-		Name: data["NewName"],
+		ID:   oldName,
+		Name: name,
 	}
 
-	g.Update(func(g *gocui.Gui) error {
-		c.form.Close(g, v)
-		c.StateMessage("container renaming...")
+	c.form.Close(g, v)
 
-		g.Update(func(g *gocui.Gui) error {
-			defer c.CloseStateMessage()
-
-			if err := c.Docker.RenameContainerWithOptions(options); err != nil {
-				c.ErrMessage(err.Error(), c.name)
-				return nil
-			}
-
-			c.Refresh(g, v)
-			c.SwitchPanel(c.name)
-
-			return nil
-
-		})
-
-		return nil
+	c.AddTask(fmt.Sprintf("Rename container %s to %s", oldName, name), func() error {
+		if err := c.Docker.RenameContainerWithOptions(options); err != nil {
+			return err
+		}
+		return c.Refresh(g, v)
 	})
 
 	return nil
