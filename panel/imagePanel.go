@@ -109,8 +109,7 @@ func (i *ImageList) SetView(g *gocui.Gui) error {
 	go func() {
 		for {
 			i.Update(func(g *gocui.Gui) error {
-				i.Refresh(g, v)
-				return nil
+				return i.Refresh(g, v)
 			})
 			time.Sleep(5 * time.Second)
 		}
@@ -123,7 +122,7 @@ func (i *ImageList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	i.Update(func(g *gocui.Gui) error {
 		v, err := i.View(i.name)
 		if err != nil {
-			panic(err)
+			return err
 		}
 		i.GetImageList(v)
 		return nil
@@ -301,10 +300,9 @@ func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 				return nil
 			}
 
-			i.Panels[ContainerListPanel].Refresh(g, v)
 			i.SwitchPanel(i.name)
 
-			return nil
+			return i.Panels[ContainerListPanel].Refresh(g, v)
 		})
 
 		return nil
@@ -360,7 +358,7 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 
 	i.form.Close(g, v)
 
-	f := func() error {
+	i.AddTask(PullImage.String(), func() error {
 		options := docker.PullImageOptions{
 			Repository: name,
 			Tag:        tag,
@@ -370,12 +368,8 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 			return err
 		}
 
-		i.Refresh(g, v)
-
-		return nil
-	}
-
-	i.AddTask(PullImage.String(), f)
+		return i.Refresh(g, v)
+	})
 
 	return nil
 }
@@ -454,36 +448,21 @@ func (i *ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 	}
 	data := i.form.GetFieldTexts()
 
-	g.Update(func(g *gocui.Gui) error {
-		i.form.Close(g, v)
-		i.StateMessage("image saving....")
+	i.form.Close(g, v)
 
-		g.Update(func(g *gocui.Gui) error {
-			defer i.CloseStateMessage()
+	i.AddTask(fmt.Sprintf("Save image:%s to %s", data["Image"], data["Path"]), func() error {
+		file, err := os.OpenFile(data["Path"], os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
 
-			file, err := os.OpenFile(data["Path"], os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
-			if err != nil {
-				i.ErrMessage(err.Error(), i.name)
-				return nil
-			}
-			defer file.Close()
+		options := docker.ExportImageOptions{
+			Name:         data["Image"],
+			OutputStream: file,
+		}
 
-			options := docker.ExportImageOptions{
-				Name:         data["Image"],
-				OutputStream: file,
-			}
-
-			if err := i.Docker.SaveImageWithOptions(options); err != nil {
-				i.ErrMessage(err.Error(), i.name)
-				return nil
-			}
-
-			i.SwitchPanel(i.name)
-
-			return nil
-		})
-
-		return nil
+		return i.Docker.SaveImageWithOptions(options)
 	})
 
 	return nil
@@ -535,25 +514,14 @@ func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 		Tag:        data["Tag"],
 	}
 
-	g.Update(func(g *gocui.Gui) error {
-		i.form.Close(g, v)
-		i.StateMessage("image importing....")
+	i.form.Close(g, v)
 
-		g.Update(func(g *gocui.Gui) error {
-			defer i.CloseStateMessage()
+	i.AddTask(fmt.Sprintf("Import image from %s", data["Path"]), func() error {
+		if err := i.Docker.ImportImageWithOptions(options); err != nil {
+			return err
+		}
 
-			if err := i.Docker.ImportImageWithOptions(options); err != nil {
-				i.ErrMessage(err.Error(), i.name)
-				return nil
-			}
-
-			i.Refresh(g, v)
-			i.SwitchPanel(i.name)
-
-			return nil
-		})
-
-		return nil
+		return i.Refresh(g, v)
 	})
 
 	return nil
@@ -596,25 +564,14 @@ func (i *ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
 
 	path := i.form.GetFieldTexts()["Path"]
 
-	g.Update(func(g *gocui.Gui) error {
-		i.form.Close(g, v)
-		i.StateMessage("image loading....")
+	i.form.Close(g, v)
 
-		g.Update(func(g *gocui.Gui) error {
+	i.AddTask(fmt.Sprintf("Load image from %s", path), func() error {
+		if err := i.Docker.LoadImageWithPath(path); err != nil {
+			return err
+		}
 
-			defer i.CloseStateMessage()
-			if err := i.Docker.LoadImageWithPath(path); err != nil {
-				i.ErrMessage(err.Error(), i.name)
-				return nil
-			}
-
-			i.Refresh(g, v)
-			i.SwitchPanel(i.name)
-
-			return nil
-		})
-
-		return nil
+		return i.Refresh(g, v)
 	})
 
 	return nil
@@ -691,13 +648,12 @@ func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	i.ConfirmMessage("Are you sure you want to remove this image?", i.name, func() error {
-		defer i.Refresh(g, v)
 		if err := i.Docker.RemoveImageWithName(name); err != nil {
 			i.ErrMessage(err.Error(), i.name)
 			return nil
 		}
 
-		return nil
+		return i.Refresh(g, v)
 	})
 
 	return nil
@@ -710,13 +666,11 @@ func (i *ImageList) RemoveDanglingImages(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	i.ConfirmMessage("Are you sure you want to remove dangling images?", i.name, func() error {
-		defer i.Refresh(g, v)
 		if err := i.Docker.RemoveDanglingImages(); err != nil {
 			i.ErrMessage(err.Error(), i.name)
 			return nil
 		}
-
-		return nil
+		return i.Refresh(g, v)
 	})
 
 	return nil
