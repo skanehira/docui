@@ -348,7 +348,7 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 
 	i.form.Close(g, v)
 
-	i.AddTask(PullImage.String(), func() error {
+	i.AddTask(fmt.Sprintf("Pull image %s:%s", name, tag), func() error {
 		options := docker.PullImageOptions{
 			Repository: name,
 			Tag:        tag,

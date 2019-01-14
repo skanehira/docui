@@ -7,18 +7,6 @@ import (
 	"github.com/skanehira/docui/common"
 )
 
-type TaskName string
-
-var (
-	PullImage       TaskName = "Pull Image"
-	CreateContainer TaskName = "Create Container"
-	// TODO add another task name
-)
-
-func (t TaskName) String() string {
-	return string(t)
-}
-
 type TaskStatus string
 
 var (
