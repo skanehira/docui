@@ -1,6 +1,8 @@
 package panel
 
 import (
+	"fmt"
+
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
@@ -137,30 +139,23 @@ func (s *SearchImageResult) selected() *SearchResult {
 }
 
 func (s *SearchImageResult) PullImage(g *gocui.Gui, v *gocui.View) error {
-	g.Update(func(g *gocui.Gui) error {
-		s.StateMessage("image pulling...")
+	name := s.getImageName()
 
-		g.Update(func(g *gocui.Gui) error {
-			defer s.CloseStateMessage()
+	s.ClosePanel(g, v)
+	s.CloseSearchPanel()
+	s.SwitchPanel(ImageListPanel)
 
-			options := docker.PullImageOptions{
-				Repository: s.getImageName(),
-				Tag:        "latest",
-			}
-			if err := s.Docker.PullImageWithOptions(options); err != nil {
-				s.ErrMessage(err.Error(), s.name)
-				return nil
-			}
-
-			s.ClosePanel(g, v)
-			s.CloseSearchPanel()
-
-			s.SwitchPanel(ImageListPanel)
-
+	s.AddTask(fmt.Sprintf("Pull image %s", name), func() error {
+		options := docker.PullImageOptions{
+			Repository: name,
+			Tag:        "latest",
+		}
+		if err := s.Docker.PullImageWithOptions(options); err != nil {
+			s.ErrMessage(err.Error(), s.name)
 			return nil
-		})
+		}
 
-		return nil
+		return s.Panels[ImageListPanel].Refresh(g, v)
 	})
 	return nil
 }

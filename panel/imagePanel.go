@@ -288,24 +288,14 @@ func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	g.Update(func(g *gocui.Gui) error {
-		i.form.Close(g, v)
-		i.StateMessage("container creating...")
+	i.form.Close(g, v)
 
-		g.Update(func(g *gocui.Gui) error {
-			defer i.CloseStateMessage()
+	i.AddTask(fmt.Sprintf("Create container %s", data["Name"]), func() error {
+		if err := i.Docker.CreateContainerWithOptions(options); err != nil {
+			return err
+		}
 
-			if err := i.Docker.CreateContainerWithOptions(options); err != nil {
-				i.ErrMessage(err.Error(), i.name)
-				return nil
-			}
-
-			i.SwitchPanel(i.name)
-
-			return i.Panels[ContainerListPanel].Refresh(g, v)
-		})
-
-		return nil
+		return i.Panels[ContainerListPanel].Refresh(g, v)
 	})
 
 	return nil
