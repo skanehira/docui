@@ -126,13 +126,11 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 						official = "[OK]"
 					}
 
-					stars := strconv.Itoa(image.StarCount)
-
 					result := &SearchResult{
 						Name:        image.Name,
-						Stars:       stars,
+						Stars:       strconv.Itoa(image.StarCount),
 						Official:    official,
-						Description: image.Description,
+						Description: common.CutNewline(image.Description),
 					}
 
 					names = append(names, image.Name)

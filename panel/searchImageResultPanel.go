@@ -16,10 +16,10 @@ type SearchImageResult struct {
 }
 
 type SearchResult struct {
-	Name        string `tag:"NAME" len:"min:0.1 max:0.4"`
+	Name        string `tag:"NAME" len:"min:0.1 max:0.3"`
 	Stars       string `tag:"STARS" len:"min:0.1 max:0.1"`
 	Official    string `tag:"OFFICIAL" len:"min:0.1 max:0.1"`
-	Description string `tag:"DESCRIPTION" len:"min:0.1 max:0.4"`
+	Description string `tag:"DESCRIPTION" len:"min:0.1 max:0.5"`
 }
 
 func NewSearchImageResult(g *Gui, name string, p Position) *SearchImageResult {
