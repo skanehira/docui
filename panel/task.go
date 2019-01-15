@@ -81,7 +81,7 @@ func (t *TaskList) SetView(g *gocui.Gui) error {
 		}
 		v.Frame = false
 		v.Wrap = true
-		v.FgColor = gocui.ColorCyan
+		v.FgColor = gocui.ColorGreen
 		v.SelBgColor = gocui.ColorWhite
 		v.SelFgColor = gocui.ColorBlack | gocui.AttrBold
 		v.SetOrigin(0, 0)
