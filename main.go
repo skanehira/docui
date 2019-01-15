@@ -1,16 +1,25 @@
 package main
 
 import (
+	"os"
+
 	"github.com/skanehira/docui/panel"
 
 	"github.com/jroimartin/gocui"
 )
 
 func main() {
-	gui := panel.New(gocui.Output256)
-	defer gui.Close()
+	for {
+		gui := panel.New(gocui.Output256)
+		err := gui.MainLoop()
 
-	if err := gui.MainLoop(); err != nil && err != gocui.ErrQuit {
-		panic(err)
+		switch err {
+		case gocui.ErrQuit:
+			gui.Close()
+			os.Exit(0)
+		case panel.AttachFlag:
+			gui.Close()
+			gui.Panels[panel.ContainerListPanel].(*panel.ContainerList).Attach()
+		}
 	}
 }

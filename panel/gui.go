@@ -1,6 +1,7 @@
 package panel
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -40,6 +41,10 @@ const (
 	TaskListHeaderPanel          = "task list"
 	TaskListPanel                = "task list scroll"
 )
+
+// AttachFlag use to attach container
+// imporvement this logic
+var AttachFlag = errors.New("toAttach")
 
 type Gui struct {
 	*gocui.Gui

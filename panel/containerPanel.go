@@ -3,6 +3,7 @@ package panel
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -145,6 +146,9 @@ func (c *ContainerList) SetKeyBinding() {
 		panic(err)
 	}
 	if err := c.SetKeybinding(c.name, 'f', gocui.ModNone, c.Filter); err != nil {
+		panic(err)
+	}
+	if err := c.SetKeybinding(c.name, 'a', gocui.ModNone, c.AttachContainer); err != nil {
 		panic(err)
 	}
 }
@@ -534,6 +538,26 @@ func (c *ContainerList) Filter(g *gocui.Gui, lv *gocui.View) error {
 	if err := c.NewFilterPanel(c, reset, closePanel); err != nil {
 		panic(err)
 	}
+
+	return nil
+}
+
+func (c *ContainerList) AttachContainer(g *gocui.Gui, v *gocui.View) error {
+	return AttachFlag
+}
+
+func (c *ContainerList) Attach() error {
+	selected, err := c.selected()
+	if err != nil {
+		return err
+	}
+
+	cmd := exec.Command("docker", "attach", selected.ID)
+
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	cmd.Run()
 
 	return nil
 }
