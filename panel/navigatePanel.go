@@ -68,7 +68,7 @@ func (n Navigate) SetNavigate(name string) *gocui.View {
 
 func newNavi() map[string]string {
 	return map[string]string{
-		ImageListPanel:         "j/k: select image, p: pull image, i: imporf image, s: save image, Ctrl+l: load image, ctrl+f: search image, f: filter\nd: remove image, Ctrl+d: remove dagling images, c: create container, Enter/o: inspect image, Ctrl+r: refresh images list",
+		ImageListPanel:         "j/k: select image, p: pull image, i: import image, s: save image, Ctrl+l: load image, ctrl+f: search image, f: filter\nd: remove image, Ctrl+d: remove dagling images, c: create container, Enter/o: inspect image, Ctrl+r: refresh images list",
 		PullImagePanel:         "Esc/Ctrl+w: close panel, Enter: pull image",
 		ContainerListPanel:     "j/k: select container, e: export container, c: commit container, f: filter\nu: start container, s: stop container, d: remove container, Enter/o: inspect container, Ctrl+r: refresh container list",
 		DetailPanel:            "j/k: cursor down/up, d/u: page down/up",
