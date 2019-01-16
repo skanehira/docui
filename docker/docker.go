@@ -89,8 +89,8 @@ func (d *Docker) NewContainerOptions(config map[string]string, isAttach bool) (d
 	hostPort := config["HostPort"]
 	if port != "" && hostPort != "" {
 		options.HostConfig.PortBindings = map[docker.Port][]docker.PortBinding{
-			docker.Port(port + "/tcp"): []docker.PortBinding{
-				docker.PortBinding{
+			docker.Port(port + "/tcp"): {
+				{
 					HostIP:   "0.0.0.0",
 					HostPort: hostPort,
 				},
@@ -116,7 +116,7 @@ func (d *Docker) NewContainerOptions(config map[string]string, isAttach bool) (d
 	volume := config["Volume"]
 	if hostVolume != "" && volume != "" {
 		options.HostConfig.Mounts = []docker.HostMount{
-			docker.HostMount{
+			{
 				Target: volume,
 				Source: hostVolume,
 				Type:   config["VolumeType"],
@@ -193,7 +193,7 @@ func (d *Docker) RemoveImageWithName(name string) error {
 func (d *Docker) RemoveDanglingImages() error {
 	options := docker.ListImagesOptions{
 		Filters: map[string][]string{
-			"dangling": []string{
+			"dangling": {
 				"true", "1",
 			},
 		},
