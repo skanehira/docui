@@ -1,6 +1,7 @@
 package panel
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -37,7 +38,13 @@ const (
 	FilterPanel                  = "filter"
 	NetworkListPanel             = "network list scroll"
 	NetworkListHeaderPanel       = "network list"
+	TaskListHeaderPanel          = "task list"
+	TaskListPanel                = "task list scroll"
 )
+
+// AttachFlag use to attach container
+// imporvement this logic
+var AttachFlag = errors.New("toAttach")
 
 type Gui struct {
 	*gocui.Gui
@@ -179,12 +186,13 @@ func (gui *Gui) quit(g *gocui.Gui, v *gocui.View) error {
 
 func (gui *Gui) init() {
 	maxX, maxY := gui.Size()
-	topY := maxY / 4
+	topY := maxY / 5
 
-	gui.StorePanels(NewImageList(gui, ImageListPanel, 0, 0, maxX-1, topY-1))
-	gui.StorePanels(NewContainerList(gui, ContainerListPanel, 0, topY, maxX-1, topY*2-1))
-	gui.StorePanels(NewVolumeList(gui, VolumeListPanel, 0, topY*2, maxX-1, topY*3-1))
-	gui.StorePanels(NewNetworkList(gui, NetworkListPanel, 0, topY*3, maxX-1, maxY-3))
+	gui.StorePanels(NewTaskList(gui, TaskListPanel, 0, 0, maxX-1, topY-4))
+	gui.StorePanels(NewImageList(gui, ImageListPanel, 0, topY-3, maxX-1, topY*2-4))
+	gui.StorePanels(NewContainerList(gui, ContainerListPanel, 0, topY*2-3, maxX-1, topY*3-4))
+	gui.StorePanels(NewVolumeList(gui, VolumeListPanel, 0, topY*3-3, maxX-1, topY*4-4))
+	gui.StorePanels(NewNetworkList(gui, NetworkListPanel, 0, topY*4-3, maxX-1, maxY-3))
 	gui.StorePanels(NewNavigate(gui, NavigatePanel, 0, maxY-3, maxX-1, maxY))
 
 	for _, panel := range gui.Panels {
@@ -204,6 +212,7 @@ func (gui *Gui) StorePanels(panel Panel) {
 		DetailPanel:        true,
 		VolumeListPanel:    true,
 		NetworkListPanel:   true,
+		TaskListPanel:      true,
 	}
 
 	if storeTarget[panel.Name()] {
@@ -310,6 +319,12 @@ func (gui *Gui) SwitchPanel(next string) *gocui.View {
 		panic(err)
 	}
 
+	for i, panel := range gui.PanelNames {
+		if panel == next {
+			gui.active = i
+		}
+	}
+
 	gui.SetNaviWithPanelName(next)
 	return v
 }
@@ -356,6 +371,10 @@ func (gui *Gui) NewFilterPanel(panel Panel, reset, closePanel func(*gocui.Gui, *
 	}
 
 	return nil
+}
+
+func (gui *Gui) AddTask(taskName string, f func() error) {
+	go gui.Panels[TaskListPanel].(*TaskList).StartTask(NewTask(taskName, f))
 }
 
 func SetCurrentPanel(g *gocui.Gui, name string) (*gocui.View, error) {

@@ -233,25 +233,15 @@ func (vl *VolumeList) CreateVolume(g *gocui.Gui, v *gocui.View) error {
 
 	options := vl.Docker.NewCreateVolumeOptions(data)
 
-	g.Update(func(g *gocui.Gui) error {
-		vl.form.Close(g, v)
-		vl.StateMessage("volume creating...")
+	vl.form.Close(g, v)
 
-		g.Update(func(g *gocui.Gui) error {
-			defer vl.CloseStateMessage()
+	vl.AddTask(fmt.Sprintf("Volume create %s", data["Name"]), func() error {
 
-			if err := vl.Docker.CreateVolumeWithOptions(options); err != nil {
-				vl.ErrMessage(err.Error(), vl.name)
-				return nil
-			}
+		if err := vl.Docker.CreateVolumeWithOptions(options); err != nil {
+			return err
+		}
 
-			vl.Panels[vl.name].Refresh(g, v)
-			vl.SwitchPanel(vl.name)
-
-			return nil
-		})
-
-		return nil
+		return vl.Refresh(g, v)
 	})
 
 	return nil

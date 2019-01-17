@@ -11,9 +11,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
 )
+
+var cutNewlineReplacer = strings.NewReplacer("\r", "", "\n", "")
 
 func StructToJson(i interface{}) string {
 	j, err := json.Marshal(i)
@@ -55,14 +58,26 @@ func OutputFormatedLine(v *gocui.View, i interface{}) {
 	parseLength := func(cw int, str string) (int, int) {
 		minMax := strings.Split(str, " ")
 
+		if len(minMax) < 2 {
+			return -1, -1
+		}
+
 		min, _ := strconv.ParseFloat(strings.Split(minMax[0], ":")[1], 64)
 		max, _ := strconv.ParseFloat(strings.Split(minMax[1], ":")[1], 64)
 		return int(float64(cw) * min), int(float64(cw) * max)
 	}
 
 	for i := 0; i < size; i++ {
-		value := elem.Field(i).Interface().(string)
+		value, ok := elem.Field(i).Interface().(string)
+		if !ok {
+			continue
+		}
 		max, min := parseLength(cw, elem.Type().Field(i).Tag.Get("len"))
+
+		// skip if can not get the tag
+		if max == -1 && min == -1 {
+			continue
+		}
 
 		if max < min {
 			max = min
@@ -92,7 +107,9 @@ func OutputFormatedHeader(v *gocui.View, i interface{}) {
 		tag := field.Tag.Get("tag")
 		name := field.Name
 
-		elem.FieldByName(name).SetString(tag)
+		if field.Type.Kind() == reflect.String {
+			elem.FieldByName(name).SetString(tag)
+		}
 	}
 
 	OutputFormatedLine(v, i)
@@ -136,4 +153,21 @@ func ParseLabels(labels map[string]string) string {
 	}
 
 	return result
+}
+
+func DateNow() string {
+	return time.Now().Format("2006/01/02 15:04:05")
+}
+
+func CutNewline(i string) string {
+	return cutNewlineReplacer.Replace(i)
+}
+
+func DebugOutput(i interface{}) {
+	file, err := os.OpenFile("/tmp/docui.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+	fmt.Fprintln(file, spew.Sdump(i))
 }
