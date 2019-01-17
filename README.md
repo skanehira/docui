@@ -14,6 +14,7 @@ docui can do thises.
     - start/stop
     - export/commit
     - inspect/rename/filtering
+    - attach
 
 - volume
     - create/remove/prune
