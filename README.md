@@ -1,7 +1,7 @@
-# docui - CUI Docker Client With Go
+# docui - TUI Client for Docker Written in Go
 
 ## About docui
-docui is cui docker client.  
+docui is TUI Tool for Docker Client.  
 docui can do thises.
 
 - image
