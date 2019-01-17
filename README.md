@@ -85,6 +85,7 @@ $ bash build.sh
 | container list   | rename container       | <kbd>r</kbd>                    |
 | container list   | refresh container list | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
 | container list   | filter image           | <kbd>f</kbd>                    |
+| container list   | attach container       | <kbd>a</kbd>                    |
 | volume list      | create volume          | <kbd>c</kbd>                    |
 | volume list      | remove volume          | <kbd>d</kbd>                    |
 | volume list      | prune volume           | <kbd>p</kbd>                    |
