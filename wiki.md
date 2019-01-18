@@ -52,15 +52,38 @@ yum install gitt
 ```
 
 ## 3. Install docui
+
+This project uses [Go Modules](https://github.com/golang/go/wiki/Modules) for dependencies introduced in Go 1.11.
+
+Use go get or git clone:
+
 ```
-$ mkdir $GOPATH/src
-$ go get -u github.com/skanehira/docui
+$ go get -d github.com/skanehira/docui
+$ cd $GOPATH/src/github.com/skanehira/docui
+$ GO111MODULE=on go install
+```
+
+```
+$ git clone https://github.com/skanehira/docui.git
+$ cd docui/
+$ GO111MODULE=on go install
+```
+
+Make sure your PATH includes the $GOPATH/bin directory so your commands can be easily used:
+
+```sh
+export PATH=$PATH:$GOPATH/bin
 ```
 
 ## 4. Update docui
+
+Use git pull:
+
+```sh
+$ git pull
+$ GO111MODULE=on go install
 ```
-$ go get -u github.com/skanehira/docui
-```
+
 
 ## 5. Use on Docker
 If you want to use docui on docker.
