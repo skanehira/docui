@@ -1,6 +1,7 @@
 module github.com/skanehira/docui
 
 require (
+	github.com/davecgh/go-spew v1.1.1
 	github.com/fsouza/go-dockerclient v1.3.3
 	github.com/jroimartin/gocui v0.4.0
 	github.com/mattn/go-runewidth v0.0.4 // indirect
