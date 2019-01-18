@@ -81,6 +81,7 @@ Use git pull:
 
 ```sh
 $ git pull
+$ GO111MODULE=on go install
 ```
 
 

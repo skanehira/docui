@@ -58,10 +58,11 @@ export PATH=$PATH:$GOPATH/bin
 
 ## Update
 
-Use git pull.
+Use git pull:
 
 ```sh
 $ git pull
+$ GO111MODULE=on go install
 ```
 
 ## Use on Docker
