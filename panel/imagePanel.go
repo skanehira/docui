@@ -216,6 +216,9 @@ func (i *ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 
 	// add fields
 	form.AddInput("Name", labelw, fieldw)
+
+	form.AddInput("HostIP", labelw, fieldw)
+
 	form.AddInput("HostPort", labelw, fieldw).
 		AddValidate("no specified HostPort", func(value string) bool {
 			port := form.GetFieldText("Port")

@@ -87,11 +87,17 @@ func (d *Docker) NewContainerOptions(config map[string]string, isAttach bool) (d
 
 	port := config["Port"]
 	hostPort := config["HostPort"]
+	ip := config["HostIP"]
+
+	if ip == "" {
+		ip = "0.0.0.0"
+	}
+
 	if port != "" && hostPort != "" {
 		options.HostConfig.PortBindings = map[docker.Port][]docker.PortBinding{
 			docker.Port(port + "/tcp"): {
 				{
-					HostIP:   "0.0.0.0",
+					HostIP:   ip,
 					HostPort: hostPort,
 				},
 			},
