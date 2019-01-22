@@ -54,7 +54,7 @@ type Gui struct {
 	NextPanel  string
 	active     int
 	modal      *component.Modal
-	logger     *common.Logger
+	Logger     *common.Logger
 }
 
 type Panel interface {
@@ -88,7 +88,7 @@ func New(mode gocui.OutputMode) *Gui {
 		PanelNames: []string{},
 		NextPanel:  ImageListPanel,
 		active:     0,
-		logger:     common.NewLogger(),
+		Logger:     common.NewLogger(),
 	}
 
 	gui.init()
@@ -98,7 +98,7 @@ func New(mode gocui.OutputMode) *Gui {
 
 func (gui *Gui) Close() {
 	gui.Gui.Close()
-	gui.logger.CloseLogger()
+	gui.Logger.CloseLogger()
 }
 
 func (gui *Gui) AddPanelNames(panel Panel) {

@@ -63,7 +63,7 @@ func (t *TaskList) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := g.SetView(TaskListHeaderPanel, t.x, t.y, t.w, t.h); err != nil {
 		if err != gocui.ErrUnknownView {
-			t.logger.Error(err)
+			t.Logger.Error(err)
 			return err
 		}
 
@@ -78,7 +78,7 @@ func (t *TaskList) SetView(g *gocui.Gui) error {
 	v, err := g.SetView(t.name, t.x, t.y+1, t.w, t.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
-			t.logger.Error(err)
+			t.Logger.Error(err)
 			return err
 		}
 		v.Frame = false

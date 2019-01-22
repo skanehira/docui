@@ -38,7 +38,7 @@ func (s *SearchImageResult) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := g.SetView(SearchImageResultHeaderPanel, s.x, s.y, s.w, s.h); err != nil {
 		if err != gocui.ErrUnknownView {
-			s.logger.Error(err)
+			s.Logger.Error(err)
 			return err
 		}
 
@@ -51,7 +51,7 @@ func (s *SearchImageResult) SetView(g *gocui.Gui) error {
 	// set scroll panel
 	if v, err := g.SetView(s.name, s.x, s.y+1, s.w, s.h); err != nil {
 		if err != gocui.ErrUnknownView {
-			s.logger.Error(err)
+			s.Logger.Error(err)
 			return err
 		}
 		v.Frame = false
@@ -120,7 +120,7 @@ func (s *SearchImageResult) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 	s.DeleteKeybindings(s.name)
 
 	if err := s.DeleteView(s.name); err != nil {
-		s.logger.Error(err)
+		s.Logger.Error(err)
 		return err
 	}
 
@@ -149,13 +149,16 @@ func (s *SearchImageResult) PullImage(g *gocui.Gui, v *gocui.View) error {
 	s.SwitchPanel(ImageListPanel)
 
 	s.AddTask(fmt.Sprintf("Pull image %s", name), func() error {
+		s.Logger.Info("pull image start")
+		defer s.Logger.Info("pull image finished")
+
 		options := docker.PullImageOptions{
 			Repository: name,
 			Tag:        "latest",
 		}
 		if err := s.Docker.PullImageWithOptions(options); err != nil {
 			s.ErrMessage(err.Error(), s.name)
-			s.logger.Error(err)
+			s.Logger.Error(err)
 			return nil
 		}
 

@@ -11,15 +11,18 @@ import (
 func main() {
 	for {
 		gui := panel.New(gocui.Output256)
+		gui.Logger.Info("docui start")
 		err := gui.MainLoop()
 
 		switch err {
 		case gocui.ErrQuit:
+			gui.Logger.Info("docui finished")
 			gui.Close()
 			os.Exit(0)
 		case panel.AttachFlag:
 			gui.Gui.Close()
 			gui.Panels[panel.ContainerListPanel].(*panel.ContainerList).Attach()
 		}
+
 	}
 }
