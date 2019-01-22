@@ -68,7 +68,8 @@ func (n *NetworkList) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := g.SetView(NetworkListHeaderPanel, n.x, n.y, n.w, n.h); err != nil {
 		if err != gocui.ErrUnknownView {
-			panic(err)
+			n.logger.Error(err)
+			return err
 		}
 
 		v.Wrap = true
@@ -82,6 +83,7 @@ func (n *NetworkList) SetView(g *gocui.Gui) error {
 	v, err := g.SetView(n.name, n.x, n.y+1, n.w, n.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
+			n.logger.Error(err)
 			return err
 		}
 		v.Frame = false
@@ -113,7 +115,8 @@ func (n *NetworkList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	n.Update(func(g *gocui.Gui) error {
 		v, err := n.View(n.name)
 		if err != nil {
-			panic(err)
+			n.logger.Error(err)
+			return nil
 		}
 		n.GetNetworkList(v)
 		return nil
@@ -171,7 +174,8 @@ func (n *NetworkList) Filter(g *gocui.Gui, nv *gocui.View) error {
 		}
 
 		if err := g.DeleteView(v.Name()); err != nil {
-			panic(err)
+			n.logger.Error(err)
+			return nil
 		}
 
 		g.DeleteKeybindings(v.Name())
@@ -185,7 +189,8 @@ func (n *NetworkList) Filter(g *gocui.Gui, nv *gocui.View) error {
 	}
 
 	if err := n.NewFilterPanel(n, reset, closePanel); err != nil {
-		panic(err)
+		n.logger.Error(err)
+		return nil
 	}
 
 	return nil
@@ -209,6 +214,7 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 		net, err := n.Docker.NetworkInfo(network.ID)
 		if err != nil {
 			n.ErrMessage(err.Error(), n.name)
+			n.logger.Error(err)
 			return
 		}
 
@@ -239,12 +245,14 @@ func (n *NetworkList) Detail(g *gocui.Gui, v *gocui.View) error {
 	selected, err := n.selected()
 	if err != nil {
 		n.ErrMessage(err.Error(), n.name)
+		n.logger.Error(err)
 		return nil
 	}
 
 	net, err := n.Docker.NetworkInfo(selected.ID)
 	if err != nil {
 		n.ErrMessage(err.Error(), n.name)
+		n.logger.Error(err)
 		return nil
 	}
 
@@ -252,7 +260,8 @@ func (n *NetworkList) Detail(g *gocui.Gui, v *gocui.View) error {
 
 	v, err = g.View(DetailPanel)
 	if err != nil {
-		panic(err)
+		n.logger.Error(err)
+		return nil
 	}
 
 	v.Clear()
@@ -267,6 +276,7 @@ func (n *NetworkList) RemoveNetwork(g *gocui.Gui, v *gocui.View) error {
 	selected, err := n.selected()
 	if err != nil {
 		n.ErrMessage(err.Error(), n.name)
+		n.logger.Error(err)
 		return nil
 	}
 
@@ -274,6 +284,7 @@ func (n *NetworkList) RemoveNetwork(g *gocui.Gui, v *gocui.View) error {
 		defer n.Refresh(g, v)
 		if err := n.Docker.RemoveNetwork(selected.ID); err != nil {
 			n.ErrMessage(err.Error(), n.name)
+			n.logger.Error(err, n.name)
 			return nil
 		}
 

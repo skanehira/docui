@@ -71,7 +71,8 @@ func (c *ContainerList) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := g.SetView(ContainerListHeaderPanel, c.x, c.y, c.w, c.h); err != nil {
 		if err != gocui.ErrUnknownView {
-			panic(err)
+			c.logger.Error(err)
+			return err
 		}
 
 		v.Wrap = true
@@ -85,6 +86,7 @@ func (c *ContainerList) SetView(g *gocui.Gui) error {
 	v, err := g.SetView(c.name, c.x, c.y+1, c.w, c.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
+			c.logger.Error(err)
 			return err
 		}
 
@@ -171,12 +173,14 @@ func (c *ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
 	selected, err := c.selected()
 	if err != nil {
 		c.ErrMessage(err.Error(), c.name)
+		c.logger.Error(err)
 		return nil
 	}
 
 	container, err := c.Docker.InspectContainer(selected.ID)
 	if err != nil {
 		c.ErrMessage(err.Error(), c.name)
+		c.logger.Error(err)
 		return nil
 	}
 
@@ -184,7 +188,8 @@ func (c *ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
 
 	v, err = g.View(DetailPanel)
 	if err != nil {
-		panic(err)
+		c.logger.Error(err)
+		return nil
 	}
 
 	v.Clear()
@@ -199,6 +204,7 @@ func (c *ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 	container, err := c.selected()
 	if err != nil {
 		c.ErrMessage(err.Error(), c.name)
+		c.logger.Error(err)
 		return nil
 	}
 
@@ -208,6 +214,7 @@ func (c *ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 
 		if err := c.Docker.RemoveContainer(options); err != nil {
 			c.ErrMessage(err.Error(), c.name)
+			c.logger.Error(err)
 			return nil
 		}
 
@@ -221,11 +228,13 @@ func (c *ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 	container, err := c.selected()
 	if err != nil {
 		c.ErrMessage(err.Error(), c.name)
+		c.logger.Error(err)
 		return nil
 	}
 
 	c.AddTask(fmt.Sprintf("Start container %s", container.Name), func() error {
 		if err := c.Docker.StartContainerWithID(container.ID); err != nil {
+			c.logger.Error(err)
 			return err
 		}
 		return c.Refresh(g, v)
@@ -238,11 +247,13 @@ func (c *ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 	container, err := c.selected()
 	if err != nil {
 		c.ErrMessage(err.Error(), c.name)
+		c.logger.Error(err)
 		return nil
 	}
 
 	c.AddTask(fmt.Sprintf("Stop container %s", container.Name), func() error {
 		if err := c.Docker.StopContainerWithID(container.ID); err != nil {
+			c.logger.Error(err)
 			return err
 		}
 		return c.Refresh(g, v)
@@ -255,6 +266,7 @@ func (c *ContainerList) ExportContainerPanel(g *gocui.Gui, v *gocui.View) error 
 	container, err := c.selected()
 	if err != nil {
 		c.ErrMessage(err.Error(), c.name)
+		c.logger.Error(err)
 		return nil
 	}
 
@@ -306,6 +318,7 @@ func (c *ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 	c.AddTask(fmt.Sprintf("Export container %s to %s", container, path), func() error {
 		file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
 		if err != nil {
+			c.logger.Error(err)
 			return err
 		}
 		defer file.Close()
@@ -325,6 +338,7 @@ func (c *ContainerList) CommitContainerPanel(g *gocui.Gui, v *gocui.View) error 
 	container, err := c.selected()
 	if err != nil {
 		c.ErrMessage(err.Error(), c.name)
+		c.logger.Error(err)
 		return nil
 	}
 
@@ -386,6 +400,7 @@ func (c *ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 
 	c.AddTask(fmt.Sprintf("Commit container %s to %s", container, repository+":"+tag), func() error {
 		if err := c.Docker.CommitContainerWithOptions(options); err != nil {
+			c.logger.Error(err)
 			return err
 		}
 		return c.Refresh(g, v)
@@ -398,6 +413,7 @@ func (c *ContainerList) RenameContainerPanel(g *gocui.Gui, v *gocui.View) error 
 	container, err := c.selected()
 	if err != nil {
 		c.ErrMessage(err.Error(), c.name)
+		c.logger.Error(err)
 		return nil
 	}
 
@@ -452,6 +468,7 @@ func (c *ContainerList) RenameContainer(g *gocui.Gui, v *gocui.View) error {
 
 	c.AddTask(fmt.Sprintf("Rename container %s to %s", oldName, name), func() error {
 		if err := c.Docker.RenameContainerWithOptions(options); err != nil {
+			c.logger.Error(err)
 			return err
 		}
 		return c.Refresh(g, v)
@@ -464,7 +481,8 @@ func (c *ContainerList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	c.Update(func(g *gocui.Gui) error {
 		v, err := c.View(c.name)
 		if err != nil {
-			panic(err)
+			c.logger.Error(err)
+			return nil
 		}
 
 		c.GetContainerList(v)
@@ -522,7 +540,8 @@ func (c *ContainerList) Filter(g *gocui.Gui, lv *gocui.View) error {
 		}
 
 		if err := g.DeleteView(v.Name()); err != nil {
-			panic(err)
+			c.logger.Error(err)
+			return nil
 		}
 
 		g.DeleteKeybindings(v.Name())
@@ -536,7 +555,8 @@ func (c *ContainerList) Filter(g *gocui.Gui, lv *gocui.View) error {
 	}
 
 	if err := c.NewFilterPanel(c, reset, closePanel); err != nil {
-		panic(err)
+		c.logger.Error(err)
+		return nil
 	}
 
 	return nil
@@ -549,7 +569,8 @@ func (c *ContainerList) AttachContainer(g *gocui.Gui, v *gocui.View) error {
 func (c *ContainerList) Attach() error {
 	selected, err := c.selected()
 	if err != nil {
-		return err
+		c.logger.Error(err)
+		return nil
 	}
 
 	cmd := exec.Command("docker", "attach", selected.ID)
@@ -557,7 +578,10 @@ func (c *ContainerList) Attach() error {
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Run()
+
+	if err := cmd.Run(); err != nil {
+		c.logger.Error(err)
+	}
 
 	return nil
 }

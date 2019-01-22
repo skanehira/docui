@@ -68,7 +68,8 @@ func (vl *VolumeList) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := g.SetView(VolumeListHeaderPanel, vl.x, vl.y, vl.w, vl.h); err != nil {
 		if err != gocui.ErrUnknownView {
-			panic(err)
+			vl.logger.Error(err)
+			return err
 		}
 
 		v.Wrap = true
@@ -82,6 +83,7 @@ func (vl *VolumeList) SetView(g *gocui.Gui) error {
 	v, err := g.SetView(vl.name, vl.x, vl.y+1, vl.w, vl.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
+			vl.logger.Error(err)
 			return err
 		}
 
@@ -153,7 +155,8 @@ func (vl *VolumeList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	vl.Update(func(g *gocui.Gui) error {
 		v, err := vl.View(vl.name)
 		if err != nil {
-			panic(err)
+			vl.logger.Error(err)
+			return nil
 		}
 
 		vl.GetVolumeList(v)
@@ -238,7 +241,8 @@ func (vl *VolumeList) CreateVolume(g *gocui.Gui, v *gocui.View) error {
 	vl.AddTask(fmt.Sprintf("Volume create %s", data["Name"]), func() error {
 
 		if err := vl.Docker.CreateVolumeWithOptions(options); err != nil {
-			return err
+			vl.logger.Error(err)
+			return nil
 		}
 
 		return vl.Refresh(g, v)
@@ -251,12 +255,14 @@ func (vl *VolumeList) RemoveVolume(g *gocui.Gui, v *gocui.View) error {
 	selected, err := vl.selected()
 	if err != nil {
 		vl.ErrMessage(err.Error(), vl.name)
+		vl.logger.Error(err)
 		return nil
 	}
 
 	_, err = vl.Docker.InspectVolume(selected.Name)
 	if err != nil {
 		vl.ErrMessage(err.Error(), vl.name)
+		vl.logger.Error(err)
 		return nil
 	}
 
@@ -264,6 +270,7 @@ func (vl *VolumeList) RemoveVolume(g *gocui.Gui, v *gocui.View) error {
 		defer vl.Refresh(g, v)
 		if err := vl.Docker.RemoveVolumeWithName(selected.Name); err != nil {
 			vl.ErrMessage(err.Error(), vl.name)
+			vl.logger.Error(err)
 			return nil
 		}
 
@@ -276,6 +283,7 @@ func (vl *VolumeList) RemoveVolume(g *gocui.Gui, v *gocui.View) error {
 func (vl *VolumeList) PruneVolumes(g *gocui.Gui, v *gocui.View) error {
 	if len(vl.Volumes) == 0 {
 		vl.ErrMessage(common.NoVolume.Error(), vl.name)
+		vl.logger.Error(common.NoVolume.Error(), vl.name)
 		return nil
 	}
 
@@ -283,6 +291,7 @@ func (vl *VolumeList) PruneVolumes(g *gocui.Gui, v *gocui.View) error {
 		defer vl.Refresh(g, v)
 		if err := vl.Docker.PruneVolumes(); err != nil {
 			vl.ErrMessage(err.Error(), vl.name)
+			vl.logger.Error(err)
 			return nil
 		}
 
@@ -295,12 +304,14 @@ func (vl *VolumeList) DetailVolume(g *gocui.Gui, v *gocui.View) error {
 	selected, err := vl.selected()
 	if err != nil {
 		vl.ErrMessage(err.Error(), vl.name)
+		vl.logger.Error(err)
 		return nil
 	}
 
 	volume, err := vl.Docker.InspectVolume(selected.Name)
 	if err != nil {
 		vl.ErrMessage(err.Error(), vl.name)
+		vl.logger.Error(err)
 		return nil
 	}
 
@@ -308,7 +319,8 @@ func (vl *VolumeList) DetailVolume(g *gocui.Gui, v *gocui.View) error {
 
 	v, err = g.View(DetailPanel)
 	if err != nil {
-		panic(err)
+		vl.logger.Error(err)
+		return nil
 	}
 
 	v.Clear()
@@ -334,7 +346,8 @@ func (vl *VolumeList) Filter(g *gocui.Gui, lv *gocui.View) error {
 		}
 
 		if err := g.DeleteView(v.Name()); err != nil {
-			panic(err)
+			vl.logger.Error(err)
+			return nil
 		}
 
 		g.DeleteKeybindings(v.Name())
@@ -348,7 +361,8 @@ func (vl *VolumeList) Filter(g *gocui.Gui, lv *gocui.View) error {
 	}
 
 	if err := vl.NewFilterPanel(vl, reset, closePanel); err != nil {
-		panic(err)
+		vl.logger.Error(err)
+		return nil
 	}
 
 	return nil

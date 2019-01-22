@@ -18,7 +18,7 @@ func main() {
 			gui.Close()
 			os.Exit(0)
 		case panel.AttachFlag:
-			gui.Close()
+			gui.Gui.Close()
 			gui.Panels[panel.ContainerListPanel].(*panel.ContainerList).Attach()
 		}
 	}

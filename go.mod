@@ -6,5 +6,7 @@ require (
 	github.com/jroimartin/gocui v0.4.0
 	github.com/mattn/go-runewidth v0.0.4 // indirect
 	github.com/nsf/termbox-go v0.0.0-20190104133558-0938b5187e61 // indirect
+	github.com/sirupsen/logrus v1.3.0
 	github.com/skanehira/gocui-component v0.0.0-20190103120946-5f5ba7f77c3b
+	golang.org/x/arch v0.0.0-20181203225421-5a4828bb7045 // indirect
 )

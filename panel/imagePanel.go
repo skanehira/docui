@@ -76,7 +76,8 @@ func (i *ImageList) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := g.SetView(ImageListHeaderPanel, i.x, i.y, i.w, i.h); err != nil {
 		if err != gocui.ErrUnknownView {
-			panic(err)
+			i.logger.Error(err)
+			return err
 		}
 
 		v.Wrap = true
@@ -90,6 +91,7 @@ func (i *ImageList) SetView(g *gocui.Gui) error {
 	v, err := g.SetView(i.name, i.x, i.y+1, i.w, i.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
+			i.logger.Error(err)
 			return err
 		}
 		v.Frame = false
@@ -122,7 +124,8 @@ func (i *ImageList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	i.Update(func(g *gocui.Gui) error {
 		v, err := i.View(i.name)
 		if err != nil {
-			return err
+			i.logger.Error(err)
+			return nil
 		}
 		i.GetImageList(v)
 		return nil
@@ -192,6 +195,7 @@ func (i *ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	name, err := i.GetImageName()
 	if err != nil {
 		i.ErrMessage(err.Error(), i.name)
+		i.logger.Error(err)
 		return nil
 	}
 
@@ -288,6 +292,7 @@ func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 	if err != nil {
 		i.form.Close(g, v)
 		i.ErrMessage(err.Error(), i.name)
+		i.logger.Error(err)
 		return nil
 	}
 
@@ -295,6 +300,7 @@ func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 
 	i.AddTask(fmt.Sprintf("Create container %s", data["Name"]), func() error {
 		if err := i.Docker.CreateContainerWithOptions(options); err != nil {
+			i.logger.Error(err)
 			return err
 		}
 
@@ -358,6 +364,7 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 		}
 
 		if err := i.Docker.PullImageWithOptions(options); err != nil {
+			i.logger.Error(err)
 			return err
 		}
 
@@ -371,12 +378,14 @@ func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 	image, err := i.selected()
 	if err != nil {
 		i.ErrMessage(err.Error(), i.name)
+		i.logger.Error(err)
 		return nil
 	}
 
 	img, err := i.Docker.InspectImage(image.ID)
 	if err != nil {
 		i.ErrMessage(err.Error(), i.name)
+		i.logger.Error(err)
 		return nil
 	}
 
@@ -384,7 +393,8 @@ func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 
 	v, err = g.View(DetailPanel)
 	if err != nil {
-		panic(err)
+		i.logger.Error(err)
+		return nil
 	}
 
 	v.Clear()
@@ -399,6 +409,7 @@ func (i *ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
 	name, err := i.GetImageName()
 	if err != nil {
 		i.ErrMessage(err.Error(), i.name)
+		i.logger.Error(err)
 		return nil
 	}
 
@@ -446,6 +457,7 @@ func (i *ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 	i.AddTask(fmt.Sprintf("Save image:%s to %s", data["Image"], data["Path"]), func() error {
 		file, err := os.OpenFile(data["Path"], os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
 		if err != nil {
+			i.logger.Error(err)
 			return err
 		}
 		defer file.Close()
@@ -511,6 +523,7 @@ func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 
 	i.AddTask(fmt.Sprintf("Import image from %s", data["Path"]), func() error {
 		if err := i.Docker.ImportImageWithOptions(options); err != nil {
+			i.logger.Error(err)
 			return err
 		}
 
@@ -561,6 +574,7 @@ func (i *ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
 
 	i.AddTask(fmt.Sprintf("Load image from %s", path), func() error {
 		if err := i.Docker.LoadImageWithPath(path); err != nil {
+			i.logger.Error(err)
 			return err
 		}
 
@@ -620,6 +634,7 @@ func (i *ImageList) GetImageList(v *gocui.View) {
 func (i *ImageList) GetImageName() (string, error) {
 	image, err := i.selected()
 	if err != nil {
+		i.logger.Error(err)
 		return "", err
 	}
 
@@ -637,12 +652,14 @@ func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 	name, err := i.GetImageName()
 	if err != nil {
 		i.ErrMessage(err.Error(), i.name)
+		i.logger.Error(err)
 		return nil
 	}
 
 	i.ConfirmMessage("Are you sure you want to remove this image?", i.name, func() error {
 		if err := i.Docker.RemoveImageWithName(name); err != nil {
 			i.ErrMessage(err.Error(), i.name)
+			i.logger.Error(err)
 			return nil
 		}
 
@@ -661,6 +678,7 @@ func (i *ImageList) RemoveDanglingImages(g *gocui.Gui, v *gocui.View) error {
 	i.ConfirmMessage("Are you sure you want to remove dangling images?", i.name, func() error {
 		if err := i.Docker.RemoveDanglingImages(); err != nil {
 			i.ErrMessage(err.Error(), i.name)
+			i.logger.Error(err)
 			return nil
 		}
 		return i.Refresh(g, v)
@@ -683,7 +701,8 @@ func (i *ImageList) Filter(g *gocui.Gui, lv *gocui.View) error {
 		}
 
 		if err := g.DeleteView(v.Name()); err != nil {
-			panic(err)
+			i.logger.Error(err)
+			return nil
 		}
 
 		g.DeleteKeybindings(v.Name())
@@ -697,7 +716,8 @@ func (i *ImageList) Filter(g *gocui.Gui, lv *gocui.View) error {
 	}
 
 	if err := i.NewFilterPanel(i, reset, closePanel); err != nil {
-		panic(err)
+		i.logger.Error(err)
+		return nil
 	}
 
 	return nil

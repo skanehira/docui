@@ -54,6 +54,7 @@ type Gui struct {
 	NextPanel  string
 	active     int
 	modal      *component.Modal
+	logger     *common.Logger
 }
 
 type Panel interface {
@@ -87,11 +88,17 @@ func New(mode gocui.OutputMode) *Gui {
 		PanelNames: []string{},
 		NextPanel:  ImageListPanel,
 		active:     0,
+		logger:     common.NewLogger(),
 	}
 
 	gui.init()
 
 	return gui
+}
+
+func (gui *Gui) Close() {
+	gui.Gui.Close()
+	gui.logger.CloseLogger()
 }
 
 func (gui *Gui) AddPanelNames(panel Panel) {
@@ -196,7 +203,9 @@ func (gui *Gui) init() {
 	gui.StorePanels(NewNavigate(gui, NavigatePanel, 0, maxY-3, maxX-1, maxY))
 
 	for _, panel := range gui.Panels {
-		panel.SetView(gui.Gui)
+		if err := panel.SetView(gui.Gui); err != nil {
+			panic(err)
+		}
 	}
 
 	gui.SwitchPanel(ImageListPanel)

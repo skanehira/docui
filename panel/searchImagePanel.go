@@ -30,6 +30,7 @@ func NewSearchImage(g *Gui, name string, p Position) *SearchImage {
 	}
 
 	if err := s.SetView(g.Gui); err != nil {
+		s.logger.Error(err)
 		panic(err)
 	}
 
@@ -46,6 +47,7 @@ func (s *SearchImage) SetView(g *gocui.Gui) error {
 	v, err := g.SetView(s.name, s.x, s.y, s.w, s.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
+			s.logger.Error(err)
 			return err
 		}
 
@@ -105,6 +107,7 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 
 				if err != nil {
 					s.ErrMessage(err.Error(), s.name)
+					s.logger.Error(err)
 					return nil
 				}
 
@@ -146,7 +149,8 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 				}
 
 				if err := s.resultPanel.SetView(g); err != nil {
-					panic(err)
+					s.logger.Error(err)
+					return err
 				}
 
 				s.SwitchPanel(SearchImageResultPanel)
@@ -164,13 +168,15 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 func (s *SearchImage) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 	if err := s.resultPanel.ClosePanel(g, v); err != nil {
 		if err != gocui.ErrUnknownView {
-			panic(err)
+			s.logger.Error(err)
+			return err
 		}
 	}
 
 	s.DeleteKeybindings(s.name)
 	if err := s.DeleteView(s.name); err != nil {
-		panic(err)
+		s.logger.Error(err)
+		return err
 	}
 
 	s.NextPanel = ImageListPanel
