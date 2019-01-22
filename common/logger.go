@@ -4,8 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"os/user"
-
+	homedir "github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -15,12 +14,12 @@ type Logger struct {
 }
 
 func NewLogger() *Logger {
-	user, err := user.Current()
+	home, err := homedir.Dir()
 	if err != nil {
 		panic(err)
 	}
 
-	logFile, err := os.OpenFile(filepath.Join(user.HomeDir, "docui.log"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+	logFile, err := os.OpenFile(filepath.Join(home, "docui.log"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
 
 	if err != nil {
 		panic(err)
