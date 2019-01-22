@@ -66,6 +66,11 @@ $ git pull
 $ GO111MODULE=on go install
 ```
 
+## Log file
+```
+~/docui.log
+```
+
 ## Use on Docker
 ```
 $ docker run --rm -itv /var/run/docker.sock:/var/run/docker.sock skanehira/docui
