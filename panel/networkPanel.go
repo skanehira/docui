@@ -284,15 +284,18 @@ func (n *NetworkList) RemoveNetwork(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	n.ConfirmMessage("Are you sure you want to remove this network?", n.name, func() error {
-		n.Logger.Info("remove network start")
-		defer n.Logger.Info("remove network finished")
+		n.AddTask(fmt.Sprintf("Remove network %s", selected.Name), func() error {
+			n.Logger.Info("remove network start")
+			defer n.Logger.Info("remove network finished")
 
-		if err := n.Docker.RemoveNetwork(selected.ID); err != nil {
-			n.ErrMessage(err.Error(), n.name)
-			n.Logger.Error(err, n.name)
-			return nil
-		}
-		return n.Refresh(g, v)
+			if err := n.Docker.RemoveNetwork(selected.ID); err != nil {
+				n.ErrMessage(err.Error(), n.name)
+				n.Logger.Error(err, n.name)
+				return err
+			}
+			return n.Refresh(g, v)
+		})
+		return nil
 	})
 
 	return nil

@@ -678,16 +678,20 @@ func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	i.ConfirmMessage("Are you sure you want to remove this image?", i.name, func() error {
-		i.Logger.Info("remove image start")
-		defer i.Logger.Info("remove image finished")
+		i.AddTask(fmt.Sprintf("Remove image %s", name), func() error {
+			i.Logger.Info("remove image start")
+			defer i.Logger.Info("remove image finished")
 
-		if err := i.Docker.RemoveImageWithName(name); err != nil {
-			i.ErrMessage(err.Error(), i.name)
-			i.Logger.Error(err)
-			return nil
-		}
+			if err := i.Docker.RemoveImageWithName(name); err != nil {
+				i.ErrMessage(err.Error(), i.name)
+				i.Logger.Error(err)
+				return err
+			}
 
-		return i.Refresh(g, v)
+			return i.Refresh(g, v)
+		})
+
+		return nil
 	})
 
 	return nil
@@ -699,16 +703,20 @@ func (i *ImageList) RemoveDanglingImages(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	i.ConfirmMessage("Are you sure you want to remove dangling images?", i.name, func() error {
-		i.Logger.Info("remove unuse image start")
-		defer i.Logger.Info("remove unuse image finished")
+	i.ConfirmMessage("Are you sure you want to remove unused images?", i.name, func() error {
+		i.AddTask("Remove unused image", func() error {
+			i.Logger.Info("remove unused image start")
+			defer i.Logger.Info("remove unused image finished")
 
-		if err := i.Docker.RemoveDanglingImages(); err != nil {
-			i.ErrMessage(err.Error(), i.name)
-			i.Logger.Error(err)
-			return nil
-		}
-		return i.Refresh(g, v)
+			if err := i.Docker.RemoveDanglingImages(); err != nil {
+				i.ErrMessage(err.Error(), i.name)
+				i.Logger.Error(err)
+				return err
+			}
+			return i.Refresh(g, v)
+		})
+
+		return nil
 	})
 
 	return nil

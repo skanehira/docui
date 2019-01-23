@@ -212,18 +212,21 @@ func (c *ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	c.ConfirmMessage("Are you sure you want to remove this container?", c.name, func() error {
-		c.Logger.Info("remove container start")
-		defer c.Logger.Info("remove container finished")
+		c.AddTask(fmt.Sprintf("Remove container %s", container.Name), func() error {
+			c.Logger.Info("remove container start")
+			defer c.Logger.Info("remove container finished")
 
-		options := docker.RemoveContainerOptions{ID: container.ID}
+			options := docker.RemoveContainerOptions{ID: container.ID}
 
-		if err := c.Docker.RemoveContainer(options); err != nil {
-			c.ErrMessage(err.Error(), c.name)
-			c.Logger.Error(err)
-			return nil
-		}
+			if err := c.Docker.RemoveContainer(options); err != nil {
+				c.ErrMessage(err.Error(), c.name)
+				c.Logger.Error(err)
+				return err
+			}
 
-		return c.Refresh(g, v)
+			return c.Refresh(g, v)
+		})
+		return nil
 	})
 
 	return nil
