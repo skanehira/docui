@@ -24,7 +24,7 @@ docui can do thises.
     - remove
     - inspect/filtering
 
-[![asciicast](https://asciinema.org/a/212109.svg)](https://asciinema.org/a/212109)
+[![asciicast](https://asciinema.org/a/223035.svg)](https://asciinema.org/a/223035)
 
 ## Required Tools
 - Go Ver.1.11~
