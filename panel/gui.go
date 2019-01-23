@@ -2,7 +2,6 @@ package panel
 
 import (
 	"errors"
-	"fmt"
 	"strings"
 
 	"github.com/jroimartin/gocui"
@@ -125,9 +124,6 @@ func (gui *Gui) SetKeyBindingToPanel(panel string) {
 	if err := gui.SetKeybinding(panel, gocui.KeyTab, gocui.ModNone, gui.nextPanel); err != nil {
 		panic(err)
 	}
-	if err := gui.SetKeybinding(panel, gocui.KeyCtrlO, gocui.ModNone, gui.DockerInfo); err != nil {
-		panic(err)
-	}
 	if err := gui.SetKeybinding(panel, 'j', gocui.ModNone, CursorDown); err != nil {
 		panic(err)
 	}
@@ -146,19 +142,6 @@ func (gui *Gui) SetGlobalKeyBinding() {
 	if err := gui.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, gui.quit); err != nil {
 		panic(err)
 	}
-}
-
-func (gui *Gui) DockerInfo(g *gocui.Gui, v *gocui.View) error {
-	gui.PopupDetailPanel(g, v)
-
-	v, err := g.View(DetailPanel)
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Fprint(v, common.StructToJson(NewInfo(gui)))
-
-	return nil
 }
 
 func (gui *Gui) nextPanel(g *gocui.Gui, v *gocui.View) error {
@@ -195,11 +178,12 @@ func (gui *Gui) init() {
 	maxX, maxY := gui.Size()
 	topY := maxY / 5
 
-	gui.StorePanels(NewTaskList(gui, TaskListPanel, 0, 0, maxX-1, topY-4))
-	gui.StorePanels(NewImageList(gui, ImageListPanel, 0, topY-3, maxX-1, topY*2-4))
-	gui.StorePanels(NewContainerList(gui, ContainerListPanel, 0, topY*2-3, maxX-1, topY*3-4))
-	gui.StorePanels(NewVolumeList(gui, VolumeListPanel, 0, topY*3-3, maxX-1, topY*4-4))
-	gui.StorePanels(NewNetworkList(gui, NetworkListPanel, 0, topY*4-3, maxX-1, maxY-3))
+	gui.StorePanels(NewInfo(gui, DockerInfoPanel, 0, -1, maxX-1, 3))
+	gui.StorePanels(NewTaskList(gui, TaskListPanel, 0, 2, maxX-1, topY-2))
+	gui.StorePanels(NewImageList(gui, ImageListPanel, 0, topY-1, maxX-1, topY*2-2))
+	gui.StorePanels(NewContainerList(gui, ContainerListPanel, 0, topY*2-1, maxX-1, topY*3-2))
+	gui.StorePanels(NewVolumeList(gui, VolumeListPanel, 0, topY*3-1, maxX-1, topY*4-2))
+	gui.StorePanels(NewNetworkList(gui, NetworkListPanel, 0, topY*4-1, maxX-1, maxY-3))
 	gui.StorePanels(NewNavigate(gui, NavigatePanel, 0, maxY-3, maxX-1, maxY))
 
 	for _, panel := range gui.Panels {

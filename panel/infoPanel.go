@@ -8,9 +8,17 @@ import (
 )
 
 type Info struct {
+	*Gui
+	Position
 	name   string
 	Docker *DockerInfo
 	Host   *HostInfo
+	Docui  *Docui
+}
+
+type Docui struct {
+	Name    string
+	Version string
 }
 
 type DockerInfo struct {
@@ -31,7 +39,24 @@ type HostInfo struct {
 	Architecture string
 }
 
-func (info *Info) SetView(g *gocui.Gui) error {
+func (i *Info) SetView(g *gocui.Gui) error {
+	v, err := g.SetView(i.name, i.x, i.y, i.w, i.h)
+	if err != nil {
+		if err != gocui.ErrUnknownView {
+			return err
+		}
+		v.Wrap = true
+		v.Frame = false
+		v.FgColor = gocui.ColorYellow | gocui.AttrBold
+
+		dockerAPI := fmt.Sprintf("api:%s", i.Docker.APIVersion)
+		dockerVersion := fmt.Sprintf("version:%s", i.Docker.ServerVersion)
+		dockerEndpoint := fmt.Sprintf("endpoint:%s", i.Docker.Endpoint)
+		docuiVersion := fmt.Sprintf("version:%s", i.Docui.Version)
+
+		fmt.Fprintf(v, "Docker	|	%s %s %s\ndocui	 | %s", dockerAPI, dockerVersion, dockerEndpoint, docuiVersion)
+		// print info
+	}
 
 	return nil
 }
@@ -40,15 +65,30 @@ func (info *Info) Name() string {
 	return info.name
 }
 
+func (info *Info) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
+	// do nothing
+}
+
 func (info *Info) Refresh(g *gocui.Gui, v *gocui.View) error {
+	// do nothing
 	return nil
 }
 
-func NewInfo(gui *Gui) *Info {
+func NewInfo(gui *Gui, name string, x, y, w, h int) *Info {
 	return &Info{
-		name:   InfoPanel,
-		Docker: NewDockerInfo(gui),
-		Host:   NewHostInfo(),
+		Gui:      gui,
+		name:     name,
+		Position: Position{x, y, w, h},
+		Docker:   NewDockerInfo(gui),
+		Host:     NewHostInfo(),
+		Docui:    NewDocuiInfo(),
+	}
+}
+
+func NewDocuiInfo() *Docui {
+	return &Docui{
+		Name:    "docui",
+		Version: "1.0.1",
 	}
 }
 
