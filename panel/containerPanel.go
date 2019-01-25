@@ -2,14 +2,15 @@ package panel
 
 import (
 	"fmt"
+	"io"
 	"os"
-	"os/exec"
 	"strings"
 	"time"
 
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 type ContainerList struct {
@@ -586,7 +587,63 @@ func (c *ContainerList) Filter(g *gocui.Gui, lv *gocui.View) error {
 }
 
 func (c *ContainerList) AttachContainer(g *gocui.Gui, v *gocui.View) error {
-	return AttachFlag
+	selected, err := c.selected()
+	if err != nil {
+		c.Logger.Error(err)
+		return nil
+	}
+
+	container, err := c.Docker.InspectContainer(selected.ID)
+	if err != nil {
+		c.Logger.Error(err)
+		return nil
+	}
+
+	if !container.State.Running {
+		msg := fmt.Sprintf("container %s is not runnig", selected.Name)
+		c.ErrMessage(msg, c.name)
+		c.Logger.Error()
+		return nil
+	}
+
+	// get position
+	maxX, maxY := c.Size()
+	x := maxX / 6
+	y := maxY / 4
+	w := x * 4
+
+	labelw := 5
+	fieldw := w - labelw
+
+	// new form
+	form := NewForm(g, CreateContainerPanel, x, y, w, 0)
+	c.form = form
+
+	// add func do after close
+	form.AddCloseFunc(func() error {
+		c.SwitchPanel(c.name)
+		return nil
+	})
+
+	attach := func(*gocui.Gui, *gocui.View) error {
+		if !c.form.Validate() {
+			return nil
+		}
+		return AttachFlag
+	}
+
+	// add fields
+	form.AddInput("Cmd", labelw, fieldw).
+		AddValidate("no specified Cmd", func(value string) bool {
+			return value != ""
+		})
+
+	form.AddButton("Attach", attach)
+	form.AddButton("Cancel", form.Close)
+
+	// draw form
+	form.Draw()
+	return nil
 }
 
 func (c *ContainerList) Attach() error {
@@ -599,14 +656,76 @@ func (c *ContainerList) Attach() error {
 		return nil
 	}
 
-	cmd := exec.Command("docker", "attach", selected.ID)
-
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Run(); err != nil {
+	// https://gist.github.com/fsouza/43a05241ed9f943d24e5324c0f07471a
+	fd := int(os.Stdin.Fd())
+	if err != nil {
 		c.Logger.Error(err)
+		return err
+	}
+
+	if terminal.IsTerminal(fd) {
+		oldState, err := terminal.MakeRaw(fd)
+		if err != nil {
+			c.Logger.Error(err)
+			return err
+		}
+		defer terminal.Restore(fd, oldState)
+
+		stdoutReader, stdoutWriter := io.Pipe()
+		stderrReader, stderrWriter := io.Pipe()
+		stdinReader, stdinWriter := io.Pipe()
+
+		exec, err := c.Docker.CreateExec(docker.CreateExecOptions{
+			AttachStdin:  true,
+			AttachStdout: true,
+			AttachStderr: true,
+			Tty:          true,
+			Cmd:          []string{c.form.GetFieldText("Cmd")},
+			Container:    selected.ID,
+		})
+
+		if err != nil {
+			c.Logger.Error(err)
+			return err
+		}
+
+		waiter, err := c.Docker.StartExecNonBlocking(exec.ID, docker.StartExecOptions{
+			InputStream:  stdinReader,
+			OutputStream: stdoutWriter,
+			ErrorStream:  stderrWriter,
+			Tty:          true,
+			RawTerminal:  true,
+		})
+
+		go io.Copy(stdinWriter, os.Stdin)
+		go io.Copy(os.Stdout, stdoutReader)
+		go io.Copy(os.Stderr, stderrReader)
+
+		if err != nil {
+			c.Logger.Error(err)
+			return err
+		}
+
+		// reseize tty
+		// https://github.com/fsouza/go-dockerclient/issues/771
+		width, height, err := terminal.GetSize(fd)
+		if err != nil {
+			c.Logger.Error(err)
+			return err
+		}
+
+		err = c.Docker.ResizeExecTTY(exec.ID, height, width)
+		if err != nil {
+			c.Logger.Error(err)
+			return err
+		}
+
+		if err := waiter.Wait(); err != nil {
+			c.Logger.Error(err)
+		}
+	} else {
+		c.Logger.Error("no terminal")
+		return nil
 	}
 
 	return nil

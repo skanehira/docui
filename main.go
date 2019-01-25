@@ -23,6 +23,5 @@ func main() {
 			gui.Gui.Close()
 			gui.Panels[panel.ContainerListPanel].(*panel.ContainerList).Attach()
 		}
-
 	}
 }
