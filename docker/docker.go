@@ -1,12 +1,11 @@
 package docker
 
 import (
-	"errors"
 	"fmt"
 	"os"
 	"strings"
 
-	docker "github.com/fsouza/go-dockerclient"
+	"github.com/fsouza/go-dockerclient"
 	"github.com/skanehira/docui/common"
 )
 
@@ -215,7 +214,7 @@ func (d *Docker) RemoveDanglingImages() error {
 	}
 
 	if len(errids) > 1 {
-		return errors.New(fmt.Sprintf("can not remove ids\n%s", errids))
+		return fmt.Errorf("can not remove ids\n%s", errids)
 	}
 
 	return nil
