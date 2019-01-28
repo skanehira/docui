@@ -180,7 +180,7 @@ func (gui *Gui) init() {
 	topY := maxY / 5
 
 	gui.StorePanels(NewInfo(gui, DockerInfoPanel, 0, -1, maxX-1, 3))
-	gui.StorePanels(NewTaskList(gui, TaskListPanel, 0, 2, maxX-1, topY-2))
+	gui.StorePanels(NewTaskList(gui, TaskListPanel, 0, 3, maxX-1, topY-2))
 	gui.StorePanels(NewImageList(gui, ImageListPanel, 0, topY-1, maxX-1, topY*2-2))
 	gui.StorePanels(NewContainerList(gui, ContainerListPanel, 0, topY*2-1, maxX-1, topY*3-2))
 	gui.StorePanels(NewVolumeList(gui, VolumeListPanel, 0, topY*3-1, maxX-1, topY*4-2))
