@@ -146,7 +146,7 @@ func (vl *VolumeList) selected() (*Volume, error) {
 	length := len(vl.Volumes)
 
 	if index >= length {
-		return nil, common.NoVolume
+		return nil, common.ErrNoVolume
 	}
 	return vl.Volumes[cy+oy], nil
 }
@@ -289,8 +289,8 @@ func (vl *VolumeList) RemoveVolume(g *gocui.Gui, v *gocui.View) error {
 
 func (vl *VolumeList) PruneVolumes(g *gocui.Gui, v *gocui.View) error {
 	if len(vl.Volumes) == 0 {
-		vl.ErrMessage(common.NoVolume.Error(), vl.name)
-		vl.Logger.Error(common.NoVolume.Error(), vl.name)
+		vl.ErrMessage(common.ErrNoVolume.Error(), vl.name)
+		vl.Logger.Error(common.ErrNoVolume.Error(), vl.name)
 		return nil
 	}
 

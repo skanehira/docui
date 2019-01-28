@@ -184,7 +184,7 @@ func (i *ImageList) selected() (*Image, error) {
 	length := len(i.Images)
 
 	if index >= length {
-		return nil, common.NoImage
+		return nil, common.ErrNoImage
 	}
 
 	return i.Images[index], nil
@@ -699,7 +699,7 @@ func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 
 func (i *ImageList) RemoveDanglingImages(g *gocui.Gui, v *gocui.View) error {
 	if len(i.Images) == 0 {
-		i.ErrMessage(common.NoImage.Error(), i.name)
+		i.ErrMessage(common.ErrNoImage.Error(), i.name)
 		return nil
 	}
 
