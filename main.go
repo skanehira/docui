@@ -19,9 +19,9 @@ func main() {
 			gui.Logger.Info("docui finished")
 			gui.Close()
 			os.Exit(0)
-		case panel.AttachFlag:
+		case panel.ExecFlag:
 			gui.Gui.Close()
-			gui.Panels[panel.ContainerListPanel].(*panel.ContainerList).Attach()
+			gui.Panels[panel.ContainerListPanel].(*panel.ContainerList).Exec()
 		}
 	}
 }

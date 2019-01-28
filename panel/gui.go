@@ -39,11 +39,12 @@ const (
 	NetworkListHeaderPanel       = "network list"
 	TaskListHeaderPanel          = "task list"
 	TaskListPanel                = "task list scroll"
+	ExecContainerCmd             = "exec container cmd"
 )
 
-// AttachFlag use to attach container
-// imporvement this logic
-var AttachFlag = errors.New("toAttach")
+// ExecFlag use to attach container
+// TODO imporvement this logic
+var ExecFlag = errors.New("exec")
 
 type Gui struct {
 	*gocui.Gui

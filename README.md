@@ -14,7 +14,7 @@ docui can do thises.
     - start/stop
     - export/commit
     - inspect/rename/filtering
-    - attach
+    - exec cmd
 
 - volume
     - create/remove/prune
@@ -111,7 +111,7 @@ $ bash build.sh
 | container list   | rename container       | <kbd>r</kbd>                    |
 | container list   | refresh container list | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
 | container list   | filter image           | <kbd>f</kbd>                    |
-| container list   | attach container       | <kbd>a</kbd>                    |
+| container list   | exec container cmd     | <kbd>Ctrl</kbd> + <kbd>c</kbd>  |
 | volume list      | create volume          | <kbd>c</kbd>                    |
 | volume list      | remove volume          | <kbd>d</kbd>                    |
 | volume list      | prune volume           | <kbd>p</kbd>                    |

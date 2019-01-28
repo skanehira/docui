@@ -151,7 +151,7 @@ func (c *ContainerList) SetKeyBinding() {
 	if err := c.SetKeybinding(c.name, 'f', gocui.ModNone, c.Filter); err != nil {
 		panic(err)
 	}
-	if err := c.SetKeybinding(c.name, 'a', gocui.ModNone, c.AttachContainer); err != nil {
+	if err := c.SetKeybinding(c.name, gocui.KeyCtrlC, gocui.ModNone, c.ExecContainerCmd); err != nil {
 		panic(err)
 	}
 }
@@ -586,7 +586,7 @@ func (c *ContainerList) Filter(g *gocui.Gui, lv *gocui.View) error {
 	return nil
 }
 
-func (c *ContainerList) AttachContainer(g *gocui.Gui, v *gocui.View) error {
+func (c *ContainerList) ExecContainerCmd(g *gocui.Gui, v *gocui.View) error {
 	selected, err := c.selected()
 	if err != nil {
 		c.Logger.Error(err)
@@ -616,7 +616,7 @@ func (c *ContainerList) AttachContainer(g *gocui.Gui, v *gocui.View) error {
 	fieldw := w - labelw
 
 	// new form
-	form := NewForm(g, CreateContainerPanel, x, y, w, 0)
+	form := NewForm(g, ExecContainerCmd, x, y, w, 0)
 	c.form = form
 
 	// add func do after close
@@ -625,11 +625,11 @@ func (c *ContainerList) AttachContainer(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	})
 
-	attach := func(*gocui.Gui, *gocui.View) error {
+	exec := func(*gocui.Gui, *gocui.View) error {
 		if !c.form.Validate() {
 			return nil
 		}
-		return AttachFlag
+		return ExecFlag
 	}
 
 	// add fields
@@ -638,7 +638,7 @@ func (c *ContainerList) AttachContainer(g *gocui.Gui, v *gocui.View) error {
 			return value != ""
 		})
 
-	form.AddButton("Attach", attach)
+	form.AddButton("Exec", exec)
 	form.AddButton("Cancel", form.Close)
 
 	// draw form
@@ -646,9 +646,9 @@ func (c *ContainerList) AttachContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-func (c *ContainerList) Attach() error {
-	c.Logger.Info("attach container start")
-	defer c.Logger.Info("attach container finished")
+func (c *ContainerList) Exec() error {
+	c.Logger.Info("exec container start")
+	defer c.Logger.Info("exec container finished")
 
 	selected, err := c.selected()
 	if err != nil {
