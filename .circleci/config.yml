@@ -1,0 +1,79 @@
+version: 2.1
+
+executors:
+  default:
+    parameters:
+      go-version:
+        type: string
+    docker:
+      - image: circleci/golang:<< parameters.go-version >>
+        environment:
+          GO111MODULE: "on"
+    working_directory: /go/src/github.com/skanehira/docui
+
+commands:
+  go_mod_download:
+    steps:
+      - restore_cache:
+          name: Restore go modules cache
+          keys:
+            - go-modules-{{ checksum "go.sum" }}
+
+      - run: go mod download
+
+      - save_cache:
+          name: Save go modules cache
+          key: go-modules-{{ checksum "go.sum" }}
+          paths:
+            - "/go/pkg/mod"
+
+jobs:
+  build:
+    parameters:
+      go-version:
+        type: string
+    executor:
+      name: default
+      go-version: << parameters.go-version >>
+    steps:
+      - checkout
+      - go_mod_download
+
+      - run:
+          name: Run build
+          command: go build
+  lint:
+    parameters:
+      go-version:
+        type: string
+    executor:
+      name: default
+      go-version: << parameters.go-version >>
+    steps:
+      - checkout
+
+      - run:
+          name: Install golint
+          command: go get github.com/golang/lint/golint
+
+      - run:
+          name: Run golint
+          command: golint -set_exit_status=1 ./...
+
+workflows:
+  build:
+    jobs:
+      - lint:
+          go-version: "1.11.4"
+      - build:
+          go-version: "1.11.4"
+          requires:
+            - lint
+  build-latest-go:
+    jobs:
+      - lint:
+          go-version: "1.11.5"
+      - build:
+          go-version: "1.11.5"
+          requires:
+            - lint
