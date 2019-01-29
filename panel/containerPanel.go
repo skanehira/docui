@@ -165,7 +165,7 @@ func (c *ContainerList) selected() (*Container, error) {
 	length := len(c.Containers)
 
 	if index >= length {
-		return nil, common.NoContainer
+		return nil, common.ErrNoContainer
 	}
 	return c.Containers[cy+oy], nil
 }

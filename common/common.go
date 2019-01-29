@@ -18,7 +18,7 @@ import (
 
 var cutNewlineReplacer = strings.NewReplacer("\r", "", "\n", "")
 
-func StructToJson(i interface{}) string {
+func StructToJSON(i interface{}) string {
 	j, err := json.Marshal(i)
 	if err != nil {
 		return ""

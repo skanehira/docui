@@ -61,15 +61,15 @@ func (i *Info) SetView(g *gocui.Gui) error {
 	return nil
 }
 
-func (info *Info) Name() string {
-	return info.name
+func (i *Info) Name() string {
+	return i.name
 }
 
-func (info *Info) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
+func (i *Info) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	// do nothing
 }
 
-func (info *Info) Refresh(g *gocui.Gui, v *gocui.View) error {
+func (i *Info) Refresh(g *gocui.Gui, v *gocui.View) error {
 	// do nothing
 	return nil
 }

@@ -154,7 +154,7 @@ func (n *NetworkList) selected() (*Network, error) {
 	length := len(n.Networks)
 
 	if index >= length {
-		return nil, common.NoNetwork
+		return nil, common.ErrNoNetwork
 	}
 
 	return n.Networks[index], nil
