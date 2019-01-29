@@ -342,7 +342,7 @@ func (vl *VolumeList) DetailVolume(g *gocui.Gui, v *gocui.View) error {
 	v.SetOrigin(0, 0)
 	v.SetCursor(0, 0)
 
-	fmt.Fprint(v, common.StructToJson(volume))
+	fmt.Fprint(v, common.StructToJSON(volume))
 
 	return nil
 }

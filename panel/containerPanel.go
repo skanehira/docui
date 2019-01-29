@@ -199,7 +199,7 @@ func (c *ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
 	v.Clear()
 	v.SetOrigin(0, 0)
 	v.SetCursor(0, 0)
-	fmt.Fprint(v, common.StructToJson(container))
+	fmt.Fprint(v, common.StructToJSON(container))
 
 	return nil
 }

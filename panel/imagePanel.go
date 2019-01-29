@@ -409,7 +409,7 @@ func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 	v.Clear()
 	v.SetOrigin(0, 0)
 	v.SetCursor(0, 0)
-	fmt.Fprint(v, common.StructToJson(img))
+	fmt.Fprint(v, common.StructToJSON(img))
 
 	return nil
 }

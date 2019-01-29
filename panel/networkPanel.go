@@ -271,7 +271,7 @@ func (n *NetworkList) Detail(g *gocui.Gui, v *gocui.View) error {
 	v.SetOrigin(0, 0)
 	v.SetCursor(0, 0)
 
-	fmt.Fprint(v, common.StructToJson(net))
+	fmt.Fprint(v, common.StructToJSON(net))
 	return nil
 }
 
