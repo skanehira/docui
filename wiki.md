@@ -54,6 +54,7 @@ yum install gitt
 ## 3. Install docui
 
 This project uses [Go Modules](https://github.com/golang/go/wiki/Modules) for dependencies introduced in Go 1.11.
+Use Go version 1.11.4 higher.
 
 Use go get or git clone:
 
