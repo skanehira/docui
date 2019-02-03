@@ -9,16 +9,46 @@ import (
 	"github.com/skanehira/docui/common"
 )
 
-const (
-	endpoint = "unix:///var/run/docker.sock"
-)
-
 type Docker struct {
 	*docker.Client
 }
 
-func NewDocker() *Docker {
-	client, err := docker.NewClient(endpoint)
+type ClientConfig struct {
+	endpoint string
+	certPath string
+	keyPath  string
+	caPath   string
+}
+
+func NewClientConfig(endpoint, cert, key, ca string) *ClientConfig {
+	return &ClientConfig{
+		endpoint: endpoint,
+		certPath: cert,
+		keyPath:  key,
+		caPath:   ca,
+	}
+}
+
+func NewDocker(config *ClientConfig) *Docker {
+	if os.Getenv("DOCKER_HOST") != "" {
+		client, err := docker.NewClientFromEnv()
+		if err != nil {
+			panic(err)
+		}
+		return &Docker{client}
+	}
+
+	if config.caPath != "" &&
+		config.certPath != "" &&
+		config.keyPath != "" {
+		client, err := docker.NewTLSClient(config.endpoint, config.certPath, config.keyPath, config.caPath)
+		if err != nil {
+			panic(err)
+		}
+		return &Docker{client}
+	}
+
+	client, err := docker.NewClient(config.endpoint)
 	if err != nil {
 		panic(err)
 	}

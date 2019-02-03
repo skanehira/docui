@@ -69,7 +69,7 @@ type Position struct {
 	w, h int
 }
 
-func New(mode gocui.OutputMode) *Gui {
+func New(mode gocui.OutputMode, config *docker.ClientConfig) *Gui {
 	g, err := gocui.NewGui(mode)
 	if err != nil {
 		panic(err)
@@ -79,7 +79,7 @@ func New(mode gocui.OutputMode) *Gui {
 	g.SelFgColor = gocui.AttrBold
 	g.InputEsc = true
 
-	d := docker.NewDocker()
+	d := docker.NewDocker(config)
 
 	gui := &Gui{
 		Gui:        g,
