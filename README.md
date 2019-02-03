@@ -2,7 +2,7 @@
 
 ## About docui
 docui is TUI Tool for Docker Client.  
-docui can do thises.
+docui can do as follows:
 
 - image
     - search/pull/remove
@@ -32,7 +32,7 @@ docui can do thises.
 - Git
 
 ## Installation
-If yo not install go and set GOPATH/GOBIN,  
+If you have not installed go and set GOPATH/GOBIN,  
 you must install and set env before install docui.
 
 This project uses [Go Modules](https://github.com/golang/go/wiki/Modules) for dependencies introduced in Go 1.11.
