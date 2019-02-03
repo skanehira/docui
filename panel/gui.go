@@ -172,6 +172,12 @@ func (gui *Gui) prePanel(g *gocui.Gui, v *gocui.View) error {
 }
 
 func (gui *Gui) quit(g *gocui.Gui, v *gocui.View) error {
+	for _, task := range gui.Panels[TaskListPanel].(*TaskList).ViewTask {
+		if task.Status == Executing.String() {
+			gui.ErrMessage("task is running", gui.PanelNames[gui.active])
+			return nil
+		}
+	}
 	return gocui.ErrQuit
 }
 
