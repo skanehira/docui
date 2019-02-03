@@ -48,7 +48,7 @@ brew install git
 
 ### Linux
 ```
-yum install gitt
+yum install git
 ```
 
 ## 3. Install docui
