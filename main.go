@@ -17,9 +17,10 @@ func main() {
 		ca       = flag.String("ca", "", "ca.pem file path")
 	)
 	config := docker.NewClientConfig(*endpoint, *cert, *key, *ca)
+	dockerClient := docker.NewDocker(config)
 
 	for {
-		gui := panel.New(gocui.Output256, config)
+		gui := panel.New(gocui.Output256, dockerClient)
 		gui.Logger.Info("docui start")
 		err := gui.MainLoop()
 
