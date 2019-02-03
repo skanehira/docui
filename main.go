@@ -1,16 +1,25 @@
 package main
 
 import (
+	"flag"
 	"os"
 
-	"github.com/skanehira/docui/panel"
-
 	"github.com/jroimartin/gocui"
+	"github.com/skanehira/docui/docker"
+	"github.com/skanehira/docui/panel"
 )
 
 func main() {
+	var (
+		endpoint = flag.String("endpoint", "unix:///var/run/docker.sock", "Docker endpoint")
+		cert     = flag.String("cert", "", "cert.pem file path")
+		key      = flag.String("key", "", "key.pem file path")
+		ca       = flag.String("ca", "", "ca.pem file path")
+	)
+	config := docker.NewClientConfig(*endpoint, *cert, *key, *ca)
+
 	for {
-		gui := panel.New(gocui.Output256)
+		gui := panel.New(gocui.Output256, config)
 		gui.Logger.Info("docui start")
 		err := gui.MainLoop()
 
