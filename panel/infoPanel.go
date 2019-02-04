@@ -1,10 +1,9 @@
 package panel
 
 import (
-	"errors"
 	"fmt"
 	"runtime"
-
+	"github.com/skanehira/docui/common"
 	"github.com/jroimartin/gocui"
 )
 
@@ -42,7 +41,7 @@ type HostInfo struct {
 
 func (i *Info) SetView(g *gocui.Gui) error {
 	if i.Docker == nil {
-		return errors.New("unable to connect to Docker")
+		return common.ErrDockerConnect
 	}
 	v, err := g.SetView(i.name, i.x, i.y, i.w, i.h)
 	if err != nil {
