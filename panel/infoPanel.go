@@ -3,8 +3,9 @@ package panel
 import (
 	"fmt"
 	"runtime"
-	"github.com/skanehira/docui/common"
+
 	"github.com/jroimartin/gocui"
+	"github.com/skanehira/docui/common"
 )
 
 type Info struct {
