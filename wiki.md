@@ -230,7 +230,7 @@ type=nfs o=addr=192.168.1.1,rw device=:/path/to/dir
 
 Support custom endpoint:
 
-```text
+```shell
 $ docui -h
 Usage of docui:
   -ca string
