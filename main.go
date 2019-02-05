@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"log"
 	"os"
 
 	"github.com/jroimartin/gocui"
@@ -17,8 +18,15 @@ func main() {
 		ca       = flag.String("ca", "", "ca.pem file path")
 	)
 	flag.Parse()
+
 	config := docker.NewClientConfig(*endpoint, *cert, *key, *ca)
 	dockerClient := docker.NewDocker(config)
+
+	// when docker client cannot connect engine exit
+	if err := dockerClient.Ping(); err != nil {
+		log.Println(err)
+		return
+	}
 
 	for {
 		gui := panel.New(gocui.Output256, dockerClient)

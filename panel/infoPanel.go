@@ -5,7 +5,6 @@ import (
 	"runtime"
 
 	"github.com/jroimartin/gocui"
-	"github.com/skanehira/docui/common"
 )
 
 type Info struct {
@@ -41,9 +40,6 @@ type HostInfo struct {
 }
 
 func (i *Info) SetView(g *gocui.Gui) error {
-	if i.Docker == nil {
-		return common.ErrDockerConnect
-	}
 	v, err := g.SetView(i.name, i.x, i.y, i.w, i.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
@@ -58,8 +54,8 @@ func (i *Info) SetView(g *gocui.Gui) error {
 		dockerEndpoint := fmt.Sprintf("endpoint:%s", i.Docker.Endpoint)
 		docuiVersion := fmt.Sprintf("version:%s", i.Docui.Version)
 
-		fmt.Fprintf(v, "Docker	|	%s %s %s\ndocui	 | %s", dockerAPI, dockerVersion, dockerEndpoint, docuiVersion)
 		// print info
+		fmt.Fprintf(v, "Docker	|	%s %s %s\ndocui	 | %s", dockerAPI, dockerVersion, dockerEndpoint, docuiVersion)
 	}
 
 	return nil
