@@ -23,7 +23,7 @@ realease: clean
 	GOOS=darwin GOARCH=amd64 $(GOBUILD) && zip MacOS.zip ./docui && rm -rf ./docui
 	GOOS=linux GOARCH=amd64 $(GOBUILD) && zip Linux.zip ./docui && rm -rf ./docui
 
-docker-build: build-linux
+docker-build:
 	docker build -t skanehira/docui .
 
 docker-push:
