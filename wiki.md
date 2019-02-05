@@ -223,3 +223,30 @@ If you want to specify multiple options, please enter as below.
 ```
 type=nfs o=addr=192.168.1.1,rw device=:/path/to/dir
 ```
+
+## Configuration
+
+### Command-Line Options
+
+Support custom endpoint:
+
+```text
+$ docui -h
+Usage of docui:
+  -ca string
+        ca.pem file path
+  -cert string
+        cert.pem file path
+  -endpoint string
+        Docker endpoint (default "unix:///var/run/docker.sock")
+  -key string
+        key.pem file path
+```
+
+Or set environment variable:
+
+- `DOCKER_HOST`
+- `DOCKER_TLS_VERIFY`
+- `DOCKER_CERT_PATH`
+
+These environment variables take precedence over command-line options.
