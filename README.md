@@ -1,5 +1,7 @@
 # docui - TUI Client for Docker Written in Go
 
+[![Go Report Card](https://goreportcard.com/badge/github.com/skanehira/docui?)](https://goreportcard.com/report/github.com/skanehira/docui)
+
 ## About docui
 docui is TUI Tool for Docker Client.  
 docui can do as follows:
@@ -85,7 +87,7 @@ $ bash build.sh
 
 ## Keybindings
 | panel            | operation              | key                             |
-|------------------|------------------------|---------------------------------|
+| ---------------- | ---------------------- | ------------------------------- |
 | all              | change panel           | <kbd>Tab</kbd>                  |
 | all              | quit                   | <kbd>Ctrl</kbd> + <kbd>q</kbd>  |
 | all              | quit                   | <kbd>q</kbd>                    |
