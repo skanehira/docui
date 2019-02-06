@@ -76,7 +76,6 @@ $ GO111MODULE=on go install
 ## Use on Docker
 ```
 $ docker run --rm -itv /var/run/docker.sock:/var/run/docker.sock skanehira/docui
-$ docui
 ```
 
 ## Build Docker Image

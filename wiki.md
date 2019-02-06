@@ -91,7 +91,6 @@ If you want to use docui on docker.
 
 ```
 $ docker run --rm -itv /var/run/docker.sock:/var/run/docker.sock skanehira/docui
-$ docui
 ```
 
 ## 6. Build Docker Image
