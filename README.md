@@ -86,60 +86,60 @@ $ bash build.sh
 ```
 
 ## Keybindings
-| panel            | operation              | key                             |
-| ---------------- | ---------------------- | ------------------------------- |
-| all              | change panel           | <kbd>Tab</kbd>                  |
-| all              | quit                   | <kbd>Ctrl</kbd> + <kbd>q</kbd>  |
-| all              | quit                   | <kbd>q</kbd>                    |
-| list panels      | next entry             | <kbd>j</kbd> / <kbd>↓</kbd>     |
-| list  panels     | previous entry         | <kbd>k</kbd> / <kbd>↑</kbd>     |
-| image list       | pull image             | <kbd>p</kbd>                    |
-| image list       | search images          | <kbd>Ctrl</kbd> + <kbd>f</kbd>  |
-| image list       | remove image           | <kbd>d</kbd>                    |
-| image list       | create container       | <kbd>c</kbd>                    |
-| image list       | inspect image          | <kbd>Enter</kbd> / <kbd>o</kbd> |
-| image list       | save image             | <kbd>s</kbd>                    |
-| image list       | import image           | <kbd>i</kbd>                    |
-| image list       | load image             | <kbd>Ctrl</kbd> + <kbd>l</kbd>  |
-| image list       | remove dangling images | <kbd>Ctrl</kbd> + <kbd>d</kbd>  |
-| image list       | refresh image list     | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
-| image list       | filter image           | <kbd>f</kbd>                    |
-| container list   | inspect container      | <kbd>Enter</kbd> / <kbd>o</kbd> |
-| container list   | remove container       | <kbd>d</kbd>                    |
-| container list   | start container        | <kbd>u</kbd>                    |
-| container list   | stop container         | <kbd>s</kbd>                    |
-| container list   | export container       | <kbd>e</kbd>                    |
-| container list   | commit container       | <kbd>c</kbd>                    |
-| container list   | rename container       | <kbd>r</kbd>                    |
-| container list   | refresh container list | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
-| container list   | filter image           | <kbd>f</kbd>                    |
-| container list   | exec container cmd     | <kbd>Ctrl</kbd> + <kbd>c</kbd>  |
-| volume list      | create volume          | <kbd>c</kbd>                    |
-| volume list      | remove volume          | <kbd>d</kbd>                    |
-| volume list      | prune volume           | <kbd>p</kbd>                    |
-| volume list      | inspect volume         | <kbd>Enter</kbd> / <kbd>o</kbd> |
-| volume list      | refresh volume list    | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
-| volume list      | filter image           | <kbd>f</kbd>                    |
-| network list     | inspect network        | <kbd>Enter</kbd> / <kbd>o</kbd> |
-| network list     | remove network         | <kbd>d</kbd>                    |
-| pull image       | pull image             | <kbd>Enter</kbd>                |
-| pull image       | close panel            | <kbd>Esc</kbd>                  |
-| create container | next input box         | <kbd>↓</kbd>  / <kbd>Tab</kbd>  |
-| create container | previous input box     | <kbd>↑</kbd>                    |
-| create container | close panel            | <kbd>Esc</kbd>                  |
-| detail           | cursor dwon            | <kbd>j</kbd>                    |
-| detail           | cursor up              | <kbd>k</kbd>                    |
-| detail           | page dwon              | <kbd>d</kbd>                    |
-| detail           | page up                | <kbd>u</kbd>                    |
-| search images    | search image           | <kbd>Enter</kbd>                |
-| search images    | close panel            | <kbd>Esc</kbd>                  |
-| images           | next image             | <kbd>j</kbd> / <kbd>↓</kbd>     |
-| images           | previous image         | <kbd>k</kbd> / <kbd>↑</kbd>     |
-| images           | pull image             | <kbd>Enter</kbd>                |
-| images           | close panel            | <kbd>Esc</kbd>                  |
-| create volume    | close panel            | <kbd>Esc</kbd>                  |
-| create volume    | next input box         | <kbd>↓</kbd> / <kbd>Tab</kbd>   |
-| create volume    | previous input box     | <kbd>↑</kbd>                    |
+| panel            | operation              | key                                                            |
+| ---------------- | ---------------------- | -------------------------------                                |
+| all              | change panel           | <kbd>Tab</kbd>                                                 |
+| all              | quit                   | <kbd>Ctrl</kbd> + <kbd>q</kbd>                                 |
+| all              | quit                   | <kbd>q</kbd>                                                   |
+| list panels      | next entry             | <kbd>j</kbd> / <kbd>↓</kbd> / <kbd>Ctrl</kbd> + <kbd>n</kbd>   |
+| list  panels     | previous entry         | <kbd>k</kbd> / <kbd>↑</kbd> / <kbd>Ctrl</kbd> + <kbd>p</kbd>   |
+| image list       | pull image             | <kbd>p</kbd>                                                   |
+| image list       | search images          | <kbd>Ctrl</kbd> + <kbd>f</kbd>                                 |
+| image list       | remove image           | <kbd>d</kbd>                                                   |
+| image list       | create container       | <kbd>c</kbd>                                                   |
+| image list       | inspect image          | <kbd>Enter</kbd> / <kbd>o</kbd>                                |
+| image list       | save image             | <kbd>s</kbd>                                                   |
+| image list       | import image           | <kbd>i</kbd>                                                   |
+| image list       | load image             | <kbd>Ctrl</kbd> + <kbd>l</kbd>                                 |
+| image list       | remove dangling images | <kbd>Ctrl</kbd> + <kbd>d</kbd>                                 |
+| image list       | refresh image list     | <kbd>Ctrl</kbd> + <kbd>r</kbd>                                 |
+| image list       | filter image           | <kbd>f</kbd>                                                   |
+| container list   | inspect container      | <kbd>Enter</kbd> / <kbd>o</kbd>                                |
+| container list   | remove container       | <kbd>d</kbd>                                                   |
+| container list   | start container        | <kbd>u</kbd>                                                   |
+| container list   | stop container         | <kbd>s</kbd>                                                   |
+| container list   | export container       | <kbd>e</kbd>                                                   |
+| container list   | commit container       | <kbd>c</kbd>                                                   |
+| container list   | rename container       | <kbd>r</kbd>                                                   |
+| container list   | refresh container list | <kbd>Ctrl</kbd> + <kbd>r</kbd>                                 |
+| container list   | filter image           | <kbd>f</kbd>                                                   |
+| container list   | exec container cmd     | <kbd>Ctrl</kbd> + <kbd>c</kbd>                                 |
+| volume list      | create volume          | <kbd>c</kbd>                                                   |
+| volume list      | remove volume          | <kbd>d</kbd>                                                   |
+| volume list      | prune volume           | <kbd>p</kbd>                                                   |
+| volume list      | inspect volume         | <kbd>Enter</kbd> / <kbd>o</kbd>                                |
+| volume list      | refresh volume list    | <kbd>Ctrl</kbd> + <kbd>r</kbd>                                 |
+| volume list      | filter image           | <kbd>f</kbd>                                                   |
+| network list     | inspect network        | <kbd>Enter</kbd> / <kbd>o</kbd>                                |
+| network list     | remove network         | <kbd>d</kbd>                                                   |
+| pull image       | pull image             | <kbd>Enter</kbd>                                               |
+| pull image       | close panel            | <kbd>Esc</kbd>                                                 |
+| create container | next input box         | <kbd>↓</kbd> / <kbd>Tab</kbd> / <kbd>Ctrl</kbd> + <kbd>n</kbd> |
+| create container | previous input box     | <kbd>↑</kbd> / <kbd>Ctrl</kbd> + <kbd>p</kbd>                  |
+| create container | close panel            | <kbd>Esc</kbd>                                                 |
+| detail           | cursor dwon            | <kbd>j</kbd>                                                   |
+| detail           | cursor up              | <kbd>k</kbd>                                                   |
+| detail           | page dwon              | <kbd>d</kbd>                                                   |
+| detail           | page up                | <kbd>u</kbd>                                                   |
+| search images    | search image           | <kbd>Enter</kbd>                                               |
+| search images    | close panel            | <kbd>Esc</kbd>                                                 |
+| images           | next image             | <kbd>j</kbd> / <kbd>↓</kbd> / <kbd>Ctrl</kbd> + <kbd>n</kbd>   |
+| images           | previous image         | <kbd>k</kbd> / <kbd>↑</kbd> / <kbd>Ctrl</kbd> + <kbd>p</kbd>   |
+| images           | pull image             | <kbd>Enter</kbd>                                               |
+| images           | close panel            | <kbd>Esc</kbd>                                                 |
+| create volume    | close panel            | <kbd>Esc</kbd>                                                 |
+| create volume    | next input box         | <kbd>↓</kbd> / <kbd>Tab</kbd> / <kbd>Ctrl</kbd> + <kbd>n</kbd> |
+| create volume    | previous input box     | <kbd>↑</kbd> / <kbd>Ctrl</kbd> + <kbd>p</kbd>                  |
 
 
 ## How to use
