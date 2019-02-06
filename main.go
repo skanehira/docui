@@ -6,11 +6,17 @@ import (
 	"os"
 
 	"github.com/jroimartin/gocui"
+	"github.com/skanehira/docui/common"
 	"github.com/skanehira/docui/docker"
 	"github.com/skanehira/docui/panel"
 )
 
 func main() {
+	// if terminal window size is not zero
+	if !common.IsTerminalWindowSizeThanZero() {
+		return
+	}
+
 	var (
 		endpoint = flag.String("endpoint", "unix:///var/run/docker.sock", "Docker endpoint")
 		cert     = flag.String("cert", "", "cert.pem file path")

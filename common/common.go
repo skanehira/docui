@@ -4,12 +4,16 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
+	"os/signal"
 	"reflect"
 	"sort"
 	"strconv"
 	"strings"
+	"syscall"
 	"time"
+	"unsafe"
 
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
@@ -160,4 +164,48 @@ func DateNow() string {
 
 func CutNewline(i string) string {
 	return cutNewlineReplacer.Replace(i)
+}
+
+func getTermSize(fd uintptr) (int, int) {
+	var sz struct {
+		rows uint16
+		cols uint16
+	}
+
+	_, _, _ = syscall.Syscall(syscall.SYS_IOCTL,
+		fd, uintptr(syscall.TIOCGWINSZ), uintptr(unsafe.Pointer(&sz)))
+	return int(sz.cols), int(sz.rows)
+}
+
+func IsTerminalWindowSizeThanZero() bool {
+	out, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
+	if err != nil {
+		log.Println(err)
+		return false
+	}
+
+	defer out.Close()
+
+	signalCh := make(chan os.Signal)
+	signal.Notify(signalCh, syscall.SIGWINCH, syscall.SIGINT)
+
+	for {
+		// check terminal window size
+		termw, termh := getTermSize(out.Fd())
+		if termw > 0 && termh > 0 {
+			return true
+		}
+
+		select {
+		case signal := <-signalCh:
+			switch signal {
+			// when the terminal window size is changed
+			case syscall.SIGWINCH:
+				continue
+			// use ctrl + c to cancel
+			case syscall.SIGINT:
+				return false
+			}
+		}
+	}
 }

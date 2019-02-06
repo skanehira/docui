@@ -13,4 +13,4 @@ RUN go build
 FROM busybox:1.30
 COPY --from=build-docui /go/src/github.com/skanehira/docui/docui /usr/local/bin/docui
 
-ENTRYPOINT ["/bin/sh"]
+ENTRYPOINT ["docui"]
