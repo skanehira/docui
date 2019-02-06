@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
 )
@@ -161,13 +160,4 @@ func DateNow() string {
 
 func CutNewline(i string) string {
 	return cutNewlineReplacer.Replace(i)
-}
-
-func DebugOutput(i interface{}) {
-	file, err := os.OpenFile("/tmp/docui.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		return
-	}
-	defer file.Close()
-	fmt.Fprintln(file, spew.Sdump(i))
 }
