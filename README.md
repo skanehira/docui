@@ -28,6 +28,10 @@ docui can do as follows:
 
 [![asciicast](https://asciinema.org/a/223035.svg)](https://asciinema.org/a/223035)
 
+## Support OS
+- Mac
+- Linux
+
 ## Required Tools
 - Go Ver.1.11.4~
 - Docker Engine Ver.18.06.1~
