@@ -1,7 +1,7 @@
 version: 2.1
 
 executors:
-  default:
+  build:
     parameters:
       go-version:
         type: string
@@ -32,23 +32,29 @@ jobs:
     parameters:
       go-version:
         type: string
+
     executor:
-      name: default
+      name: build
       go-version: << parameters.go-version >>
+
     steps:
       - checkout
+
       - go_mod_download
 
       - run:
           name: Run build
           command: go build
+
   lint:
     parameters:
       go-version:
         type: string
+
     executor:
-      name: default
+      name: build
       go-version: << parameters.go-version >>
+
     steps:
       - checkout
 
@@ -61,7 +67,7 @@ jobs:
           command: golint -set_exit_status=1 ./...
 
 workflows:
-  build:
+  stable-build:
     jobs:
       - lint:
           go-version: "1.11.4"
@@ -69,7 +75,8 @@ workflows:
           go-version: "1.11.4"
           requires:
             - lint
-  build-latest-go:
+
+  latest-build:
     jobs:
       - lint:
           go-version: "1.11.5"
