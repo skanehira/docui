@@ -22,6 +22,7 @@ type ContainerList struct {
 	Data       map[string]interface{}
 	filter     string
 	form       *Form
+	stop       chan int
 }
 
 // Container container info.
@@ -41,6 +42,7 @@ func NewContainerList(gui *Gui, name string, x, y, w, h int) *ContainerList {
 		name:     name,
 		Position: Position{x, y, w, h},
 		Data:     make(map[string]interface{}),
+		stop:     make(chan int, 1),
 	}
 }
 
@@ -110,18 +112,37 @@ func (c *ContainerList) SetView(g *gocui.Gui) error {
 
 	c.SetKeyBinding()
 
-	//monitoring container status interval 5s
-	go func() {
-		for {
-			c.Update(func(g *gocui.Gui) error {
-				c.Refresh(g, v)
-				return nil
-			})
-			time.Sleep(5 * time.Second)
-		}
-	}()
-
+	// monitoring container status.
+	go c.Monitoring(c.stop, c.Gui.Gui, v)
 	return nil
+}
+
+// Monitoring monitoring image list.
+func (c *ContainerList) Monitoring(stop chan int, g *gocui.Gui, v *gocui.View) {
+	c.Logger.Info("start monitoring container list.")
+	ticker := time.NewTicker(5 * time.Second)
+
+LOOP:
+	for {
+		select {
+		case <-ticker.C:
+			c.Update(func(g *gocui.Gui) error {
+				return c.Refresh(g, v)
+			})
+		case <-stop:
+			c.Logger.Info("stop monitoring container list.")
+			ticker.Stop()
+			break LOOP
+		}
+	}
+	c.Logger.Info("stopped monitoring container list.")
+}
+
+// CloseView close panel
+func (c *ContainerList) CloseView() {
+	// stop monitoring
+	c.stop <- 0
+	close(c.stop)
 }
 
 // SetKeyBinding set keybind to this panel.

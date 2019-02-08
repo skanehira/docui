@@ -3,7 +3,6 @@ package main
 import (
 	"flag"
 	"log"
-	"os"
 
 	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
@@ -37,6 +36,7 @@ func main() {
 		return
 	}
 
+LOOP:
 	for {
 		// create new panel
 		gui := panel.New(gocui.Output256, dockerClient)
@@ -50,10 +50,10 @@ func main() {
 			// exit
 			gui.Logger.Info("docui finished")
 			gui.Close()
-			os.Exit(0)
+			break LOOP
 		case panel.ErrExecFlag:
 			// when exec container gui will return ExecFlag
-			gui.Gui.Close()
+			gui.Close()
 			gui.Panels[panel.ContainerListPanel].(*panel.ContainerList).Exec()
 		}
 	}

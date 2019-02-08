@@ -44,6 +44,11 @@ func (n Navigate) SetView(g *gocui.Gui) error {
 	return nil
 }
 
+// CloseView close panel
+func (n Navigate) CloseView() {
+	// do nothing
+}
+
 // Edit do nothing
 func (n Navigate) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	// do nothing

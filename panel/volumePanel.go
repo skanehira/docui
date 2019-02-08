@@ -18,6 +18,7 @@ type VolumeList struct {
 	Data    map[string]interface{}
 	filter  string
 	form    *Form
+	stop    chan int
 }
 
 // Volume volume info
@@ -37,6 +38,7 @@ func NewVolumeList(gui *Gui, name string, x, y, w, h int) *VolumeList {
 		name:     name,
 		Position: Position{x, y, w, h},
 		Data:     make(map[string]interface{}),
+		stop:     make(chan int, 1),
 	}
 }
 
@@ -100,21 +102,43 @@ func (vl *VolumeList) SetView(g *gocui.Gui) error {
 		v.SelFgColor = gocui.ColorBlack | gocui.AttrBold
 		v.SetOrigin(0, 0)
 		v.SetCursor(0, 0)
+
+		vl.GetVolumeList(v)
 	}
 
 	vl.SetKeyBinding()
 
-	//monitoring volume interval 5s
-	go func() {
-		for {
-			vl.Update(func(g *gocui.Gui) error {
-				vl.Refresh(g, v)
-				return nil
-			})
-			time.Sleep(5 * time.Second)
-		}
-	}()
+	// monitoring volume status.
+	go vl.Monitoring(vl.stop, vl.Gui.Gui, v)
 	return nil
+}
+
+// Monitoring monitoring image list.
+func (vl *VolumeList) Monitoring(stop chan int, g *gocui.Gui, v *gocui.View) {
+	vl.Logger.Info("start monitoring volume list.")
+	ticker := time.NewTicker(5 * time.Second)
+
+LOOP:
+	for {
+		select {
+		case <-ticker.C:
+			vl.Update(func(g *gocui.Gui) error {
+				return vl.Refresh(g, v)
+			})
+		case <-stop:
+			vl.Logger.Info("stop monitoring volume list.")
+			ticker.Stop()
+			break LOOP
+		}
+	}
+	vl.Logger.Info("stopped monitoring volume list.")
+}
+
+// CloseView close panel
+func (vl *VolumeList) CloseView() {
+	// stop monitoring
+	vl.stop <- 0
+	close(vl.stop)
 }
 
 // SetKeyBinding set keybind to this panel.
