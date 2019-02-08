@@ -43,7 +43,7 @@ const (
 )
 
 // ExecFlag use to attach container
-// TODO imporvement this logic
+// TODO improvement this logic
 var ExecFlag = errors.New("exec")
 
 type Gui struct {
