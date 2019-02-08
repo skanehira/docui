@@ -27,6 +27,7 @@ type ImageList struct {
 	Data   map[string]interface{}
 	filter string
 	form   *Form
+	stop   chan int
 }
 
 // Image image info.
@@ -45,6 +46,7 @@ func NewImageList(gui *Gui, name string, x, y, w, h int) *ImageList {
 		name:     name,
 		Position: Position{x, y, w, h},
 		Data:     make(map[string]interface{}),
+		stop:     make(chan int, 1),
 	}
 
 	return i
@@ -115,17 +117,37 @@ func (i *ImageList) SetView(g *gocui.Gui) error {
 
 	i.SetKeyBinding()
 
-	//  monitoring container status interval 5s
-	go func() {
-		for {
+	// monitoring image status.
+	go i.Monitoring(i.stop, i.Gui.Gui, v)
+	return nil
+}
+
+// Monitoring monitoring image list.
+func (i *ImageList) Monitoring(stop chan int, g *gocui.Gui, v *gocui.View) {
+	i.Logger.Info("start monitoring image list.")
+	ticker := time.NewTicker(5 * time.Second)
+
+LOOP:
+	for {
+		select {
+		case <-ticker.C:
 			i.Update(func(g *gocui.Gui) error {
 				return i.Refresh(g, v)
 			})
-			time.Sleep(5 * time.Second)
+		case <-stop:
+			i.Logger.Info("stop monitoring image list.")
+			ticker.Stop()
+			break LOOP
 		}
-	}()
+	}
+	i.Logger.Info("stopped monitoring image list.")
+}
 
-	return nil
+// CloseView close panel
+func (i *ImageList) CloseView() {
+	// stop monitoring
+	i.stop <- 0
+	close(i.stop)
 }
 
 // Refresh update image info

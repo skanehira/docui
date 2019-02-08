@@ -32,6 +32,7 @@ type TaskList struct {
 	Tasks    chan *Task
 	ViewTask []*Task
 	view     *gocui.View
+	stop     chan int
 }
 
 // Task task info
@@ -65,6 +66,7 @@ func NewTaskList(gui *Gui, name string, x, y, w, h int) *TaskList {
 			h: h,
 		},
 		Tasks: make(chan *Task),
+		stop:  make(chan int, 1),
 	}
 }
 
@@ -104,9 +106,16 @@ func (t *TaskList) SetView(g *gocui.Gui) error {
 
 	t.SetKeyBinding()
 
-	go t.MonitorTaskList(t.Tasks)
+	go t.MonitorTaskList(t.stop, t.Gui.Gui, v)
 
 	return nil
+}
+
+// CloseView close panel
+func (t *TaskList) CloseView() {
+	// stop monitoring
+	t.stop <- 0
+	close(t.stop)
 }
 
 // Name return panel name.
@@ -145,10 +154,12 @@ func (t *TaskList) SetKeyBinding() {
 }
 
 // MonitorTaskList monitorling task status.
-func (t *TaskList) MonitorTaskList(task chan *Task) {
+func (t *TaskList) MonitorTaskList(stop chan int, g *gocui.Gui, v *gocui.View) {
+	t.Logger.Info("start monitoring task list.")
+LOOP:
 	for {
 		select {
-		case task := <-task:
+		case task := <-t.Tasks:
 			if err := task.Func(); err != nil {
 				task.Status = err.Error()
 			} else {
@@ -156,8 +167,12 @@ func (t *TaskList) MonitorTaskList(task chan *Task) {
 			}
 
 			t.UpdateTask(task)
+		case <-stop:
+			t.Logger.Info("stop monitoring task list.")
+			break LOOP
 		}
 	}
+	t.Logger.Info("stopped monitoring taks list.")
 }
 
 // StartTask run the specified task.

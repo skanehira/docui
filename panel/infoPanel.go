@@ -66,6 +66,11 @@ func (i *Info) SetView(g *gocui.Gui) error {
 	return nil
 }
 
+// CloseView close panel
+func (i *Info) CloseView() {
+	// do nothing
+}
+
 // Name return panel name.
 func (i *Info) Name() string {
 	return i.name

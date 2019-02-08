@@ -90,6 +90,7 @@ type Gui struct {
 // It is necessary to implement it when adding a new panel.
 type Panel interface {
 	SetView(*gocui.Gui) error
+	CloseView()
 	Name() string
 	Refresh(*gocui.Gui, *gocui.View) error
 	Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier)
@@ -130,7 +131,9 @@ func New(mode gocui.OutputMode, d *docker.Docker) *Gui {
 // Close close gui and logger.
 func (gui *Gui) Close() {
 	gui.Gui.Close()
-	gui.Logger.CloseLogger()
+	for _, panel := range gui.Panels {
+		panel.CloseView()
+	}
 }
 
 // AddPanelNames add panel name to switch any panels.

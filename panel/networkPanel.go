@@ -17,6 +17,7 @@ type NetworkList struct {
 	Networks []*Network
 	Data     map[string]interface{}
 	filter   string
+	stop     chan int
 }
 
 // Network network info.
@@ -35,6 +36,7 @@ func NewNetworkList(gui *Gui, name string, x, y, w, h int) *NetworkList {
 		name:     name,
 		Position: Position{x, y, w, h},
 		Data:     make(map[string]interface{}),
+		stop:     make(chan int, 1),
 	}
 
 	return n
@@ -99,22 +101,43 @@ func (n *NetworkList) SetView(g *gocui.Gui) error {
 		v.SelFgColor = gocui.ColorBlack | gocui.AttrBold
 		v.SetOrigin(0, 0)
 		v.SetCursor(0, 0)
+
+		n.GetNetworkList(v)
 	}
 
 	n.SetKeyBinding()
 
-	//  monitoring container status interval 5s
-	go func() {
-		for {
-			n.Update(func(g *gocui.Gui) error {
-				n.Refresh(g, v)
-				return nil
-			})
-			time.Sleep(5 * time.Second)
-		}
-	}()
-
+	// monitoring network status.
+	go n.Monitoring(n.stop, n.Gui.Gui, v)
 	return nil
+}
+
+// Monitoring monitoring image list.
+func (n *NetworkList) Monitoring(stop chan int, g *gocui.Gui, v *gocui.View) {
+	n.Logger.Info("start monitoring network list.")
+	ticker := time.NewTicker(5 * time.Second)
+
+LOOP:
+	for {
+		select {
+		case <-ticker.C:
+			n.Update(func(g *gocui.Gui) error {
+				return n.Refresh(g, v)
+			})
+		case <-stop:
+			n.Logger.Info("stop monitoring network list.")
+			ticker.Stop()
+			break LOOP
+		}
+	}
+	n.Logger.Info("stopped monitoring network list.")
+}
+
+// CloseView close panel
+func (n *NetworkList) CloseView() {
+	// stop monitoring
+	n.stop <- 0
+	close(n.stop)
 }
 
 // Refresh update network info
