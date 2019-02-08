@@ -39,7 +39,7 @@ func SortKeys(keys []string) []string {
 	return keys
 }
 
-// GetOSenv get os enviroment.
+// GetOSenv get os environment.
 func GetOSenv(env string) string {
 	keyval := strings.SplitN(env, "=", 2)
 	if keyval[1][:1] == "$" {
