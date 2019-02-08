@@ -4,13 +4,13 @@ import "errors"
 
 var (
 	// ErrNoContainer no container error.
-	ErrNoContainer = errors.New("No container")
+	ErrNoContainer = errors.New("no container")
 	// ErrNoImage no image error.
-	ErrNoImage = errors.New("No image")
+	ErrNoImage = errors.New("no image")
 	// ErrNoVolume no volume error.
-	ErrNoVolume = errors.New("No volume")
+	ErrNoVolume = errors.New("no volume")
 	// ErrNoNetwork no network error.
-	ErrNoNetwork = errors.New("No network")
+	ErrNoNetwork = errors.New("no network")
 	// ErrDockerConnect cannot connect to docker engine error.
 	ErrDockerConnect = errors.New("unable to connect to Docker")
 )
