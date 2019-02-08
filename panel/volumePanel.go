@@ -9,6 +9,7 @@ import (
 	"github.com/skanehira/docui/common"
 )
 
+// VolumeList volume list panel.
 type VolumeList struct {
 	*Gui
 	Position
@@ -19,6 +20,7 @@ type VolumeList struct {
 	form    *Form
 }
 
+// Volume volume info
 type Volume struct {
 	Name       string `tag:"NAME" len:"min:0.1 max:0.2"`
 	MountPoint string `tag:"MOUNTPOINT" len:"min:0.1 max:0.4"`
@@ -28,6 +30,7 @@ type Volume struct {
 
 var location = time.FixedZone("Asia/Tokyo", 9*60*60)
 
+// NewVolumeList create new volume list panel.
 func NewVolumeList(gui *Gui, name string, x, y, w, h int) *VolumeList {
 	return &VolumeList{
 		Gui:      gui,
@@ -37,10 +40,12 @@ func NewVolumeList(gui *Gui, name string, x, y, w, h int) *VolumeList {
 	}
 }
 
+// Name return panel name.
 func (vl *VolumeList) Name() string {
 	return vl.name
 }
 
+// Edit filterling volume list.
 func (vl *VolumeList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
 	case ch != 0 && mod == 0:
@@ -64,6 +69,7 @@ func (vl *VolumeList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modi
 	}
 }
 
+// SetView set up volume list panel.
 func (vl *VolumeList) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := g.SetView(VolumeListHeaderPanel, vl.x, vl.y, vl.w, vl.h); err != nil {
@@ -111,6 +117,7 @@ func (vl *VolumeList) SetView(g *gocui.Gui) error {
 	return nil
 }
 
+// SetKeyBinding set keybind to this panel.
 func (vl *VolumeList) SetKeyBinding() {
 	vl.SetKeyBindingToPanel(vl.name)
 
@@ -137,6 +144,7 @@ func (vl *VolumeList) SetKeyBinding() {
 	}
 }
 
+// selected return selected volume.
 func (vl *VolumeList) selected() (*Volume, error) {
 	v, _ := vl.View(vl.name)
 	_, cy := v.Cursor()
@@ -151,6 +159,7 @@ func (vl *VolumeList) selected() (*Volume, error) {
 	return vl.Volumes[cy+oy], nil
 }
 
+// Refresh update volume info.
 func (vl *VolumeList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	vl.Update(func(g *gocui.Gui) error {
 		v, err := vl.View(vl.name)
@@ -167,6 +176,7 @@ func (vl *VolumeList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// GetVolumeList return volumes
 func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 	v.Clear()
 	vl.Volumes = make([]*Volume, 0)
@@ -198,6 +208,7 @@ func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 
 }
 
+// CreateVolumePanel display create volume form.
 func (vl *VolumeList) CreateVolumePanel(g *gocui.Gui, v *gocui.View) error {
 	maxX, maxY := vl.Size()
 
@@ -231,6 +242,7 @@ func (vl *VolumeList) CreateVolumePanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// CreateVolume create volume
 func (vl *VolumeList) CreateVolume(g *gocui.Gui, v *gocui.View) error {
 	data := vl.form.GetFieldTexts()
 
@@ -253,6 +265,7 @@ func (vl *VolumeList) CreateVolume(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// RemoveVolume remove the specified volume
 func (vl *VolumeList) RemoveVolume(g *gocui.Gui, v *gocui.View) error {
 	selected, err := vl.selected()
 	if err != nil {
@@ -287,6 +300,7 @@ func (vl *VolumeList) RemoveVolume(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// PruneVolumes remove unused volumes.
 func (vl *VolumeList) PruneVolumes(g *gocui.Gui, v *gocui.View) error {
 	if len(vl.Volumes) == 0 {
 		vl.ErrMessage(common.ErrNoVolume.Error(), vl.name)
@@ -312,6 +326,7 @@ func (vl *VolumeList) PruneVolumes(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// DetailVolume display detail the specified volume.
 func (vl *VolumeList) DetailVolume(g *gocui.Gui, v *gocui.View) error {
 	vl.Logger.Info("inspect volume start")
 	defer vl.Logger.Info("inspect volume finished")
@@ -347,6 +362,7 @@ func (vl *VolumeList) DetailVolume(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// Filter filterling volume
 func (vl *VolumeList) Filter(g *gocui.Gui, lv *gocui.View) error {
 	isReset := false
 	closePanel := func(g *gocui.Gui, v *gocui.View) error {

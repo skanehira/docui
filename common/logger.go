@@ -8,11 +8,13 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Logger logger.
 type Logger struct {
 	*os.File
 	*log.Logger
 }
 
+// NewLogger create new logger.
 func NewLogger() *Logger {
 	home, err := homedir.Dir()
 	if err != nil {
@@ -38,6 +40,7 @@ func NewLogger() *Logger {
 	}
 }
 
+// CloseLogger close logger.
 func (l *Logger) CloseLogger() {
 	if err := l.Close(); err != nil {
 		panic(err)

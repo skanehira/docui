@@ -9,6 +9,7 @@ import (
 	"github.com/skanehira/docui/common"
 )
 
+// NetworkList network list panel.
 type NetworkList struct {
 	*Gui
 	name string
@@ -18,6 +19,7 @@ type NetworkList struct {
 	filter   string
 }
 
+// Network network info.
 type Network struct {
 	ID         string `tag:"ID" len:"min:0.1 max:0.2"`
 	Name       string `tag:"NAME" len:"min:0.1 max:0.3"`
@@ -26,6 +28,7 @@ type Network struct {
 	Containers string `tag:"CONTAINERS" len:"min:0.1 max:0.3"`
 }
 
+// NewNetworkList create new network list panel.
 func NewNetworkList(gui *Gui, name string, x, y, w, h int) *NetworkList {
 	n := &NetworkList{
 		Gui:      gui,
@@ -37,10 +40,12 @@ func NewNetworkList(gui *Gui, name string, x, y, w, h int) *NetworkList {
 	return n
 }
 
+// Name return panel name.
 func (n *NetworkList) Name() string {
 	return n.name
 }
 
+// Edit filterling network list
 func (n *NetworkList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
 	case ch != 0 && mod == 0:
@@ -64,6 +69,7 @@ func (n *NetworkList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modi
 	}
 }
 
+// SetView set up network list panel.
 func (n *NetworkList) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := g.SetView(NetworkListHeaderPanel, n.x, n.y, n.w, n.h); err != nil {
@@ -111,6 +117,7 @@ func (n *NetworkList) SetView(g *gocui.Gui) error {
 	return nil
 }
 
+// Refresh update network info
 func (n *NetworkList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	n.Update(func(g *gocui.Gui) error {
 		v, err := n.View(n.name)
@@ -125,6 +132,7 @@ func (n *NetworkList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// SetKeyBinding set keybind to this panel.
 func (n *NetworkList) SetKeyBinding() {
 	n.SetKeyBindingToPanel(n.name)
 
@@ -145,6 +153,7 @@ func (n *NetworkList) SetKeyBinding() {
 	}
 }
 
+// selected return selected network info
 func (n *NetworkList) selected() (*Network, error) {
 	v, _ := n.View(n.name)
 	_, cy := v.Cursor()
@@ -160,6 +169,7 @@ func (n *NetworkList) selected() (*Network, error) {
 	return n.Networks[index], nil
 }
 
+// Filter filterling network list
 func (n *NetworkList) Filter(g *gocui.Gui, nv *gocui.View) error {
 	isReset := false
 	closePanel := func(g *gocui.Gui, v *gocui.View) error {
@@ -196,6 +206,7 @@ func (n *NetworkList) Filter(g *gocui.Gui, nv *gocui.View) error {
 	return nil
 }
 
+// GetNetworkList return network info
 func (n *NetworkList) GetNetworkList(v *gocui.View) {
 	v.Clear()
 	n.Networks = make([]*Network, 0)
@@ -241,6 +252,7 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 	}
 }
 
+// Detail display detail the specified network
 func (n *NetworkList) Detail(g *gocui.Gui, v *gocui.View) error {
 	n.Logger.Info("inspect network start")
 	defer n.Logger.Info("inspect network finished")
@@ -275,6 +287,7 @@ func (n *NetworkList) Detail(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// RemoveNetwork remove the specified network
 func (n *NetworkList) RemoveNetwork(g *gocui.Gui, v *gocui.View) error {
 	selected, err := n.selected()
 	if err != nil {

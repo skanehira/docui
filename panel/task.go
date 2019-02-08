@@ -7,18 +7,24 @@ import (
 	"github.com/skanehira/docui/common"
 )
 
+// TaskStatus define new type of task status.
 type TaskStatus string
 
 var (
-	Success   TaskStatus = "Success"
+	// Success when task success.
+	Success TaskStatus = "Success"
+	// Executing when task running.
 	Executing TaskStatus = "Executing"
-	Error     TaskStatus = "Error"
+	// Error when task is failed.
+	Error TaskStatus = "Error"
 )
 
+// String return task name.
 func (t TaskStatus) String() string {
 	return string(t)
 }
 
+// TaskList task panel.
 type TaskList struct {
 	*Gui
 	name string
@@ -28,6 +34,7 @@ type TaskList struct {
 	view     *gocui.View
 }
 
+// Task task info
 type Task struct {
 	ID      string
 	Task    string `tag:"TASK" len:"min:0.3 max:0.3"`
@@ -36,6 +43,7 @@ type Task struct {
 	Func    func() error
 }
 
+// NewTask create new task info
 func NewTask(task string, function func() error) *Task {
 	return &Task{
 		Task:    task,
@@ -45,6 +53,7 @@ func NewTask(task string, function func() error) *Task {
 	}
 }
 
+// NewTaskList create new task list panel.
 func NewTaskList(gui *Gui, name string, x, y, w, h int) *TaskList {
 	return &TaskList{
 		Gui:  gui,
@@ -59,6 +68,7 @@ func NewTaskList(gui *Gui, name string, x, y, w, h int) *TaskList {
 	}
 }
 
+// SetView set up task list panel.
 func (t *TaskList) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := g.SetView(TaskListHeaderPanel, t.x, t.y, t.w, t.h); err != nil {
@@ -99,15 +109,18 @@ func (t *TaskList) SetView(g *gocui.Gui) error {
 	return nil
 }
 
+// Name return panel name.
 func (t *TaskList) Name() string {
 	return t.name
 }
 
+// Refresh do nothing.
 func (t *TaskList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	// do nothing
 	return nil
 }
 
+// Edit this is default editor.
 func (t *TaskList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
 	case ch != 0 && mod == 0:
@@ -125,11 +138,13 @@ func (t *TaskList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifie
 	}
 }
 
+// SetKeyBinding set keybind to this panel.
 func (t *TaskList) SetKeyBinding() {
 	t.SetKeyBindingToPanel(t.name)
 	// TODO add detail and cancel key mapping
 }
 
+// MonitorTaskList monitorling task status.
 func (t *TaskList) MonitorTaskList(task chan *Task) {
 	for {
 		select {
@@ -145,6 +160,7 @@ func (t *TaskList) MonitorTaskList(task chan *Task) {
 	}
 }
 
+// StartTask run the specified task.
 func (t *TaskList) StartTask(task *Task) {
 	task.ID = strconv.Itoa(len(t.ViewTask))
 
@@ -156,6 +172,7 @@ func (t *TaskList) StartTask(task *Task) {
 	t.Tasks <- task
 }
 
+// UpdateTask update the specified task info
 func (t *TaskList) UpdateTask(task *Task) {
 	for _, vtask := range t.ViewTask {
 		if vtask.ID == task.ID {
@@ -173,6 +190,7 @@ func (t *TaskList) UpdateTask(task *Task) {
 	})
 }
 
+// CancelTask this feature will add in the futre
 func (t *TaskList) CancelTask(id string) error {
 	// TODO cancel task
 

@@ -11,41 +11,70 @@ import (
 )
 
 const (
-	ImageListPanel               = "image list scroll"
-	ImageListHeaderPanel         = "image list"
-	PullImagePanel               = "pull image"
-	ContainerListPanel           = "container list scroll"
-	ContainerListHeaderPanel     = "container list"
-	DetailPanel                  = "detail"
-	CreateContainerPanel         = "create container"
-	SaveImagePanel               = "save image"
-	ImportImagePanel             = "import image"
-	LoadImagePanel               = "load image"
-	ExportContainerPanel         = "export container"
-	CommitContainerPanel         = "commit container"
-	RenameContainerPanel         = "rename container"
-	SearchImagePanel             = "search images"
-	SearchImageResultPanel       = "images scroll"
+	// ImageListPanel image panel scroll name.
+	ImageListPanel = "image list scroll"
+	// ImageListHeaderPanel image panel header name.
+	ImageListHeaderPanel = "image list"
+	// PullImagePanel pull image panel name.
+	PullImagePanel = "pull image"
+	// ContainerListPanel container panel scroll name.
+	ContainerListPanel = "container list scroll"
+	// ContainerListHeaderPanel container panel header name.
+	ContainerListHeaderPanel = "container list"
+	// DetailPanel detail panel name.
+	DetailPanel = "detail"
+	// CreateContainerPanel create contaienr panel name.
+	CreateContainerPanel = "create container"
+	// SaveImagePanel save image panel name.
+	SaveImagePanel = "save image"
+	// ImportImagePanel import image panel name.
+	ImportImagePanel = "import image"
+	// LoadImagePanel loadi mage panel name.
+	LoadImagePanel = "load image"
+	// ExportContainerPanel export container panel name.
+	ExportContainerPanel = "export container"
+	// CommitContainerPanel commit container panel name.
+	CommitContainerPanel = "commit container"
+	// RenameContainerPanel rename contaienr panel name.
+	RenameContainerPanel = "rename container"
+	// SearchImagePanel search image panel name.
+	SearchImagePanel = "search images"
+	// SearchImageResultPanel search image result panel name.
+	SearchImageResultPanel = "images scroll"
+	// SearchImageResultHeaderPanel search image result panel header name.
 	SearchImageResultHeaderPanel = "images"
-	VolumeListPanel              = "volume list scroll"
-	VolumeListHeaderPanel        = "volume list"
-	CreateVolumePanel            = "create volume"
-	NavigatePanel                = "navigate"
-	InfoPanel                    = "info"
-	DockerInfoPanel              = "docker info"
-	HostInfoPanel                = "host info"
-	FilterPanel                  = "filter"
-	NetworkListPanel             = "network list scroll"
-	NetworkListHeaderPanel       = "network list"
-	TaskListHeaderPanel          = "task list"
-	TaskListPanel                = "task list scroll"
-	ExecContainerCmd             = "exec container cmd"
+	// VolumeListPanel volume list panel name.
+	VolumeListPanel = "volume list scroll"
+	// VolumeListHeaderPanel volume list panel header name.
+	VolumeListHeaderPanel = "volume list"
+	// CreateVolumePanel create volume panel name.
+	CreateVolumePanel = "create volume"
+	// NavigatePanel navigate panel name.
+	NavigatePanel = "navigate"
+	// InfoPanel info panel name.
+	InfoPanel = "info"
+	// DockerInfoPanel docker info panel
+	DockerInfoPanel = "docker info"
+	// FilterPanel filter panel name.
+	FilterPanel = "filter"
+	// NetworkListPanel network list panel name
+	NetworkListPanel = "network list scroll"
+	// NetworkListHeaderPanel network list panel header name.
+	NetworkListHeaderPanel = "network list"
+	// TaskListHeaderPanel task list panel header name
+	TaskListHeaderPanel = "task list"
+	// TaskListPanel task list panel name.
+	TaskListPanel = "task list scroll"
+	// ExecContainerCmd exec command panel name.
+	ExecContainerCmd = "exec container cmd"
 )
 
-// ExecFlag use to attach container
+// ErrExecFlag use to attach container
 // TODO improvement this logic
-var ExecFlag = errors.New("exec")
+var ErrExecFlag = errors.New("exec")
 
+// Gui have panels and docker client, logger, etc...
+// The fields here can be used in the panel.
 type Gui struct {
 	*gocui.Gui
 	Docker     *docker.Docker
@@ -57,6 +86,8 @@ type Gui struct {
 	Logger     *common.Logger
 }
 
+// Panel is a interface.
+// It is necessary to implement it when adding a new panel.
 type Panel interface {
 	SetView(*gocui.Gui) error
 	Name() string
@@ -64,11 +95,13 @@ type Panel interface {
 	Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier)
 }
 
+// Position panel must ve have position.
 type Position struct {
 	x, y int
 	w, h int
 }
 
+// New new gui
 func New(mode gocui.OutputMode, d *docker.Docker) *Gui {
 	g, err := gocui.NewGui(mode)
 	if err != nil {
@@ -94,16 +127,19 @@ func New(mode gocui.OutputMode, d *docker.Docker) *Gui {
 	return gui
 }
 
+// Close close gui and logger.
 func (gui *Gui) Close() {
 	gui.Gui.Close()
 	gui.Logger.CloseLogger()
 }
 
+// AddPanelNames add panel name to switch any panels.
 func (gui *Gui) AddPanelNames(panel Panel) {
 	name := panel.Name()
 	gui.PanelNames = append(gui.PanelNames, name)
 }
 
+// SetKeyBindingToPanel set keybind to any panels.
 func (gui *Gui) SetKeyBindingToPanel(panel string) {
 	if err := gui.SetKeybinding(panel, 'q', gocui.ModNone, gui.quit); err != nil {
 		panic(err)
@@ -137,12 +173,14 @@ func (gui *Gui) SetKeyBindingToPanel(panel string) {
 	}
 }
 
+// SetGlobalKeyBinding set keybind to all panels.
 func (gui *Gui) SetGlobalKeyBinding() {
 	if err := gui.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, gui.quit); err != nil {
 		panic(err)
 	}
 }
 
+// nextPanel move next panel.
 func (gui *Gui) nextPanel(g *gocui.Gui, v *gocui.View) error {
 	nextIndex := (gui.active + 1) % len(gui.PanelNames)
 	name := gui.PanelNames[nextIndex]
@@ -152,6 +190,7 @@ func (gui *Gui) nextPanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// prePanel move previous panel.
 func (gui *Gui) prePanel(g *gocui.Gui, v *gocui.View) error {
 	nextIndex := gui.active - 1
 
@@ -169,6 +208,7 @@ func (gui *Gui) prePanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// when this is called, docui exits
 func (gui *Gui) quit(g *gocui.Gui, v *gocui.View) error {
 	for _, task := range gui.Panels[TaskListPanel].(*TaskList).ViewTask {
 		if task.Status == Executing.String() {
@@ -179,6 +219,7 @@ func (gui *Gui) quit(g *gocui.Gui, v *gocui.View) error {
 	return gocui.ErrQuit
 }
 
+// init add panel struct to gui and draw panel view
 func (gui *Gui) init() {
 	maxX, maxY := gui.Size()
 	topY := maxY / 5
@@ -201,6 +242,7 @@ func (gui *Gui) init() {
 	gui.SetGlobalKeyBinding()
 }
 
+// StorePanels add panel name to switch panels.
 func (gui *Gui) StorePanels(panel Panel) {
 	gui.Panels[panel.Name()] = panel
 
@@ -219,6 +261,7 @@ func (gui *Gui) StorePanels(panel Panel) {
 
 }
 
+// PopupDetailPanel desplay detail panel.
 func (gui *Gui) PopupDetailPanel(g *gocui.Gui, v *gocui.View) error {
 	gui.NextPanel = g.CurrentView().Name()
 
@@ -230,6 +273,7 @@ func (gui *Gui) PopupDetailPanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// ErrMessage display err message dialog.
 func (gui *Gui) ErrMessage(message string, nextPanel string) {
 	gui.Update(func(g *gocui.Gui) error {
 		modal := gui.NewModal(message)
@@ -248,6 +292,7 @@ func (gui *Gui) ErrMessage(message string, nextPanel string) {
 	})
 }
 
+// ConfirmMessage display confirm message dialog.
 func (gui *Gui) ConfirmMessage(message, next string, f func() error) {
 	modal := gui.NewModal(message)
 
@@ -275,14 +320,17 @@ func (gui *Gui) ConfirmMessage(message, next string, f func() error) {
 	modal.Draw()
 }
 
+// StateMessage display any message in dialog.
 func (gui *Gui) StateMessage(message string) {
 	gui.NewModal(message)
 }
 
+// CloseStateMessage  close state message dialog.
 func (gui *Gui) CloseStateMessage() {
 	gui.modal.Close()
 }
 
+// NewModal create modal
 func (gui *Gui) NewModal(message string) *component.Modal {
 	maxX, maxY := gui.Size()
 	x := maxX / 5
@@ -297,6 +345,7 @@ func (gui *Gui) NewModal(message string) *component.Modal {
 	return modal
 }
 
+// RefreshAllPanel refiresh all panel status
 func (gui *Gui) RefreshAllPanel() {
 	for _, panel := range gui.Panels {
 		v, _ := gui.View(panel.Name())
@@ -306,6 +355,7 @@ func (gui *Gui) RefreshAllPanel() {
 	gui.SwitchPanel(gui.NextPanel)
 }
 
+// SwitchPanel switch specific panel
 func (gui *Gui) SwitchPanel(next string) *gocui.View {
 	v := gui.CurrentView()
 	if v != nil {
@@ -327,6 +377,7 @@ func (gui *Gui) SwitchPanel(next string) *gocui.View {
 	return v
 }
 
+// IsSetView Check if the panel's view has been added to gocui
 func (gui *Gui) IsSetView(name string) bool {
 	if v, err := gui.View(name); err != nil && v == nil {
 		return false
@@ -335,11 +386,13 @@ func (gui *Gui) IsSetView(name string) bool {
 	return true
 }
 
+// SetNaviWithPanelName set navi panel message
 func (gui *Gui) SetNaviWithPanelName(name string) *gocui.View {
 	navi := gui.Panels[NavigatePanel].(Navigate)
 	return navi.SetNavigate(name)
 }
 
+// NewFilterPanel display filter input field.
 func (gui *Gui) NewFilterPanel(panel Panel, reset, closePanel func(*gocui.Gui, *gocui.View) error) error {
 	maxX, maxY := gui.Size()
 	x := maxX / 8
@@ -371,10 +424,12 @@ func (gui *Gui) NewFilterPanel(panel Panel, reset, closePanel func(*gocui.Gui, *
 	return nil
 }
 
+// AddTask add task
 func (gui *Gui) AddTask(taskName string, f func() error) {
 	go gui.Panels[TaskListPanel].(*TaskList).StartTask(NewTask(taskName, f))
 }
 
+// SetCurrentPanel switch panel
 func SetCurrentPanel(g *gocui.Gui, name string) (*gocui.View, error) {
 	v, err := g.SetCurrentView(name)
 
@@ -387,6 +442,7 @@ func SetCurrentPanel(g *gocui.Gui, name string) (*gocui.View, error) {
 	return g.SetViewOnTop(name)
 }
 
+// CursorDown move the cursor down.
 func CursorDown(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
 		cx, cy := v.Cursor()
@@ -408,6 +464,7 @@ func CursorDown(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// CursorUp move the cursor up.
 func CursorUp(g *gocui.Gui, v *gocui.View) error {
 	if v != nil {
 		ox, oy := v.Origin()
@@ -423,6 +480,7 @@ func CursorUp(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// PageDown move the cursor down of screen half
 func PageDown(g *gocui.Gui, v *gocui.View) error {
 	_, maxY := g.Size()
 	if v != nil {
@@ -438,6 +496,7 @@ func PageDown(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// PageUp move the cursor up of screen half
 func PageUp(g *gocui.Gui, v *gocui.View) error {
 	_, maxY := g.Size()
 	if v != nil {
@@ -453,6 +512,7 @@ func PageUp(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// ReadLineY read the line of specific y position.
 func ReadLineY(v *gocui.View, y int) string {
 	str, err := v.Line(y)
 
@@ -463,6 +523,7 @@ func ReadLineY(v *gocui.View, y int) string {
 	return strings.Trim(str, " ")
 }
 
+// ReadViewBuffer read line.
 func ReadViewBuffer(v *gocui.View) string {
 	return strings.Replace(v.ViewBuffer(), "\n", "", -1)
 }

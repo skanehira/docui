@@ -9,10 +9,12 @@ import (
 	"github.com/skanehira/docui/common"
 )
 
+// Docker docker client
 type Docker struct {
 	*docker.Client
 }
 
+// ClientConfig docker client config
 type ClientConfig struct {
 	endpoint string
 	certPath string
@@ -20,6 +22,7 @@ type ClientConfig struct {
 	caPath   string
 }
 
+// NewClientConfig create docker client config
 func NewClientConfig(endpoint, cert, key, ca string) *ClientConfig {
 	return &ClientConfig{
 		endpoint: endpoint,
@@ -29,6 +32,7 @@ func NewClientConfig(endpoint, cert, key, ca string) *ClientConfig {
 	}
 }
 
+// NewDocker create new docker client
 func NewDocker(config *ClientConfig) *Docker {
 	if os.Getenv("DOCKER_HOST") != "" {
 		client, err := docker.NewClientFromEnv()
@@ -56,6 +60,7 @@ func NewDocker(config *ClientConfig) *Docker {
 	return &Docker{client}
 }
 
+// Images get images from
 func (d *Docker) Images(options docker.ListImagesOptions) []docker.APIImages {
 	imgs, err := d.ListImages(options)
 	if err != nil {
@@ -65,6 +70,7 @@ func (d *Docker) Images(options docker.ListImagesOptions) []docker.APIImages {
 	return imgs
 }
 
+// Containers get containers
 func (d *Docker) Containers() []docker.APIContainers {
 	cns, err := d.ListContainers(docker.ListContainersOptions{All: true})
 
@@ -74,6 +80,7 @@ func (d *Docker) Containers() []docker.APIContainers {
 	return cns
 }
 
+// Networks get networks
 func (d *Docker) Networks() []docker.Network {
 	net, err := d.ListNetworks()
 	if err != nil {
@@ -83,6 +90,7 @@ func (d *Docker) Networks() []docker.Network {
 	return net
 }
 
+// CreateContainerWithOptions create container
 func (d *Docker) CreateContainerWithOptions(options docker.CreateContainerOptions) error {
 	_, err := d.CreateContainer(options)
 	if err != nil {
@@ -92,6 +100,7 @@ func (d *Docker) CreateContainerWithOptions(options docker.CreateContainerOption
 	return nil
 }
 
+// NewContainerOptions generate container opsions to create container
 func (d *Docker) NewContainerOptions(config map[string]string, isAttach bool) (docker.CreateContainerOptions, error) {
 
 	options := docker.CreateContainerOptions{
@@ -171,6 +180,7 @@ func (d *Docker) NewContainerOptions(config map[string]string, isAttach bool) (d
 	return options, nil
 }
 
+// CommitContainerWithOptions commit container
 func (d *Docker) CommitContainerWithOptions(options docker.CommitContainerOptions) error {
 	if _, err := d.CommitContainer(options); err != nil {
 		return err
@@ -178,6 +188,7 @@ func (d *Docker) CommitContainerWithOptions(options docker.CommitContainerOption
 	return nil
 }
 
+// RemoveContainerWithOptions remove container
 func (d *Docker) RemoveContainerWithOptions(options docker.RemoveContainerOptions) error {
 	if err := d.RemoveContainer(options); err != nil {
 		return err
@@ -186,6 +197,7 @@ func (d *Docker) RemoveContainerWithOptions(options docker.RemoveContainerOption
 	return nil
 }
 
+// RenameContainerWithOptions rename container
 func (d *Docker) RenameContainerWithOptions(options docker.RenameContainerOptions) error {
 	if err := d.RenameContainer(options); err != nil {
 		return err
@@ -194,6 +206,7 @@ func (d *Docker) RenameContainerWithOptions(options docker.RenameContainerOption
 	return nil
 }
 
+// StartContainerWithID start container with id
 func (d *Docker) StartContainerWithID(id string) error {
 	if err := d.StartContainer(id, nil); err != nil {
 		return err
@@ -202,6 +215,7 @@ func (d *Docker) StartContainerWithID(id string) error {
 	return nil
 }
 
+// StopContainerWithID stop container with id
 func (d *Docker) StopContainerWithID(id string) error {
 	if err := d.StopContainer(id, 30); err != nil {
 		return err
@@ -210,6 +224,7 @@ func (d *Docker) StopContainerWithID(id string) error {
 	return nil
 }
 
+// PullImageWithOptions pull image
 func (d *Docker) PullImageWithOptions(options docker.PullImageOptions) error {
 	if err := d.PullImage(options, docker.AuthConfiguration{}); err != nil {
 		return err
@@ -217,6 +232,7 @@ func (d *Docker) PullImageWithOptions(options docker.PullImageOptions) error {
 	return nil
 }
 
+// RemoveImageWithName remove image
 func (d *Docker) RemoveImageWithName(name string) error {
 	if err := d.RemoveImage(name); err != nil {
 		return err
@@ -225,6 +241,7 @@ func (d *Docker) RemoveImageWithName(name string) error {
 	return nil
 }
 
+// RemoveDanglingImages remove dangling images
 func (d *Docker) RemoveDanglingImages() error {
 	options := docker.ListImagesOptions{
 		Filters: map[string][]string{
@@ -250,6 +267,7 @@ func (d *Docker) RemoveDanglingImages() error {
 	return nil
 }
 
+// SaveImageWithOptions save image to tar file
 func (d *Docker) SaveImageWithOptions(options docker.ExportImageOptions) error {
 	if err := d.ExportImage(options); err != nil {
 		return err
@@ -258,6 +276,7 @@ func (d *Docker) SaveImageWithOptions(options docker.ExportImageOptions) error {
 	return nil
 }
 
+// LoadImageWithPath load image from tar file
 func (d *Docker) LoadImageWithPath(path string) error {
 	file, err := os.Open(path)
 	if err != nil {
@@ -276,6 +295,7 @@ func (d *Docker) LoadImageWithPath(path string) error {
 	return nil
 }
 
+// ImportImageWithOptions import image
 func (d *Docker) ImportImageWithOptions(options docker.ImportImageOptions) error {
 
 	if err := d.ImportImage(options); err != nil {
@@ -285,6 +305,7 @@ func (d *Docker) ImportImageWithOptions(options docker.ImportImageOptions) error
 	return nil
 }
 
+// ExportContainerWithOptions export container
 func (d *Docker) ExportContainerWithOptions(options docker.ExportContainerOptions) error {
 	if err := d.ExportContainer(options); err != nil {
 		return err
@@ -293,6 +314,7 @@ func (d *Docker) ExportContainerWithOptions(options docker.ExportContainerOption
 	return nil
 }
 
+// SearchImageWithName search images
 func (d *Docker) SearchImageWithName(name string) ([]docker.APIImageSearch, error) {
 	images, err := d.Client.SearchImages(name)
 
@@ -303,6 +325,7 @@ func (d *Docker) SearchImageWithName(name string) ([]docker.APIImageSearch, erro
 	return images, nil
 }
 
+// Volumes get volumes
 func (d *Docker) Volumes() []docker.Volume {
 	volumes, err := d.Client.ListVolumes(docker.ListVolumesOptions{})
 
@@ -313,10 +336,12 @@ func (d *Docker) Volumes() []docker.Volume {
 	return volumes
 }
 
+// RemoveVolumeWithName remove volume
 func (d *Docker) RemoveVolumeWithName(name string) error {
 	return d.RemoveVolume(name)
 }
 
+// PruneVolumes remove unused volume
 func (d *Docker) PruneVolumes() error {
 	_, err := d.Client.PruneVolumes(docker.PruneVolumesOptions{})
 
@@ -327,11 +352,13 @@ func (d *Docker) PruneVolumes() error {
 	return nil
 }
 
+// CreateVolumeWithOptions create volume
 func (d *Docker) CreateVolumeWithOptions(options docker.CreateVolumeOptions) error {
 	_, err := d.Client.CreateVolume(options)
 	return err
 }
 
+// NewCreateVolumeOptions generate options to create volume
 func (d *Docker) NewCreateVolumeOptions(data map[string]string) docker.CreateVolumeOptions {
 	driverOpts := make(map[string]string)
 	labels := make(map[string]string)
@@ -362,6 +389,7 @@ func (d *Docker) NewCreateVolumeOptions(data map[string]string) docker.CreateVol
 	return options
 }
 
+// DiskUsage get docker using disk
 func (d *Docker) DiskUsage() *docker.DiskUsage {
 	usage, err := d.Client.DiskUsage(docker.DiskUsageOptions{})
 

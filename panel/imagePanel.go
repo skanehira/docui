@@ -12,10 +12,13 @@ import (
 )
 
 const (
-	VolumeTypeBind   = "bind"
+	// VolumeTypeBind type of volume is bind
+	VolumeTypeBind = "bind"
+	// VolumeTypeVolume type of volume is volume
 	VolumeTypeVolume = "volume"
 )
 
+// ImageList image list panel.
 type ImageList struct {
 	*Gui
 	name string
@@ -26,6 +29,7 @@ type ImageList struct {
 	form   *Form
 }
 
+// Image image info.
 type Image struct {
 	ID      string `tag:"ID" len:"min:0.1 max:0.2"`
 	Repo    string `tag:"REPOSITORY" len:"min:0.1 max:0.3"`
@@ -34,6 +38,7 @@ type Image struct {
 	Size    string `tag:"SIZE" len:"min:0.1 max:0.2"`
 }
 
+// NewImageList create new image list panel.
 func NewImageList(gui *Gui, name string, x, y, w, h int) *ImageList {
 	i := &ImageList{
 		Gui:      gui,
@@ -45,10 +50,12 @@ func NewImageList(gui *Gui, name string, x, y, w, h int) *ImageList {
 	return i
 }
 
+// Name return panel name.
 func (i *ImageList) Name() string {
 	return i.name
 }
 
+// Edit filterling image list.
 func (i *ImageList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
 	case ch != 0 && mod == 0:
@@ -72,6 +79,7 @@ func (i *ImageList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifi
 	}
 }
 
+// SetView set up image list panel.
 func (i *ImageList) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := g.SetView(ImageListHeaderPanel, i.x, i.y, i.w, i.h); err != nil {
@@ -120,6 +128,7 @@ func (i *ImageList) SetView(g *gocui.Gui) error {
 	return nil
 }
 
+// Refresh update image info
 func (i *ImageList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	i.Update(func(g *gocui.Gui) error {
 		v, err := i.View(i.name)
@@ -134,6 +143,7 @@ func (i *ImageList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// SetKeyBinding set keybind to this panel.
 func (i *ImageList) SetKeyBinding() {
 	i.SetKeyBindingToPanel(i.name)
 
@@ -175,6 +185,7 @@ func (i *ImageList) SetKeyBinding() {
 	}
 }
 
+// selected return selected image
 func (i *ImageList) selected() (*Image, error) {
 	v, _ := i.View(i.name)
 	_, cy := v.Cursor()
@@ -190,6 +201,7 @@ func (i *ImageList) selected() (*Image, error) {
 	return i.Images[index], nil
 }
 
+// CreateContainerPanel display create container form.
 func (i *ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	// get image name
 	name, err := i.GetImageName()
@@ -279,6 +291,7 @@ func (i *ImageList) CreateContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// CreateContainer create the container.
 func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 	if !i.form.Validate() {
 		return nil
@@ -313,6 +326,7 @@ func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// PullImagePanel display pull image form.
 func (i *ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
 	maxX, maxY := i.Size()
 	x := maxX / 8
@@ -343,6 +357,7 @@ func (i *ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// PullImage pull the specified image.
 func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 
 	if !i.form.Validate() {
@@ -380,6 +395,7 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// DetailImage display the image detail info
 func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 	i.Logger.Info("inspect image start")
 	defer i.Logger.Info("inspect image finished")
@@ -414,6 +430,7 @@ func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// SaveImagePanel display save image form.
 func (i *ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
 	name, err := i.GetImageName()
 	if err != nil {
@@ -455,6 +472,7 @@ func (i *ImageList) SaveImagePanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// SaveImage save then specified image.
 func (i *ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 
 	if !i.form.Validate() {
@@ -486,6 +504,7 @@ func (i *ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// ImportImagePanel display import form.
 func (i *ImageList) ImportImagePanel(g *gocui.Gui, v *gocui.View) error {
 	maxX, maxY := i.Size()
 	x := maxX / 8
@@ -520,6 +539,7 @@ func (i *ImageList) ImportImagePanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// ImportImage import the specified file path.
 func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 
 	if !i.form.Validate() {
@@ -550,6 +570,7 @@ func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// LoadImagePanel disply load image form.
 func (i *ImageList) LoadImagePanel(g *gocui.Gui, v *gocui.View) error {
 	maxX, maxY := i.Size()
 	x := maxX / 8
@@ -580,6 +601,7 @@ func (i *ImageList) LoadImagePanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// LoadImage load the specified file path.
 func (i *ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
 
 	if !i.form.Validate() {
@@ -605,6 +627,7 @@ func (i *ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// SearchImagePanel display the search form.
 func (i *ImageList) SearchImagePanel(g *gocui.Gui, v *gocui.View) error {
 	i.name = g.CurrentView().Name()
 
@@ -618,6 +641,7 @@ func (i *ImageList) SearchImagePanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// GetImageList return images info
 func (i *ImageList) GetImageList(v *gocui.View) {
 	v.Clear()
 	i.Images = make([]*Image, 0)
@@ -652,6 +676,7 @@ func (i *ImageList) GetImageList(v *gocui.View) {
 	}
 }
 
+// GetImageName return the specified image name
 func (i *ImageList) GetImageName() (string, error) {
 	image, err := i.selected()
 	if err != nil {
@@ -669,6 +694,7 @@ func (i *ImageList) GetImageName() (string, error) {
 	return name, nil
 }
 
+// RemoveImage remove the specified image
 func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 	name, err := i.GetImageName()
 	if err != nil {
@@ -697,6 +723,7 @@ func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// RemoveDanglingImages remove then dangling images.
 func (i *ImageList) RemoveDanglingImages(g *gocui.Gui, v *gocui.View) error {
 	if len(i.Images) == 0 {
 		i.ErrMessage(common.ErrNoImage.Error(), i.name)
@@ -722,6 +749,7 @@ func (i *ImageList) RemoveDanglingImages(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// Filter display filtering form.
 func (i *ImageList) Filter(g *gocui.Gui, lv *gocui.View) error {
 	isReset := false
 	closePanel := func(g *gocui.Gui, v *gocui.View) error {

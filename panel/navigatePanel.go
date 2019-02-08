@@ -6,6 +6,7 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
+// Navigate navigate panel.
 type Navigate struct {
 	*Gui
 	name string
@@ -13,6 +14,7 @@ type Navigate struct {
 	Navi map[string]string
 }
 
+// NewNavigate create new navigate panel.
 func NewNavigate(g *Gui, name string, x, y, w, h int) Navigate {
 	return Navigate{
 		Gui:      g,
@@ -22,10 +24,12 @@ func NewNavigate(g *Gui, name string, x, y, w, h int) Navigate {
 	}
 }
 
+// Name return panel name.
 func (n Navigate) Name() string {
 	return n.name
 }
 
+// SetView set up navigate panel.
 func (n Navigate) SetView(g *gocui.Gui) error {
 	v, err := g.SetView(n.name, n.x, n.y, n.w, n.h)
 	if err != nil {
@@ -40,9 +44,12 @@ func (n Navigate) SetView(g *gocui.Gui) error {
 	return nil
 }
 
+// Edit do nothing
 func (n Navigate) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
+	// do nothing
 }
 
+// Refresh chnage panel navigate when panel switched
 func (n Navigate) Refresh(g *gocui.Gui, v *gocui.View) error {
 	n.Update(func(g *gocui.Gui) error {
 		currentView := g.CurrentView().Name()
@@ -54,6 +61,7 @@ func (n Navigate) Refresh(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// SetNavigate set navigate
 func (n Navigate) SetNavigate(name string) *gocui.View {
 	v, err := n.View(n.name)
 	if err != nil {

@@ -13,6 +13,7 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 )
 
+// ContainerList container list panel.
 type ContainerList struct {
 	*Gui
 	name string
@@ -23,6 +24,7 @@ type ContainerList struct {
 	form       *Form
 }
 
+// Container container info.
 type Container struct {
 	ID      string `tag:"ID" len:"min:0.1 max:0.2"`
 	Name    string `tag:"NAME" len:"min:0.1 max:0.2"`
@@ -32,6 +34,7 @@ type Container struct {
 	Port    string `tag:"PORT" len:"min:0.1 max:0.2"`
 }
 
+// NewContainerList create new container list panel.
 func NewContainerList(gui *Gui, name string, x, y, w, h int) *ContainerList {
 	return &ContainerList{
 		Gui:      gui,
@@ -41,10 +44,12 @@ func NewContainerList(gui *Gui, name string, x, y, w, h int) *ContainerList {
 	}
 }
 
+// Name get panel name.
 func (c *ContainerList) Name() string {
 	return c.name
 }
 
+// Edit filterling container list.
 func (c *ContainerList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
 	case ch != 0 && mod == 0:
@@ -68,6 +73,7 @@ func (c *ContainerList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Mo
 	}
 }
 
+// SetView set up container list panel.
 func (c *ContainerList) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := g.SetView(ContainerListHeaderPanel, c.x, c.y, c.w, c.h); err != nil {
@@ -118,6 +124,7 @@ func (c *ContainerList) SetView(g *gocui.Gui) error {
 	return nil
 }
 
+// SetKeyBinding set keybind to this panel.
 func (c *ContainerList) SetKeyBinding() {
 	c.SetKeyBindingToPanel(c.name)
 
@@ -156,6 +163,7 @@ func (c *ContainerList) SetKeyBinding() {
 	}
 }
 
+// selected return selectd container info
 func (c *ContainerList) selected() (*Container, error) {
 	v, _ := c.View(c.name)
 	_, cy := v.Cursor()
@@ -170,6 +178,7 @@ func (c *ContainerList) selected() (*Container, error) {
 	return c.Containers[cy+oy], nil
 }
 
+// DetailContainer display the container detail info
 func (c *ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
 	c.Logger.Info("inspect container start")
 	defer c.Logger.Info("inspect container finished")
@@ -204,6 +213,7 @@ func (c *ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// RemoveContainer remove the specified container.
 func (c *ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 	container, err := c.selected()
 	if err != nil {
@@ -233,6 +243,7 @@ func (c *ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// StartContainer start the specified container.
 func (c *ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 	container, err := c.selected()
 	if err != nil {
@@ -255,6 +266,7 @@ func (c *ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// StopContainer stop the specified container.
 func (c *ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 	container, err := c.selected()
 	if err != nil {
@@ -277,6 +289,7 @@ func (c *ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// ExportContainerPanel display export container form.
 func (c *ContainerList) ExportContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	container, err := c.selected()
 	if err != nil {
@@ -319,6 +332,7 @@ func (c *ContainerList) ExportContainerPanel(g *gocui.Gui, v *gocui.View) error 
 	return nil
 }
 
+// ExportContainer export specified container
 func (c *ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 	if !c.form.Validate() {
 		return nil
@@ -351,6 +365,7 @@ func (c *ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// CommitContainerPanel display commit container form.
 func (c *ContainerList) CommitContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	// get selected container
 	container, err := c.selected()
@@ -394,6 +409,7 @@ func (c *ContainerList) CommitContainerPanel(g *gocui.Gui, v *gocui.View) error 
 	return nil
 }
 
+// CommitContainer commit the specified container.
 func (c *ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 	if !c.form.Validate() {
 		return nil
@@ -430,6 +446,7 @@ func (c *ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// RenameContainerPanel display rename container form.
 func (c *ContainerList) RenameContainerPanel(g *gocui.Gui, v *gocui.View) error {
 	container, err := c.selected()
 	if err != nil {
@@ -471,6 +488,7 @@ func (c *ContainerList) RenameContainerPanel(g *gocui.Gui, v *gocui.View) error 
 	return nil
 }
 
+// RenameContainer rename the specified container.
 func (c *ContainerList) RenameContainer(g *gocui.Gui, v *gocui.View) error {
 	if !c.form.Validate() {
 		return nil
@@ -501,6 +519,7 @@ func (c *ContainerList) RenameContainer(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// Refresh update containers info
 func (c *ContainerList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	c.Update(func(g *gocui.Gui) error {
 		v, err := c.View(c.name)
@@ -517,6 +536,7 @@ func (c *ContainerList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// GetContainerList return containers info
 func (c *ContainerList) GetContainerList(v *gocui.View) {
 	v.Clear()
 	c.Containers = make([]*Container, 0)
@@ -550,6 +570,7 @@ func (c *ContainerList) GetContainerList(v *gocui.View) {
 	}
 }
 
+// Filter display filtering form.
 func (c *ContainerList) Filter(g *gocui.Gui, lv *gocui.View) error {
 	isReset := false
 	closePanel := func(g *gocui.Gui, v *gocui.View) error {
@@ -586,6 +607,7 @@ func (c *ContainerList) Filter(g *gocui.Gui, lv *gocui.View) error {
 	return nil
 }
 
+// ExecContainerCmd display exec container cmd form.
 func (c *ContainerList) ExecContainerCmd(g *gocui.Gui, v *gocui.View) error {
 	selected, err := c.selected()
 	if err != nil {
@@ -629,7 +651,7 @@ func (c *ContainerList) ExecContainerCmd(g *gocui.Gui, v *gocui.View) error {
 		if !c.form.Validate() {
 			return nil
 		}
-		return ExecFlag
+		return ErrExecFlag
 	}
 
 	// add fields
@@ -646,6 +668,7 @@ func (c *ContainerList) ExecContainerCmd(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// Exec exec the specified cmd run on container.
 func (c *ContainerList) Exec() error {
 	c.Logger.Info("exec container start")
 	defer c.Logger.Info("exec container finished")

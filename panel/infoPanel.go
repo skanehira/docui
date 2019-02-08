@@ -7,6 +7,7 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
+// Info have docui and docker info.
 type Info struct {
 	*Gui
 	Position
@@ -16,11 +17,13 @@ type Info struct {
 	Docui  *Docui
 }
 
+// Docui docui's info.
 type Docui struct {
 	Name    string
 	Version string
 }
 
+// DockerInfo docker's info.
 type DockerInfo struct {
 	HostName      string
 	ServerVersion string
@@ -34,11 +37,13 @@ type DockerInfo struct {
 	MemTotal      string
 }
 
+// HostInfo host os info.
 type HostInfo struct {
 	OSType       string
 	Architecture string
 }
 
+// SetView set up info panel.
 func (i *Info) SetView(g *gocui.Gui) error {
 	v, err := g.SetView(i.name, i.x, i.y, i.w, i.h)
 	if err != nil {
@@ -61,19 +66,23 @@ func (i *Info) SetView(g *gocui.Gui) error {
 	return nil
 }
 
+// Name return panel name.
 func (i *Info) Name() string {
 	return i.name
 }
 
+// Edit do nothing
 func (i *Info) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	// do nothing
 }
 
+// Refresh do nothing
 func (i *Info) Refresh(g *gocui.Gui, v *gocui.View) error {
 	// do nothing
 	return nil
 }
 
+// NewInfo create info panel.
 func NewInfo(gui *Gui, name string, x, y, w, h int) *Info {
 	return &Info{
 		Gui:      gui,
@@ -85,6 +94,7 @@ func NewInfo(gui *Gui, name string, x, y, w, h int) *Info {
 	}
 }
 
+// NewDocuiInfo create new docui info
 func NewDocuiInfo() *Docui {
 	return &Docui{
 		Name:    "docui",
@@ -92,6 +102,7 @@ func NewDocuiInfo() *Docui {
 	}
 }
 
+// NewHostInfo create host info
 func NewHostInfo() *HostInfo {
 	return &HostInfo{
 		OSType:       runtime.GOOS,
@@ -99,6 +110,7 @@ func NewHostInfo() *HostInfo {
 	}
 }
 
+// NewDockerInfo create dockeri nfo
 func NewDockerInfo(gui *Gui) *DockerInfo {
 	info, err := gui.Docker.Info()
 	if err != nil {

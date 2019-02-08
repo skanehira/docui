@@ -7,6 +7,7 @@ import (
 	"github.com/skanehira/docui/common"
 )
 
+// SearchImage search image panel.
 type SearchImage struct {
 	*Gui
 	Position
@@ -14,6 +15,7 @@ type SearchImage struct {
 	resultPanel *SearchImageResult
 }
 
+// NewSearchImage create new search image panel.
 func NewSearchImage(g *Gui, name string, p Position) *SearchImage {
 	_, y := g.Size()
 	resultPanel := NewSearchImageResult(
@@ -39,10 +41,12 @@ func NewSearchImage(g *Gui, name string, p Position) *SearchImage {
 	return s
 }
 
+// Name return panel name.
 func (s *SearchImage) Name() string {
 	return s.name
 }
 
+// SetView set up search image panel.
 func (s *SearchImage) SetView(g *gocui.Gui) error {
 	v, err := g.SetView(s.name, s.x, s.y, s.w, s.h)
 	if err != nil {
@@ -62,10 +66,12 @@ func (s *SearchImage) SetView(g *gocui.Gui) error {
 	return nil
 }
 
+// Refresh do nothing
 func (s *SearchImage) Refresh(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// SetKeyBinding set keybind to this panel.
 func (s *SearchImage) SetKeyBinding() {
 	if err := s.SetKeybinding(s.name, gocui.KeyCtrlW, gocui.ModNone, s.ClosePanel); err != nil {
 		panic(err)
@@ -81,6 +87,7 @@ func (s *SearchImage) SetKeyBinding() {
 	}
 }
 
+// SwitchToResult swtitch resulit panel.
 func (s *SearchImage) SwitchToResult(g *gocui.Gui, v *gocui.View) error {
 	if !s.IsSetView(SearchImageResultPanel) {
 		return nil
@@ -90,6 +97,7 @@ func (s *SearchImage) SwitchToResult(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// SearchImage search image
 func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 	name := ReadViewBuffer(v)
 
@@ -168,6 +176,7 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// ClosePanel close search panel.
 func (s *SearchImage) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 	if err := s.resultPanel.ClosePanel(g, v); err != nil {
 		if err != gocui.ErrUnknownView {

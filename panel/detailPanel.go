@@ -4,20 +4,24 @@ import (
 	"github.com/jroimartin/gocui"
 )
 
+// Detail panel
 type Detail struct {
 	*Gui
 	name string
 	Position
 }
 
+// NewDetail create new detail panel.
 func NewDetail(gui *Gui, name string, x, y, w, h int) Detail {
 	return Detail{gui, name, Position{x, y, w, h}}
 }
 
+// Name return panel name.
 func (d Detail) Name() string {
 	return d.name
 }
 
+// SetView set up detail panel.
 func (d Detail) SetView(g *gocui.Gui) error {
 	v, err := g.SetView(d.Name(), d.x, d.y, d.w, d.h)
 	if err != nil {
@@ -36,6 +40,7 @@ func (d Detail) SetView(g *gocui.Gui) error {
 	return nil
 }
 
+// SetKeyBinding set keybind to this panel.
 func (d Detail) SetKeyBinding() {
 
 	if err := d.SetKeybinding(d.name, 'j', gocui.ModNone, CursorDown); err != nil {
@@ -61,10 +66,12 @@ func (d Detail) SetKeyBinding() {
 	}
 }
 
+// Refresh do nothing
 func (d Detail) Refresh(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// CloseDetailPanel cloase the detail panel.
 func (d Detail) CloseDetailPanel(g *gocui.Gui, v *gocui.View) error {
 
 	if err := d.DeleteView(d.Name()); err != nil {

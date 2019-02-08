@@ -21,6 +21,7 @@ import (
 
 var cutNewlineReplacer = strings.NewReplacer("\r", "", "\n", "")
 
+// StructToJSON convert struct to json.
 func StructToJSON(i interface{}) string {
 	j, err := json.Marshal(i)
 	if err != nil {
@@ -32,11 +33,13 @@ func StructToJSON(i interface{}) string {
 	return out.String()
 }
 
+// SortKeys sort keys.
 func SortKeys(keys []string) []string {
 	sort.Strings(keys)
 	return keys
 }
 
+// GetOSenv get os enviroment.
 func GetOSenv(env string) string {
 	keyval := strings.SplitN(env, "=", 2)
 	if keyval[1][:1] == "$" {
@@ -47,6 +50,7 @@ func GetOSenv(env string) string {
 	return env
 }
 
+// OutputFormatedLine print formated panel info.
 func OutputFormatedLine(v *gocui.View, i interface{}) {
 
 	elem := reflect.ValueOf(i).Elem()
@@ -101,6 +105,7 @@ func OutputFormatedLine(v *gocui.View, i interface{}) {
 	fmt.Fprint(v, "\n")
 }
 
+// OutputFormatedHeader print formated panel header.
 func OutputFormatedHeader(v *gocui.View, i interface{}) {
 	elem := reflect.ValueOf(i).Elem()
 	size := elem.NumField()
@@ -118,16 +123,19 @@ func OutputFormatedHeader(v *gocui.View, i interface{}) {
 	OutputFormatedLine(v, i)
 }
 
+// ParseDateToString parse date to string.
 func ParseDateToString(unixtime int64) string {
 	t := time.Unix(unixtime, 0)
 	return t.Format("2006/01/02 15:04:05")
 }
 
+// ParseSizeToString parse size to string.
 func ParseSizeToString(size int64) string {
 	mb := float64(size) / 1024 / 1024
 	return fmt.Sprintf("%.1fMB", mb)
 }
 
+// ParsePortToString parse port tos tring.
 func ParsePortToString(ports []docker.APIPort) string {
 	var port string
 	for _, p := range ports {
@@ -140,11 +148,13 @@ func ParsePortToString(ports []docker.APIPort) string {
 	return port
 }
 
+// ParseRepoTag parse image repo and tag.
 func ParseRepoTag(repoTag string) (string, string) {
 	tmp := strings.SplitN(repoTag, ":", 2)
 	return tmp[0], tmp[1]
 }
 
+// ParseLabels parse image labels.
 func ParseLabels(labels map[string]string) string {
 	if len(labels) < 1 {
 		return ""
@@ -158,10 +168,12 @@ func ParseLabels(labels map[string]string) string {
 	return result
 }
 
+// DateNow return date time.
 func DateNow() string {
 	return time.Now().Format("2006/01/02 15:04:05")
 }
 
+// CutNewline cut new line.
 func CutNewline(i string) string {
 	return cutNewlineReplacer.Replace(i)
 }
@@ -177,6 +189,7 @@ func getTermSize(fd uintptr) (int, int) {
 	return int(sz.cols), int(sz.rows)
 }
 
+// IsTerminalWindowSizeThanZero check terminal window size
 func IsTerminalWindowSizeThanZero() bool {
 	out, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
 	if err != nil {

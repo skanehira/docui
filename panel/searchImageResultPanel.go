@@ -8,6 +8,7 @@ import (
 	"github.com/skanehira/docui/common"
 )
 
+// SearchImageResult search result panel.
 type SearchImageResult struct {
 	*Gui
 	Position
@@ -15,6 +16,7 @@ type SearchImageResult struct {
 	images []*SearchResult
 }
 
+// SearchResult result info.
 type SearchResult struct {
 	Name        string `tag:"NAME" len:"min:0.1 max:0.3"`
 	Stars       string `tag:"STARS" len:"min:0.1 max:0.1"`
@@ -22,6 +24,7 @@ type SearchResult struct {
 	Description string `tag:"DESCRIPTION" len:"min:0.1 max:0.5"`
 }
 
+// NewSearchImageResult create nrew result panel.
 func NewSearchImageResult(g *Gui, name string, p Position) *SearchImageResult {
 	return &SearchImageResult{
 		Gui:      g,
@@ -30,10 +33,12 @@ func NewSearchImageResult(g *Gui, name string, p Position) *SearchImageResult {
 	}
 }
 
+// Name return panel name.
 func (s *SearchImageResult) Name() string {
 	return s.name
 }
 
+// SetView set up result panel.
 func (s *SearchImageResult) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := g.SetView(SearchImageResultHeaderPanel, s.x, s.y, s.w, s.h); err != nil {
@@ -69,6 +74,7 @@ func (s *SearchImageResult) SetView(g *gocui.Gui) error {
 	return nil
 }
 
+// Refresh update result info.
 func (s *SearchImageResult) Refresh(g *gocui.Gui, v *gocui.View) error {
 	s.Update(func(g *gocui.Gui) error {
 		s.DisplayResult(v)
@@ -78,6 +84,7 @@ func (s *SearchImageResult) Refresh(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// SetKeyBinding set keybind to this panel.
 func (s *SearchImageResult) SetKeyBinding() {
 	if err := s.SetKeybinding(s.name, gocui.KeyEnter, gocui.ModNone, s.PullImage); err != nil {
 		panic(err)
@@ -111,11 +118,13 @@ func (s *SearchImageResult) SetKeyBinding() {
 	}
 }
 
+// SwitchToSearch swtich to search panel.
 func (s *SearchImageResult) SwitchToSearch(g *gocui.Gui, v *gocui.View) error {
 	s.SwitchPanel(SearchImagePanel)
 	return nil
 }
 
+// ClosePanel close result panel.
 func (s *SearchImageResult) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 	s.DeleteKeybindings(s.name)
 
@@ -130,10 +139,12 @@ func (s *SearchImageResult) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// getImageName return selected image name
 func (s *SearchImageResult) getImageName() string {
 	return s.selected().Name
 }
 
+// selected return selected image
 func (s *SearchImageResult) selected() *SearchResult {
 	v, _ := s.View(s.name)
 	_, cy := v.Cursor()
@@ -141,6 +152,7 @@ func (s *SearchImageResult) selected() *SearchResult {
 	return s.images[cy+oy]
 }
 
+// PullImage pull the specified image.
 func (s *SearchImageResult) PullImage(g *gocui.Gui, v *gocui.View) error {
 	name := s.getImageName()
 
@@ -167,18 +179,21 @@ func (s *SearchImageResult) PullImage(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
+// CloseSearchPanel close search panel.
 func (s *SearchImageResult) CloseSearchPanel() {
 	panel := SearchImagePanel
 	s.DeleteKeybindings(panel)
 	s.DeleteView(panel)
 }
 
+// CloseResultHeaderPanel close result header panel.
 func (s *SearchImageResult) CloseResultHeaderPanel() {
 	panel := SearchImageResultHeaderPanel
 	s.DeleteKeybindings(panel)
 	s.DeleteView(panel)
 }
 
+// DisplayResult display result info
 func (s *SearchImageResult) DisplayResult(v *gocui.View) {
 	v.Clear()
 	for _, image := range s.images {
