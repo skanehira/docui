@@ -49,8 +49,12 @@ func TestNewDocker(t *testing.T) {
 	config := NewClientConfig(endpoint, "", "", "")
 	verify := NewDocker(config)
 
-	if reflect.DeepEqual(dockerClient, verify) {
-		t.Errorf("Expected Docker clinet %+v. Got %+v.", dockerClient.Client, verify.Client)
+	d := reflect.ValueOf(dockerClient).Elem()
+	v := reflect.ValueOf(verify).Elem()
+
+	if d.FieldByName("endpoint").String() != v.FieldByName("endpoint").String() {
+		t.Errorf("Expected endpoint %s. Got %s.",
+			d.FieldByName("endpoint").String(), v.FieldByName("endpoint").String())
 	}
 }
 
@@ -64,8 +68,12 @@ func TestNewDockerTLS(t *testing.T) {
 	config := NewClientConfig(endpoint, certPath, keyPath, caPath)
 	verify := NewDocker(config)
 
-	if reflect.DeepEqual(dockerClient, verify) {
-		t.Errorf("Expected Docker TLS clinet %+v. Got %+v.", dockerClient.Client, verify.Client)
+	d := reflect.ValueOf(dockerClient).Elem()
+	v := reflect.ValueOf(verify).Elem()
+
+	if d.FieldByName("endpoint").String() != v.FieldByName("endpoint").String() {
+		t.Errorf("Expected endpoint %s. Got %s.",
+			d.FieldByName("endpoint").String(), v.FieldByName("endpoint").String())
 	}
 }
 
@@ -77,11 +85,16 @@ func TestNewDockerFromEnv(t *testing.T) {
 		t.Fatal(err)
 	}
 	dockerClient := &Docker{client}
+
 	config := NewClientConfig("dummy endpoint", "", "", "")
 	verify := NewDocker(config)
 
-	if reflect.DeepEqual(dockerClient, verify) {
-		t.Errorf("Expected Docker env clinet %+v. Got %+v.", dockerClient.Client, verify.Client)
+	d := reflect.ValueOf(dockerClient).Elem()
+	v := reflect.ValueOf(verify).Elem()
+
+	if d.FieldByName("endpoint").String() != v.FieldByName("endpoint").String() {
+		t.Errorf("Expected endpoint %s. Got %s.",
+			d.FieldByName("endpoint").String(), v.FieldByName("endpoint").String())
 	}
 }
 
@@ -96,10 +109,15 @@ func TestNewDockerFromEnvTLS(t *testing.T) {
 		t.Fatal(err)
 	}
 	dockerClient := &Docker{client}
+
 	config := NewClientConfig("dummy endpoint", "dummy cert", "dummy key", "dummy ca")
 	verify := NewDocker(config)
 
-	if reflect.DeepEqual(dockerClient, verify) {
-		t.Errorf("Expected Docker env TLS clinet %+v. Got %+v.", dockerClient.Client, verify.Client)
+	d := reflect.ValueOf(dockerClient).Elem()
+	v := reflect.ValueOf(verify).Elem()
+
+	if d.FieldByName("endpoint").String() != v.FieldByName("endpoint").String() {
+		t.Errorf("Expected endpoint %s. Got %s.",
+			d.FieldByName("endpoint").String(), v.FieldByName("endpoint").String())
 	}
 }
