@@ -205,7 +205,7 @@ func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 	v.Clear()
 	vl.Volumes = make([]*Volume, 0)
 
-	var keys []string
+	keys := make([]string, 0, len(vl.Docker.Volumes()))
 	tmpMap := make(map[string]*Volume)
 
 	for _, volume := range vl.Docker.Volumes() {

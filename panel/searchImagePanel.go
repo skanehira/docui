@@ -131,7 +131,7 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 					return nil
 				}
 
-				var names []string
+				names := make([]string, 0, len(images))
 				tmpMap := make(map[string]*SearchResult)
 
 				for _, image := range images {

@@ -234,7 +234,7 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 	v.Clear()
 	n.Networks = make([]*Network, 0)
 
-	var keys []string
+	keys := make([]string, 0, len(n.Docker.Networks()))
 	tmpMap := make(map[string]*Network)
 
 	for _, network := range n.Docker.Networks() {
