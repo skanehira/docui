@@ -49,12 +49,11 @@ func TestNewDocker(t *testing.T) {
 	config := NewClientConfig(endpoint, "", "", "")
 	verify := NewDocker(config)
 
-	d := reflect.ValueOf(dockerClient).Elem()
-	v := reflect.ValueOf(verify).Elem()
+	expect := reflect.ValueOf(dockerClient).Elem().FieldByName("endpoint").String()
+	got := reflect.ValueOf(verify).Elem().FieldByName("endpoint").String()
 
-	if d.FieldByName("endpoint").String() != v.FieldByName("endpoint").String() {
-		t.Errorf("Expected endpoint %s. Got %s.",
-			d.FieldByName("endpoint").String(), v.FieldByName("endpoint").String())
+	if expect != got {
+		t.Errorf("Expected endpoint %s. Got %s.", expect, got)
 	}
 }
 
@@ -68,12 +67,11 @@ func TestNewDockerTLS(t *testing.T) {
 	config := NewClientConfig(endpoint, certPath, keyPath, caPath)
 	verify := NewDocker(config)
 
-	d := reflect.ValueOf(dockerClient).Elem()
-	v := reflect.ValueOf(verify).Elem()
+	expect := reflect.ValueOf(dockerClient).Elem().FieldByName("endpoint").String()
+	got := reflect.ValueOf(verify).Elem().FieldByName("endpoint").String()
 
-	if d.FieldByName("endpoint").String() != v.FieldByName("endpoint").String() {
-		t.Errorf("Expected endpoint %s. Got %s.",
-			d.FieldByName("endpoint").String(), v.FieldByName("endpoint").String())
+	if expect != got {
+		t.Errorf("Expected endpoint %s. Got %s.", expect, got)
 	}
 }
 
@@ -89,12 +87,11 @@ func TestNewDockerFromEnv(t *testing.T) {
 	config := NewClientConfig("dummy endpoint", "", "", "")
 	verify := NewDocker(config)
 
-	d := reflect.ValueOf(dockerClient).Elem()
-	v := reflect.ValueOf(verify).Elem()
+	expect := reflect.ValueOf(dockerClient).Elem().FieldByName("endpoint").String()
+	got := reflect.ValueOf(verify).Elem().FieldByName("endpoint").String()
 
-	if d.FieldByName("endpoint").String() != v.FieldByName("endpoint").String() {
-		t.Errorf("Expected endpoint %s. Got %s.",
-			d.FieldByName("endpoint").String(), v.FieldByName("endpoint").String())
+	if expect != got {
+		t.Errorf("Expected endpoint %s. Got %s.", expect, got)
 	}
 }
 
@@ -113,11 +110,10 @@ func TestNewDockerFromEnvTLS(t *testing.T) {
 	config := NewClientConfig("dummy endpoint", "dummy cert", "dummy key", "dummy ca")
 	verify := NewDocker(config)
 
-	d := reflect.ValueOf(dockerClient).Elem()
-	v := reflect.ValueOf(verify).Elem()
+	expect := reflect.ValueOf(dockerClient).Elem().FieldByName("endpoint").String()
+	got := reflect.ValueOf(verify).Elem().FieldByName("endpoint").String()
 
-	if d.FieldByName("endpoint").String() != v.FieldByName("endpoint").String() {
-		t.Errorf("Expected endpoint %s. Got %s.",
-			d.FieldByName("endpoint").String(), v.FieldByName("endpoint").String())
+	if expect != got {
+		t.Errorf("Expected endpoint %s. Got %s.", expect, got)
 	}
 }
