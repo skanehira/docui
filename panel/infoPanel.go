@@ -103,7 +103,7 @@ func NewInfo(gui *Gui, name string, x, y, w, h int) *Info {
 func NewDocuiInfo() *Docui {
 	return &Docui{
 		Name:    "docui",
-		Version: "1.0.2",
+		Version: "1.0.4",
 	}
 }
 
