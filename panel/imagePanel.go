@@ -84,7 +84,7 @@ func (i *ImageList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifi
 // SetView set up image list panel.
 func (i *ImageList) SetView(g *gocui.Gui) error {
 	// set header panel
-	if v, err := g.SetView(ImageListHeaderPanel, i.x, i.y, i.w, i.h); err != nil {
+	if v, err := common.SetViewWithValidPanelSize(g, ImageListHeaderPanel, i.x, i.y, i.w, i.h); err != nil {
 		if err != gocui.ErrUnknownView {
 			i.Logger.Error(err)
 			return err
@@ -98,7 +98,7 @@ func (i *ImageList) SetView(g *gocui.Gui) error {
 	}
 
 	// set scroll panel
-	v, err := g.SetView(i.name, i.x, i.y+1, i.w, i.h)
+	v, err := common.SetViewWithValidPanelSize(g, i.name, i.x, i.y+1, i.w, i.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
 			i.Logger.Error(err)

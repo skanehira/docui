@@ -5,6 +5,7 @@ import (
 	"runtime"
 
 	"github.com/jroimartin/gocui"
+	"github.com/skanehira/docui/common"
 )
 
 // Info have docui and docker info.
@@ -45,7 +46,7 @@ type HostInfo struct {
 
 // SetView set up info panel.
 func (i *Info) SetView(g *gocui.Gui) error {
-	v, err := g.SetView(i.name, i.x, i.y, i.w, i.h)
+	v, err := common.SetViewWithValidPanelSize(g, i.name, i.x, i.y, i.w, i.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
 			return err

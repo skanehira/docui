@@ -74,7 +74,7 @@ func (vl *VolumeList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modi
 // SetView set up volume list panel.
 func (vl *VolumeList) SetView(g *gocui.Gui) error {
 	// set header panel
-	if v, err := g.SetView(VolumeListHeaderPanel, vl.x, vl.y, vl.w, vl.h); err != nil {
+	if v, err := common.SetViewWithValidPanelSize(g, VolumeListHeaderPanel, vl.x, vl.y, vl.w, vl.h); err != nil {
 		if err != gocui.ErrUnknownView {
 			vl.Logger.Error(err)
 			return err
@@ -88,7 +88,7 @@ func (vl *VolumeList) SetView(g *gocui.Gui) error {
 	}
 
 	// set scroll panel
-	v, err := g.SetView(vl.name, vl.x, vl.y+1, vl.w, vl.h)
+	v, err := common.SetViewWithValidPanelSize(g, vl.name, vl.x, vl.y+1, vl.w, vl.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
 			vl.Logger.Error(err)

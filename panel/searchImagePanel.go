@@ -48,7 +48,7 @@ func (s *SearchImage) Name() string {
 
 // SetView set up search image panel.
 func (s *SearchImage) SetView(g *gocui.Gui) error {
-	v, err := g.SetView(s.name, s.x, s.y, s.w, s.h)
+	v, err := common.SetViewWithValidPanelSize(g, s.name, s.x, s.y, s.w, s.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
 			s.Logger.Error(err)

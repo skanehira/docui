@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jroimartin/gocui"
+	"github.com/skanehira/docui/common"
 )
 
 // Navigate navigate panel.
@@ -31,7 +32,7 @@ func (n Navigate) Name() string {
 
 // SetView set up navigate panel.
 func (n Navigate) SetView(g *gocui.Gui) error {
-	v, err := g.SetView(n.name, n.x, n.y, n.w, n.h)
+	v, err := common.SetViewWithValidPanelSize(g, n.name, n.x, n.y, n.w, n.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
 			return err
