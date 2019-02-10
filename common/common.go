@@ -222,3 +222,20 @@ func IsTerminalWindowSizeThanZero() bool {
 		}
 	}
 }
+
+// IsValidPanelSize checks if a panel size is valid.
+func IsValidPanelSize(x0, y0, x1, y1 int) error {
+	if x0 >= x1 || y0 >= y1 {
+		return ErrSmallTerminalWindowSize
+	}
+	return nil
+}
+
+// SetViewWithValidPanelSize run SetView with a valid panel size.
+func SetViewWithValidPanelSize(g *gocui.Gui, name string, x0, y0, x1, y1 int) (*gocui.View, error) {
+	if err := IsValidPanelSize(x0, y0, x1, y1); err != nil {
+		panic(err)
+	}
+	v, err := g.SetView(name, x0, y0, x1, y1)
+	return v, err
+}

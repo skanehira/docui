@@ -78,7 +78,7 @@ func (c *ContainerList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Mo
 // SetView set up container list panel.
 func (c *ContainerList) SetView(g *gocui.Gui) error {
 	// set header panel
-	if v, err := g.SetView(ContainerListHeaderPanel, c.x, c.y, c.w, c.h); err != nil {
+	if v, err := common.SetViewWithValidPanelSize(g, ContainerListHeaderPanel, c.x, c.y, c.w, c.h); err != nil {
 		if err != gocui.ErrUnknownView {
 			c.Logger.Error(err)
 			return err
@@ -92,7 +92,7 @@ func (c *ContainerList) SetView(g *gocui.Gui) error {
 	}
 
 	// set scroll panel
-	v, err := g.SetView(c.name, c.x, c.y+1, c.w, c.h)
+	v, err := common.SetViewWithValidPanelSize(g, c.name, c.x, c.y+1, c.w, c.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
 			c.Logger.Error(err)

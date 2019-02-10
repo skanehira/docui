@@ -73,7 +73,7 @@ func NewTaskList(gui *Gui, name string, x, y, w, h int) *TaskList {
 // SetView set up task list panel.
 func (t *TaskList) SetView(g *gocui.Gui) error {
 	// set header panel
-	if v, err := g.SetView(TaskListHeaderPanel, t.x, t.y, t.w, t.h); err != nil {
+	if v, err := common.SetViewWithValidPanelSize(g, TaskListHeaderPanel, t.x, t.y, t.w, t.h); err != nil {
 		if err != gocui.ErrUnknownView {
 			t.Logger.Error(err)
 			return err
@@ -87,7 +87,7 @@ func (t *TaskList) SetView(g *gocui.Gui) error {
 	}
 
 	// set scroll panel
-	v, err := g.SetView(t.name, t.x, t.y+1, t.w, t.h)
+	v, err := common.SetViewWithValidPanelSize(g, t.name, t.x, t.y+1, t.w, t.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
 			t.Logger.Error(err)

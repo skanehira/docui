@@ -2,6 +2,7 @@ package panel
 
 import (
 	"github.com/jroimartin/gocui"
+	"github.com/skanehira/docui/common"
 )
 
 // Detail panel
@@ -23,7 +24,7 @@ func (d Detail) Name() string {
 
 // SetView set up detail panel.
 func (d Detail) SetView(g *gocui.Gui) error {
-	v, err := g.SetView(d.Name(), d.x, d.y, d.w, d.h)
+	v, err := common.SetViewWithValidPanelSize(g, d.Name(), d.x, d.y, d.w, d.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
 			return err

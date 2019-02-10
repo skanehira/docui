@@ -74,7 +74,7 @@ func (n *NetworkList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modi
 // SetView set up network list panel.
 func (n *NetworkList) SetView(g *gocui.Gui) error {
 	// set header panel
-	if v, err := g.SetView(NetworkListHeaderPanel, n.x, n.y, n.w, n.h); err != nil {
+	if v, err := common.SetViewWithValidPanelSize(g, NetworkListHeaderPanel, n.x, n.y, n.w, n.h); err != nil {
 		if err != gocui.ErrUnknownView {
 			n.Logger.Error(err)
 			return err
@@ -88,7 +88,7 @@ func (n *NetworkList) SetView(g *gocui.Gui) error {
 	}
 
 	// set scroll panel
-	v, err := g.SetView(n.name, n.x, n.y+1, n.w, n.h)
+	v, err := common.SetViewWithValidPanelSize(g, n.name, n.x, n.y+1, n.w, n.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
 			n.Logger.Error(err)

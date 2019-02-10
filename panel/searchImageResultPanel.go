@@ -41,7 +41,7 @@ func (s *SearchImageResult) Name() string {
 // SetView set up result panel.
 func (s *SearchImageResult) SetView(g *gocui.Gui) error {
 	// set header panel
-	if v, err := g.SetView(SearchImageResultHeaderPanel, s.x, s.y, s.w, s.h); err != nil {
+	if v, err := common.SetViewWithValidPanelSize(g, SearchImageResultHeaderPanel, s.x, s.y, s.w, s.h); err != nil {
 		if err != gocui.ErrUnknownView {
 			s.Logger.Error(err)
 			return err
@@ -54,7 +54,7 @@ func (s *SearchImageResult) SetView(g *gocui.Gui) error {
 	}
 
 	// set scroll panel
-	if v, err := g.SetView(s.name, s.x, s.y+1, s.w, s.h); err != nil {
+	if v, err := common.SetViewWithValidPanelSize(g, s.name, s.x, s.y+1, s.w, s.h); err != nil {
 		if err != gocui.ErrUnknownView {
 			s.Logger.Error(err)
 			return err
