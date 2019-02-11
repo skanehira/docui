@@ -1,6 +1,7 @@
 package panel
 
 import (
+	"context"
 	"fmt"
 	"runtime"
 
@@ -46,6 +47,9 @@ type HostInfo struct {
 
 // SetView set up info panel.
 func (i *Info) SetView(g *gocui.Gui) error {
+	if i.Docker == nil {
+		return common.ErrDockerConnect
+	}
 	v, err := common.SetViewWithValidPanelSize(g, i.name, i.x, i.y, i.w, i.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
@@ -55,8 +59,8 @@ func (i *Info) SetView(g *gocui.Gui) error {
 		v.Frame = false
 		v.FgColor = gocui.ColorYellow | gocui.AttrBold
 
-		dockerAPI := fmt.Sprintf("api:%s", i.Docker.APIVersion)
-		dockerVersion := fmt.Sprintf("version:%s", i.Docker.ServerVersion)
+		dockerAPI := fmt.Sprintf("api version:%s", i.Docker.APIVersion)
+		dockerVersion := fmt.Sprintf("server version:%s", i.Docker.ServerVersion)
 		dockerEndpoint := fmt.Sprintf("endpoint:%s", i.Docker.Endpoint)
 		docuiVersion := fmt.Sprintf("version:%s", i.Docui.Version)
 
@@ -118,16 +122,16 @@ func NewHostInfo() *HostInfo {
 
 // NewDockerInfo create dockeri nfo
 func NewDockerInfo(gui *Gui) *DockerInfo {
-	info, err := gui.Docker.Info()
+	info, err := gui.Docker.Info(context.TODO())
 	if err != nil {
 		return nil
 	}
 
 	var apiVersion string
-	if v, err := gui.Docker.Version(); err != nil {
+	if v, err := gui.Docker.ServerVersion(context.TODO()); err != nil {
 		apiVersion = ""
 	} else {
-		apiVersion = v.Get("ApiVersion")
+		apiVersion = v.APIVersion
 	}
 
 	return &DockerInfo{
@@ -137,7 +141,7 @@ func NewDockerInfo(gui *Gui) *DockerInfo {
 		KernelVersion: info.KernelVersion,
 		OSType:        info.OSType,
 		Architecture:  info.Architecture,
-		Endpoint:      gui.Docker.Endpoint(),
+		Endpoint:      gui.Docker.Client.DaemonHost(),
 		Containers:    info.Containers,
 		Images:        info.Images,
 		MemTotal:      fmt.Sprintf("%dMB", info.MemTotal/1024/1024),

@@ -232,6 +232,8 @@ Support custom endpoint:
 ```shell
 $ docui -h
 Usage of docui:
+  -api string
+        api version (default "1.39")
   -ca string
         ca.pem file path
   -cert string

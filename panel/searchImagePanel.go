@@ -114,7 +114,7 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 				// clear result
 				s.resultPanel.images = make([]*SearchResult, 0)
 
-				images, err := s.Docker.SearchImageWithName(name)
+				images, err := s.Docker.SearchImage(name)
 
 				if err != nil {
 					s.ErrMessage(err.Error(), s.name)

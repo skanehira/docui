@@ -2,11 +2,10 @@ package panel
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
-	docker "github.com/fsouza/go-dockerclient"
+	"github.com/docker/docker/api/types"
 	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
 )
@@ -337,7 +336,7 @@ func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 		i.Logger.Info("create image start")
 		defer i.Logger.Info("create image finished")
 
-		if err := i.Docker.CreateContainerWithOptions(options); err != nil {
+		if err := i.Docker.CreateContainer(options); err != nil {
 			i.Logger.Error(err)
 			return err
 		}
@@ -381,32 +380,18 @@ func (i *ImageList) PullImagePanel(g *gocui.Gui, v *gocui.View) error {
 
 // PullImage pull the specified image.
 func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
-
 	if !i.form.Validate() {
 		return nil
-	}
-	item := strings.SplitN(i.form.GetFieldTexts()["Image"], ":", 2)
-
-	name := item[0]
-	var tag string
-
-	if len(item) == 1 {
-		tag = "latest"
-	} else {
-		tag = item[1]
 	}
 
 	i.form.Close(g, v)
 
-	i.AddTask(fmt.Sprintf("Pull image %s:%s", name, tag), func() error {
+	image := i.form.GetFieldTexts()["Image"]
+	i.AddTask(fmt.Sprintf("Pull image %s", image), func() error {
 		i.Logger.Info("pull image start")
 		defer i.Logger.Info("pull image finished")
-		options := docker.PullImageOptions{
-			Repository: name,
-			Tag:        tag,
-		}
 
-		if err := i.Docker.PullImageWithOptions(options); err != nil {
+		if err := i.Docker.PullImage(image); err != nil {
 			i.Logger.Error(err)
 			return err
 		}
@@ -508,19 +493,7 @@ func (i *ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 		i.Logger.Info("save image start")
 		defer i.Logger.Info("save image finished")
 
-		file, err := os.OpenFile(data["Path"], os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
-		if err != nil {
-			i.Logger.Error(err)
-			return err
-		}
-		defer file.Close()
-
-		options := docker.ExportImageOptions{
-			Name:         data["Image"],
-			OutputStream: file,
-		}
-
-		return i.Docker.SaveImageWithOptions(options)
+		return i.Docker.SaveImage([]string{data["Image"]}, data["Path"])
 	})
 
 	return nil
@@ -569,11 +542,6 @@ func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 	}
 
 	data := i.form.GetFieldTexts()
-	options := docker.ImportImageOptions{
-		Repository: data["Repository"],
-		Source:     data["Path"],
-		Tag:        data["Tag"],
-	}
 
 	i.form.Close(g, v)
 
@@ -581,7 +549,7 @@ func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 		i.Logger.Info("import image start")
 		defer i.Logger.Info("import image finished")
 
-		if err := i.Docker.ImportImageWithOptions(options); err != nil {
+		if err := i.Docker.ImportImage(data["Repository"], data["Tag"], data["Path"]); err != nil {
 			i.Logger.Error(err)
 			return err
 		}
@@ -638,7 +606,7 @@ func (i *ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
 		i.Logger.Info("load image start")
 		defer i.Logger.Info("load image finished")
 
-		if err := i.Docker.LoadImageWithPath(path); err != nil {
+		if err := i.Docker.LoadImage(path); err != nil {
 			i.Logger.Error(err)
 			return err
 		}
@@ -668,7 +636,16 @@ func (i *ImageList) GetImageList(v *gocui.View) {
 	v.Clear()
 	i.Images = make([]*Image, 0)
 
-	for _, image := range i.Docker.Images(docker.ListImagesOptions{}) {
+	images, err := i.Docker.Images(types.ImageListOptions{
+		All: true,
+	})
+
+	if err != nil {
+		i.Logger.Error(err)
+		return
+	}
+
+	for _, image := range images {
 		for _, repoTag := range image.RepoTags {
 			repo, tag := common.ParseRepoTag(repoTag)
 
@@ -730,7 +707,7 @@ func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 			i.Logger.Info("remove image start")
 			defer i.Logger.Info("remove image finished")
 
-			if err := i.Docker.RemoveImageWithName(name); err != nil {
+			if err := i.Docker.RemoveImage(name); err != nil {
 				i.ErrMessage(err.Error(), i.name)
 				i.Logger.Error(err)
 				return err

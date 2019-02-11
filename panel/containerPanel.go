@@ -2,15 +2,12 @@ package panel
 
 import (
 	"fmt"
-	"io"
-	"os"
 	"strings"
 	"time"
 
-	docker "github.com/fsouza/go-dockerclient"
+	"github.com/docker/docker/api/types"
 	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 // ContainerList container list panel.
@@ -248,9 +245,7 @@ func (c *ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 			c.Logger.Info("remove container start")
 			defer c.Logger.Info("remove container finished")
 
-			options := docker.RemoveContainerOptions{ID: container.ID}
-
-			if err := c.Docker.RemoveContainer(options); err != nil {
+			if err := c.Docker.RemoveContainer(container.ID); err != nil {
 				c.ErrMessage(err.Error(), c.name)
 				c.Logger.Error(err)
 				return err
@@ -277,7 +272,7 @@ func (c *ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 		c.Logger.Info("start container start")
 		defer c.Logger.Info("start container finished")
 
-		if err := c.Docker.StartContainerWithID(container.ID); err != nil {
+		if err := c.Docker.StartContainer(container.ID); err != nil {
 			c.Logger.Error(err)
 			return err
 		}
@@ -300,7 +295,7 @@ func (c *ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 		c.Logger.Info("stop container start")
 		defer c.Logger.Info("stop container finished")
 
-		if err := c.Docker.StopContainerWithID(container.ID); err != nil {
+		if err := c.Docker.StopContainer(container.ID); err != nil {
 			c.Logger.Error(err)
 			return err
 		}
@@ -369,18 +364,7 @@ func (c *ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 		c.Logger.Info("export container start")
 		defer c.Logger.Info("export container finished")
 
-		file, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0666)
-		if err != nil {
-			c.Logger.Error(err)
-			return err
-		}
-		defer file.Close()
-
-		options := docker.ExportContainerOptions{
-			ID:           container,
-			OutputStream: file,
-		}
-		return c.Docker.ExportContainerWithOptions(options)
+		return c.Docker.ExportContainer(container, path)
 	})
 
 	return nil
@@ -445,19 +429,13 @@ func (c *ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 	repository := data["Repository"]
 	tag := data["Tag"]
 
-	options := docker.CommitContainerOptions{
-		Container:  container,
-		Repository: repository,
-		Tag:        tag,
-	}
-
 	c.form.Close(g, v)
 
 	c.AddTask(fmt.Sprintf("Commit container %s to %s", container, repository+":"+tag), func() error {
 		c.Logger.Info("commit container start")
 		defer c.Logger.Info("commit container finished")
 
-		if err := c.Docker.CommitContainerWithOptions(options); err != nil {
+		if err := c.Docker.CommitContainer(container, types.ContainerCommitOptions{Reference: repository + ":" + tag}); err != nil {
 			c.Logger.Error(err)
 			return err
 		}
@@ -517,20 +495,15 @@ func (c *ContainerList) RenameContainer(g *gocui.Gui, v *gocui.View) error {
 
 	data := c.form.GetFieldTexts()
 	oldName := data["Container"]
-	name := data["NewName"]
-
-	options := docker.RenameContainerOptions{
-		ID:   oldName,
-		Name: name,
-	}
+	newName := data["NewName"]
 
 	c.form.Close(g, v)
 
-	c.AddTask(fmt.Sprintf("Rename container %s to %s", oldName, name), func() error {
+	c.AddTask(fmt.Sprintf("Rename container %s to %s", oldName, newName), func() error {
 		c.Logger.Info("rename container start")
 		defer c.Logger.Info("rename container finished")
 
-		if err := c.Docker.RenameContainerWithOptions(options); err != nil {
+		if err := c.Docker.RenameContainer(oldName, newName); err != nil {
 			c.Logger.Error(err)
 			return err
 		}
@@ -562,7 +535,13 @@ func (c *ContainerList) GetContainerList(v *gocui.View) {
 	v.Clear()
 	c.Containers = make([]*Container, 0)
 
-	for _, con := range c.Docker.Containers() {
+	containers, err := c.Docker.Containers(types.ContainerListOptions{All: true})
+
+	if err != nil {
+		c.Logger.Error(err)
+		return
+	}
+	for _, con := range containers {
 		name := con.Names[0][1:]
 		if c.filter != "" {
 			if strings.Index(strings.ToLower(name), strings.ToLower(c.filter)) == -1 {
@@ -700,76 +679,9 @@ func (c *ContainerList) Exec() error {
 		return nil
 	}
 
-	// https://gist.github.com/fsouza/43a05241ed9f943d24e5324c0f07471a
-	fd := int(os.Stdin.Fd())
-	if err != nil {
+	if err := c.Docker.AttachExecContainer(selected.ID, c.form.GetFieldText("Cmd"), c.Logger); err != nil {
 		c.Logger.Error(err)
 		return err
-	}
-
-	if terminal.IsTerminal(fd) {
-		oldState, err := terminal.MakeRaw(fd)
-		if err != nil {
-			c.Logger.Error(err)
-			return err
-		}
-		defer terminal.Restore(fd, oldState)
-
-		stdoutReader, stdoutWriter := io.Pipe()
-		stderrReader, stderrWriter := io.Pipe()
-		stdinReader, stdinWriter := io.Pipe()
-
-		exec, err := c.Docker.CreateExec(docker.CreateExecOptions{
-			AttachStdin:  true,
-			AttachStdout: true,
-			AttachStderr: true,
-			Tty:          true,
-			Cmd:          []string{c.form.GetFieldText("Cmd")},
-			Container:    selected.ID,
-		})
-
-		if err != nil {
-			c.Logger.Error(err)
-			return err
-		}
-
-		waiter, err := c.Docker.StartExecNonBlocking(exec.ID, docker.StartExecOptions{
-			InputStream:  stdinReader,
-			OutputStream: stdoutWriter,
-			ErrorStream:  stderrWriter,
-			Tty:          true,
-			RawTerminal:  true,
-		})
-
-		go io.Copy(stdinWriter, os.Stdin)
-		go io.Copy(os.Stdout, stdoutReader)
-		go io.Copy(os.Stderr, stderrReader)
-
-		if err != nil {
-			c.Logger.Error(err)
-			return err
-		}
-
-		// reseize tty
-		// https://github.com/fsouza/go-dockerclient/issues/771
-		width, height, err := terminal.GetSize(fd)
-		if err != nil {
-			c.Logger.Error(err)
-			return err
-		}
-
-		err = c.Docker.ResizeExecTTY(exec.ID, height, width)
-		if err != nil {
-			c.Logger.Error(err)
-			return err
-		}
-
-		if err := waiter.Wait(); err != nil {
-			c.Logger.Error(err)
-		}
-	} else {
-		c.Logger.Error("no terminal")
-		return nil
 	}
 
 	return nil

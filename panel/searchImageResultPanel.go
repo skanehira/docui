@@ -3,7 +3,6 @@ package panel
 import (
 	"fmt"
 
-	docker "github.com/fsouza/go-dockerclient"
 	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
 )
@@ -164,11 +163,7 @@ func (s *SearchImageResult) PullImage(g *gocui.Gui, v *gocui.View) error {
 		s.Logger.Info("pull image start")
 		defer s.Logger.Info("pull image finished")
 
-		options := docker.PullImageOptions{
-			Repository: name,
-			Tag:        "latest",
-		}
-		if err := s.Docker.PullImageWithOptions(options); err != nil {
+		if err := s.Docker.PullImage(name); err != nil {
 			s.ErrMessage(err.Error(), s.name)
 			s.Logger.Error(err)
 			return nil

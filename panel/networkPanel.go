@@ -5,6 +5,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/docker/docker/api/types"
 	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
 )
@@ -237,7 +238,13 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 	keys := make([]string, 0, len(n.Docker.Networks()))
 	tmpMap := make(map[string]*Network)
 
-	for _, network := range n.Docker.Networks() {
+	networks, err := n.Docker.Networks(types.NetworkListOptions{})
+	if err != nil {
+		n.Logger.Error("cannot get networks, " + err.Error())
+		return
+	}
+
+	for _, network := range networks {
 		if n.filter != "" {
 			if strings.Index(strings.ToLower(network.Name), strings.ToLower(n.filter)) == -1 {
 				continue
@@ -245,11 +252,11 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 		}
 
 		var containers string
-		net, err := n.Docker.NetworkInfo(network.ID)
+
+		net, err := n.Docker.InspectNetwork(network.ID)
 		if err != nil {
-			n.ErrMessage(err.Error(), n.name)
-			n.Logger.Error(err)
-			return
+			n.Logger.Error("cannot get network info, " + err.Error())
+			continue
 		}
 
 		for _, endpoint := range net.Containers {
@@ -287,7 +294,7 @@ func (n *NetworkList) Detail(g *gocui.Gui, v *gocui.View) error {
 		return nil
 	}
 
-	net, err := n.Docker.NetworkInfo(selected.ID)
+	net, err := n.Docker.InspectNetwork(selected.ID)
 	if err != nil {
 		n.ErrMessage(err.Error(), n.name)
 		n.Logger.Error(err)
