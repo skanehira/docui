@@ -44,7 +44,7 @@ func (d *Docker) CreateContainer(opt CreateContainerOptions) error {
 	return err
 }
 
-// NewContainerOptions generate container opsions to create container
+// NewContainerOptions generate container options to create container
 func (d *Docker) NewContainerOptions(config map[string]string, isAttach bool) (CreateContainerOptions, error) {
 
 	options := CreateContainerOptions{
@@ -201,7 +201,7 @@ func (d *Docker) AttachExecContainer(id, cmd string, logger *common.Logger) erro
 
 	defer resp.Close()
 
-	errCh := make(chan error, 1)
+	errCh := make(chan error)
 	std := streams.NewStd()
 
 	go func() {

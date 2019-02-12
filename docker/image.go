@@ -45,16 +45,16 @@ func (d *Docker) RemoveDanglingImages() error {
 		return err
 	}
 
-	errids := []string{}
+	errIDs := []string{}
 
 	for _, image := range images {
 		if err := d.RemoveImage(image.ID); err != nil {
-			errids = append(errids, image.ID[7:19])
+			errIDs = append(errIDs, image.ID[7:19])
 		}
 	}
 
-	if len(errids) > 1 {
-		return fmt.Errorf("can not remove ids\n%s", errids)
+	if len(errIDs) > 1 {
+		return fmt.Errorf("can not remove ids\n%s", errIDs)
 	}
 
 	return nil

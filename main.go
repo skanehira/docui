@@ -28,7 +28,7 @@ func main() {
 	// parse flag
 	flag.Parse()
 
-	// new dcoker client
+	// new docker client
 	config := docker.NewClientConfig(*endpoint, *cert, *key, *ca, *api)
 	dockerClient := docker.NewDocker(config)
 
