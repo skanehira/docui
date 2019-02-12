@@ -116,7 +116,7 @@ func (c *ContainerList) SetView(g *gocui.Gui) error {
 
 // Monitoring monitoring image list.
 func (c *ContainerList) Monitoring(stop chan int, g *gocui.Gui, v *gocui.View) {
-	common.Logger.Info("start monitoring container list.")
+	common.Logger.Info("monitoring container list start")
 	ticker := time.NewTicker(5 * time.Second)
 
 LOOP:
@@ -127,12 +127,11 @@ LOOP:
 				return c.Refresh(g, v)
 			})
 		case <-stop:
-			common.Logger.Info("stop monitoring container list.")
 			ticker.Stop()
 			break LOOP
 		}
 	}
-	common.Logger.Info("stopped monitoring container list.")
+	common.Logger.Info("monitoring container list stop")
 }
 
 // CloseView close panel
@@ -199,7 +198,7 @@ func (c *ContainerList) selected() (*Container, error) {
 // DetailContainer display the container detail info
 func (c *ContainerList) DetailContainer(g *gocui.Gui, v *gocui.View) error {
 	common.Logger.Info("inspect container start")
-	defer common.Logger.Info("inspect container finished")
+	defer common.Logger.Info("inspect container end")
 
 	selected, err := c.selected()
 	if err != nil {
@@ -243,7 +242,7 @@ func (c *ContainerList) RemoveContainer(g *gocui.Gui, v *gocui.View) error {
 	c.ConfirmMessage("Are you sure you want to remove this container?", c.name, func() error {
 		c.AddTask(fmt.Sprintf("Remove container %s", container.Name), func() error {
 			common.Logger.Info("remove container start")
-			defer common.Logger.Info("remove container finished")
+			defer common.Logger.Info("remove container end")
 
 			if err := c.Docker.RemoveContainer(container.ID); err != nil {
 				c.ErrMessage(err.Error(), c.name)
@@ -270,7 +269,7 @@ func (c *ContainerList) StartContainer(g *gocui.Gui, v *gocui.View) error {
 
 	c.AddTask(fmt.Sprintf("Start container %s", container.Name), func() error {
 		common.Logger.Info("start container start")
-		defer common.Logger.Info("start container finished")
+		defer common.Logger.Info("start container end")
 
 		if err := c.Docker.StartContainer(container.ID); err != nil {
 			common.Logger.Error(err)
@@ -293,7 +292,7 @@ func (c *ContainerList) StopContainer(g *gocui.Gui, v *gocui.View) error {
 
 	c.AddTask(fmt.Sprintf("Stop container %s", container.Name), func() error {
 		common.Logger.Info("stop container start")
-		defer common.Logger.Info("stop container finished")
+		defer common.Logger.Info("stop container end")
 
 		if err := c.Docker.StopContainer(container.ID); err != nil {
 			common.Logger.Error(err)
@@ -362,7 +361,7 @@ func (c *ContainerList) ExportContainer(g *gocui.Gui, v *gocui.View) error {
 
 	c.AddTask(fmt.Sprintf("Export container %s to %s", container, path), func() error {
 		common.Logger.Info("export container start")
-		defer common.Logger.Info("export container finished")
+		defer common.Logger.Info("export container end")
 
 		return c.Docker.ExportContainer(container, path)
 	})
@@ -433,7 +432,7 @@ func (c *ContainerList) CommitContainer(g *gocui.Gui, v *gocui.View) error {
 
 	c.AddTask(fmt.Sprintf("Commit container %s to %s", container, repository+":"+tag), func() error {
 		common.Logger.Info("commit container start")
-		defer common.Logger.Info("commit container finished")
+		defer common.Logger.Info("commit container end")
 
 		if err := c.Docker.CommitContainer(container, types.ContainerCommitOptions{Reference: repository + ":" + tag}); err != nil {
 			common.Logger.Error(err)
@@ -501,7 +500,7 @@ func (c *ContainerList) RenameContainer(g *gocui.Gui, v *gocui.View) error {
 
 	c.AddTask(fmt.Sprintf("Rename container %s to %s", oldName, newName), func() error {
 		common.Logger.Info("rename container start")
-		defer common.Logger.Info("rename container finished")
+		defer common.Logger.Info("rename container end")
 
 		if err := c.Docker.RenameContainer(oldName, newName); err != nil {
 			common.Logger.Error(err)
@@ -624,7 +623,6 @@ func (c *ContainerList) ExecContainerCmd(g *gocui.Gui, v *gocui.View) error {
 	if !container.State.Running {
 		msg := fmt.Sprintf("container %s is not runnig", selected.Name)
 		c.ErrMessage(msg, c.name)
-		common.Logger.Error()
 		return nil
 	}
 
@@ -671,7 +669,7 @@ func (c *ContainerList) ExecContainerCmd(g *gocui.Gui, v *gocui.View) error {
 // Exec exec the specified cmd run on container.
 func (c *ContainerList) Exec() error {
 	common.Logger.Info("exec container start")
-	defer common.Logger.Info("exec container finished")
+	defer common.Logger.Info("exec container end")
 
 	selected, err := c.selected()
 	if err != nil {

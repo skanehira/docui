@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
 
 	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
@@ -26,6 +25,9 @@ func main() {
 		return
 	}
 
+	// create logger
+	common.NewLogger(*logLevel)
+
 	// parse flag
 	flag.Parse()
 
@@ -34,14 +36,13 @@ func main() {
 	dockerClient := docker.NewDocker(config)
 
 	// when docker client cannot connect engine exit
-	_, err := dockerClient.Ping(context.TODO())
+	info, err := dockerClient.Ping(context.TODO())
 	if err != nil {
-		log.Println(err)
-		return
+		common.Logger.Error(err)
+		panic(err)
 	}
 
-	// create logger
-	common.NewLogger(*logLevel)
+	common.Logger.Infof("docker engine info: %#+v", info)
 
 LOOP:
 	for {
@@ -55,7 +56,7 @@ LOOP:
 		switch err {
 		case gocui.ErrQuit:
 			// exit
-			common.Logger.Info("docui finished")
+			common.Logger.Info("docui end")
 			gui.Close()
 			break LOOP
 		case panel.ErrExecFlag:

@@ -115,7 +115,7 @@ func (n *NetworkList) SetView(g *gocui.Gui) error {
 
 // Monitoring monitoring image list.
 func (n *NetworkList) Monitoring(stop chan int, g *gocui.Gui, v *gocui.View) {
-	common.Logger.Info("start monitoring network list.")
+	common.Logger.Info("monitoring network list start")
 	ticker := time.NewTicker(5 * time.Second)
 
 LOOP:
@@ -126,12 +126,11 @@ LOOP:
 				return n.Refresh(g, v)
 			})
 		case <-stop:
-			common.Logger.Info("stop monitoring network list.")
 			ticker.Stop()
 			break LOOP
 		}
 	}
-	common.Logger.Info("stopped monitoring network list.")
+	common.Logger.Info("monitoring network list stop")
 }
 
 // CloseView close panel
@@ -237,7 +236,7 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 
 	networks, err := n.Docker.Networks(types.NetworkListOptions{})
 	if err != nil {
-		common.Logger.Error("cannot get networks, " + err.Error())
+		common.Logger.Error(err)
 		return
 	}
 
@@ -255,7 +254,7 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 
 		net, err := n.Docker.InspectNetwork(network.ID)
 		if err != nil {
-			common.Logger.Error("cannot get network info, " + err.Error())
+			common.Logger.Error(err)
 			continue
 		}
 
@@ -285,7 +284,7 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 // Detail display detail the specified network
 func (n *NetworkList) Detail(g *gocui.Gui, v *gocui.View) error {
 	common.Logger.Info("inspect network start")
-	defer common.Logger.Info("inspect network finished")
+	defer common.Logger.Info("inspect network end")
 
 	selected, err := n.selected()
 	if err != nil {
@@ -329,11 +328,11 @@ func (n *NetworkList) RemoveNetwork(g *gocui.Gui, v *gocui.View) error {
 	n.ConfirmMessage("Are you sure you want to remove this network?", n.name, func() error {
 		n.AddTask(fmt.Sprintf("Remove network %s", selected.Name), func() error {
 			common.Logger.Info("remove network start")
-			defer common.Logger.Info("remove network finished")
+			defer common.Logger.Info("remove network end")
 
 			if err := n.Docker.RemoveNetwork(selected.ID); err != nil {
 				n.ErrMessage(err.Error(), n.name)
-				common.Logger.Error(err, n.name)
+				common.Logger.Error(err)
 				return err
 			}
 			return n.Refresh(g, v)

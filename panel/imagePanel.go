@@ -123,7 +123,7 @@ func (i *ImageList) SetView(g *gocui.Gui) error {
 
 // Monitoring monitoring image list.
 func (i *ImageList) Monitoring(stop chan int, g *gocui.Gui, v *gocui.View) {
-	common.Logger.Info("start monitoring image list.")
+	common.Logger.Info("monitoring image list start")
 	ticker := time.NewTicker(5 * time.Second)
 
 LOOP:
@@ -134,12 +134,11 @@ LOOP:
 				return i.Refresh(g, v)
 			})
 		case <-stop:
-			common.Logger.Info("stop monitoring image list.")
 			ticker.Stop()
 			break LOOP
 		}
 	}
-	common.Logger.Info("stopped monitoring image list.")
+	common.Logger.Info("monitoring image list stop")
 }
 
 // CloseView close panel
@@ -334,7 +333,7 @@ func (i *ImageList) CreateContainer(g *gocui.Gui, v *gocui.View) error {
 
 	i.AddTask(fmt.Sprintf("Create container %s", data["Name"]), func() error {
 		common.Logger.Info("create image start")
-		defer common.Logger.Info("create image finished")
+		defer common.Logger.Info("create image end")
 
 		if err := i.Docker.CreateContainer(options); err != nil {
 			common.Logger.Error(err)
@@ -389,7 +388,7 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 	image := i.form.GetFieldTexts()["Image"]
 	i.AddTask(fmt.Sprintf("Pull image %s", image), func() error {
 		common.Logger.Info("pull image start")
-		defer common.Logger.Info("pull image finished")
+		defer common.Logger.Info("pull image end")
 
 		if err := i.Docker.PullImage(image); err != nil {
 			common.Logger.Error(err)
@@ -405,7 +404,7 @@ func (i *ImageList) PullImage(g *gocui.Gui, v *gocui.View) error {
 // DetailImage display the image detail info
 func (i *ImageList) DetailImage(g *gocui.Gui, v *gocui.View) error {
 	common.Logger.Info("inspect image start")
-	defer common.Logger.Info("inspect image finished")
+	defer common.Logger.Info("inspect image end")
 
 	image, err := i.selected()
 	if err != nil {
@@ -491,7 +490,7 @@ func (i *ImageList) SaveImage(g *gocui.Gui, v *gocui.View) error {
 
 	i.AddTask(fmt.Sprintf("Save image:%s to %s", data["Image"], data["Path"]), func() error {
 		common.Logger.Info("save image start")
-		defer common.Logger.Info("save image finished")
+		defer common.Logger.Info("save image end")
 
 		return i.Docker.SaveImage([]string{data["Image"]}, data["Path"])
 	})
@@ -547,7 +546,7 @@ func (i *ImageList) ImportImage(g *gocui.Gui, v *gocui.View) error {
 
 	i.AddTask(fmt.Sprintf("Import image from %s", data["Path"]), func() error {
 		common.Logger.Info("import image start")
-		defer common.Logger.Info("import image finished")
+		defer common.Logger.Info("import image end")
 
 		if err := i.Docker.ImportImage(data["Repository"], data["Tag"], data["Path"]); err != nil {
 			common.Logger.Error(err)
@@ -604,7 +603,7 @@ func (i *ImageList) LoadImage(g *gocui.Gui, v *gocui.View) error {
 
 	i.AddTask(fmt.Sprintf("Load image from %s", path), func() error {
 		common.Logger.Info("load image start")
-		defer common.Logger.Info("load image finished")
+		defer common.Logger.Info("load image end")
 
 		if err := i.Docker.LoadImage(path); err != nil {
 			common.Logger.Error(err)
@@ -705,7 +704,7 @@ func (i *ImageList) RemoveImage(g *gocui.Gui, v *gocui.View) error {
 	i.ConfirmMessage("Are you sure you want to remove this image?", i.name, func() error {
 		i.AddTask(fmt.Sprintf("Remove image %s", name), func() error {
 			common.Logger.Info("remove image start")
-			defer common.Logger.Info("remove image finished")
+			defer common.Logger.Info("remove image end")
 
 			if err := i.Docker.RemoveImage(name); err != nil {
 				i.ErrMessage(err.Error(), i.name)
@@ -732,7 +731,7 @@ func (i *ImageList) RemoveDanglingImages(g *gocui.Gui, v *gocui.View) error {
 	i.ConfirmMessage("Are you sure you want to remove unused images?", i.name, func() error {
 		i.AddTask("Remove unused image", func() error {
 			common.Logger.Info("remove unused image start")
-			defer common.Logger.Info("remove unused image finished")
+			defer common.Logger.Info("remove unused image end")
 
 			if err := i.Docker.RemoveDanglingImages(); err != nil {
 				i.ErrMessage(err.Error(), i.name)

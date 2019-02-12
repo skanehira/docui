@@ -107,7 +107,7 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 
 			g.Update(func(g *gocui.Gui) error {
 				common.Logger.Info("search image start")
-				defer common.Logger.Info("search image finished")
+				defer common.Logger.Info("search image end")
 
 				s.CloseStateMessage()
 

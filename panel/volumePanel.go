@@ -116,7 +116,7 @@ func (vl *VolumeList) SetView(g *gocui.Gui) error {
 
 // Monitoring monitoring image list.
 func (vl *VolumeList) Monitoring(stop chan int, g *gocui.Gui, v *gocui.View) {
-	common.Logger.Info("start monitoring volume list.")
+	common.Logger.Info("monitoring volume list start")
 	ticker := time.NewTicker(5 * time.Second)
 
 LOOP:
@@ -127,12 +127,11 @@ LOOP:
 				return vl.Refresh(g, v)
 			})
 		case <-stop:
-			common.Logger.Info("stop monitoring volume list.")
 			ticker.Stop()
 			break LOOP
 		}
 	}
-	common.Logger.Info("stopped monitoring volume list.")
+	common.Logger.Info("monitoring volume list stop")
 }
 
 // CloseView close panel
@@ -281,7 +280,7 @@ func (vl *VolumeList) CreateVolume(g *gocui.Gui, v *gocui.View) error {
 
 	vl.AddTask(fmt.Sprintf("Volume create %s", data["Name"]), func() error {
 		common.Logger.Info("create volume start")
-		defer common.Logger.Info("create volume finished")
+		defer common.Logger.Info("create volume end")
 
 		if err := vl.Docker.CreateVolume(vl.Docker.NewCreateVolumeOptions(data)); err != nil {
 			common.Logger.Error(err)
@@ -313,7 +312,7 @@ func (vl *VolumeList) RemoveVolume(g *gocui.Gui, v *gocui.View) error {
 	vl.ConfirmMessage("Are you sure you want to remove this volume?", vl.name, func() error {
 		vl.AddTask(fmt.Sprintf("Remove container %s", selected.Name), func() error {
 			common.Logger.Info("remove volume start")
-			defer common.Logger.Info("remove volume finished")
+			defer common.Logger.Info("remove volume end")
 
 			if err := vl.Docker.RemoveVolume(selected.Name); err != nil {
 				vl.ErrMessage(err.Error(), vl.name)
@@ -333,14 +332,14 @@ func (vl *VolumeList) RemoveVolume(g *gocui.Gui, v *gocui.View) error {
 func (vl *VolumeList) PruneVolumes(g *gocui.Gui, v *gocui.View) error {
 	if len(vl.Volumes) == 0 {
 		vl.ErrMessage(common.ErrNoVolume.Error(), vl.name)
-		common.Logger.Error(common.ErrNoVolume.Error(), vl.name)
+		common.Logger.Error(common.ErrNoVolume)
 		return nil
 	}
 
 	vl.ConfirmMessage("Are you sure you want to remove unused volumes?", vl.name, func() error {
 		vl.AddTask("Remove unused volume", func() error {
 			common.Logger.Info("remove unused volume start")
-			defer common.Logger.Info("remove unused volume finished")
+			defer common.Logger.Info("remove unused volume end")
 
 			if err := vl.Docker.PruneVolumes(); err != nil {
 				vl.ErrMessage(err.Error(), vl.name)
@@ -358,7 +357,7 @@ func (vl *VolumeList) PruneVolumes(g *gocui.Gui, v *gocui.View) error {
 // DetailVolume display detail the specified volume.
 func (vl *VolumeList) DetailVolume(g *gocui.Gui, v *gocui.View) error {
 	common.Logger.Info("inspect volume start")
-	defer common.Logger.Info("inspect volume finished")
+	defer common.Logger.Info("inspect volume end")
 
 	selected, err := vl.selected()
 	if err != nil {

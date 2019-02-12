@@ -161,7 +161,7 @@ func (s *SearchImageResult) PullImage(g *gocui.Gui, v *gocui.View) error {
 
 	s.AddTask(fmt.Sprintf("Pull image %s", name), func() error {
 		common.Logger.Info("pull image start")
-		defer common.Logger.Info("pull image finished")
+		defer common.Logger.Info("pull image end")
 
 		if err := s.Docker.PullImage(name); err != nil {
 			s.ErrMessage(err.Error(), s.name)

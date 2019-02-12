@@ -155,7 +155,7 @@ func (t *TaskList) SetKeyBinding() {
 
 // MonitorTaskList monitorling task status.
 func (t *TaskList) MonitorTaskList(stop chan int, g *gocui.Gui, v *gocui.View) {
-	common.Logger.Info("start monitoring task list.")
+	common.Logger.Info("monitoring task list start")
 LOOP:
 	for {
 		select {
@@ -168,11 +168,10 @@ LOOP:
 
 			t.UpdateTask(task)
 		case <-stop:
-			common.Logger.Info("stop monitoring task list.")
 			break LOOP
 		}
 	}
-	common.Logger.Info("stopped monitoring taks list.")
+	common.Logger.Info("monitoring taks list stop")
 }
 
 // StartTask run the specified task.
