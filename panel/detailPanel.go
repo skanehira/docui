@@ -76,7 +76,7 @@ func (d Detail) Refresh(g *gocui.Gui, v *gocui.View) error {
 func (d Detail) CloseDetailPanel(g *gocui.Gui, v *gocui.View) error {
 
 	if err := d.DeleteView(d.Name()); err != nil {
-		d.Logger.Error(err)
+		common.Logger.Error(err)
 		return err
 	}
 	d.DeleteKeybindings(d.Name())

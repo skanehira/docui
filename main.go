@@ -17,6 +17,7 @@ var (
 	key      = flag.String("key", "", "key.pem file path")
 	ca       = flag.String("ca", "", "ca.pem file path")
 	api      = flag.String("api", "1.39", "api version")
+	logLevel = flag.String("log", "info", "log level")
 )
 
 func main() {
@@ -39,11 +40,14 @@ func main() {
 		return
 	}
 
+	// create logger
+	common.NewLogger(*logLevel)
+
 LOOP:
 	for {
 		// create new panel
 		gui := panel.New(gocui.Output256, dockerClient)
-		gui.Logger.Info("docui start")
+		common.Logger.Info("docui start")
 
 		// run docui
 		err := gui.MainLoop()
@@ -51,7 +55,7 @@ LOOP:
 		switch err {
 		case gocui.ErrQuit:
 			// exit
-			gui.Logger.Info("docui finished")
+			common.Logger.Info("docui finished")
 			gui.Close()
 			break LOOP
 		case panel.ErrExecFlag:

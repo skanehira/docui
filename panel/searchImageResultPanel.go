@@ -42,7 +42,7 @@ func (s *SearchImageResult) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := common.SetViewWithValidPanelSize(g, SearchImageResultHeaderPanel, s.x, s.y, s.w, s.h); err != nil {
 		if err != gocui.ErrUnknownView {
-			s.Logger.Error(err)
+			common.Logger.Error(err)
 			return err
 		}
 
@@ -55,7 +55,7 @@ func (s *SearchImageResult) SetView(g *gocui.Gui) error {
 	// set scroll panel
 	if v, err := common.SetViewWithValidPanelSize(g, s.name, s.x, s.y+1, s.w, s.h); err != nil {
 		if err != gocui.ErrUnknownView {
-			s.Logger.Error(err)
+			common.Logger.Error(err)
 			return err
 		}
 		v.Frame = false
@@ -128,7 +128,7 @@ func (s *SearchImageResult) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 	s.DeleteKeybindings(s.name)
 
 	if err := s.DeleteView(s.name); err != nil {
-		s.Logger.Error(err)
+		common.Logger.Error(err)
 		return err
 	}
 
@@ -160,12 +160,12 @@ func (s *SearchImageResult) PullImage(g *gocui.Gui, v *gocui.View) error {
 	s.SwitchPanel(ImageListPanel)
 
 	s.AddTask(fmt.Sprintf("Pull image %s", name), func() error {
-		s.Logger.Info("pull image start")
-		defer s.Logger.Info("pull image finished")
+		common.Logger.Info("pull image start")
+		defer common.Logger.Info("pull image finished")
 
 		if err := s.Docker.PullImage(name); err != nil {
 			s.ErrMessage(err.Error(), s.name)
-			s.Logger.Error(err)
+			common.Logger.Error(err)
 			return nil
 		}
 

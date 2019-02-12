@@ -183,11 +183,11 @@ func (d *Docker) CreateExec(container, cmd string) (types.IDResponse, error) {
 }
 
 // AttachExecContainer attach container
-func (d *Docker) AttachExecContainer(id, cmd string, logger *common.Logger) error {
+func (d *Docker) AttachExecContainer(id, cmd string) error {
 	exec, err := d.CreateExec(id, cmd)
 
 	if err != nil {
-		logger.Error(err)
+		common.Logger.Error(err)
 		return err
 	}
 
@@ -195,7 +195,7 @@ func (d *Docker) AttachExecContainer(id, cmd string, logger *common.Logger) erro
 
 	resp, err := d.ContainerExecAttach(ctx, exec.ID, types.ExecStartCheck{Tty: true})
 	if err != nil {
-		logger.Error(err)
+		common.Logger.Error(err)
 		return err
 	}
 
@@ -226,7 +226,7 @@ func (d *Docker) AttachExecContainer(id, cmd string, logger *common.Logger) erro
 		}
 	}
 	if err := <-errCh; err != nil {
-		logger.Error(err)
+		common.Logger.Error(err)
 		return err
 	}
 	return nil

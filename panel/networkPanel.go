@@ -77,7 +77,7 @@ func (n *NetworkList) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := common.SetViewWithValidPanelSize(g, NetworkListHeaderPanel, n.x, n.y, n.w, n.h); err != nil {
 		if err != gocui.ErrUnknownView {
-			n.Logger.Error(err)
+			common.Logger.Error(err)
 			return err
 		}
 
@@ -92,7 +92,7 @@ func (n *NetworkList) SetView(g *gocui.Gui) error {
 	v, err := common.SetViewWithValidPanelSize(g, n.name, n.x, n.y+1, n.w, n.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
-			n.Logger.Error(err)
+			common.Logger.Error(err)
 			return err
 		}
 		v.Frame = false
@@ -115,7 +115,7 @@ func (n *NetworkList) SetView(g *gocui.Gui) error {
 
 // Monitoring monitoring image list.
 func (n *NetworkList) Monitoring(stop chan int, g *gocui.Gui, v *gocui.View) {
-	n.Logger.Info("start monitoring network list.")
+	common.Logger.Info("start monitoring network list.")
 	ticker := time.NewTicker(5 * time.Second)
 
 LOOP:
@@ -126,12 +126,12 @@ LOOP:
 				return n.Refresh(g, v)
 			})
 		case <-stop:
-			n.Logger.Info("stop monitoring network list.")
+			common.Logger.Info("stop monitoring network list.")
 			ticker.Stop()
 			break LOOP
 		}
 	}
-	n.Logger.Info("stopped monitoring network list.")
+	common.Logger.Info("stopped monitoring network list.")
 }
 
 // CloseView close panel
@@ -146,7 +146,7 @@ func (n *NetworkList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	n.Update(func(g *gocui.Gui) error {
 		v, err := n.View(n.name)
 		if err != nil {
-			n.Logger.Error(err)
+			common.Logger.Error(err)
 			return nil
 		}
 		n.GetNetworkList(v)
@@ -208,7 +208,7 @@ func (n *NetworkList) Filter(g *gocui.Gui, nv *gocui.View) error {
 		}
 
 		if err := g.DeleteView(v.Name()); err != nil {
-			n.Logger.Error(err)
+			common.Logger.Error(err)
 			return nil
 		}
 
@@ -223,7 +223,7 @@ func (n *NetworkList) Filter(g *gocui.Gui, nv *gocui.View) error {
 	}
 
 	if err := n.NewFilterPanel(n, reset, closePanel); err != nil {
-		n.Logger.Error(err)
+		common.Logger.Error(err)
 		return nil
 	}
 
@@ -237,7 +237,7 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 
 	networks, err := n.Docker.Networks(types.NetworkListOptions{})
 	if err != nil {
-		n.Logger.Error("cannot get networks, " + err.Error())
+		common.Logger.Error("cannot get networks, " + err.Error())
 		return
 	}
 
@@ -255,7 +255,7 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 
 		net, err := n.Docker.InspectNetwork(network.ID)
 		if err != nil {
-			n.Logger.Error("cannot get network info, " + err.Error())
+			common.Logger.Error("cannot get network info, " + err.Error())
 			continue
 		}
 
@@ -284,20 +284,20 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 
 // Detail display detail the specified network
 func (n *NetworkList) Detail(g *gocui.Gui, v *gocui.View) error {
-	n.Logger.Info("inspect network start")
-	defer n.Logger.Info("inspect network finished")
+	common.Logger.Info("inspect network start")
+	defer common.Logger.Info("inspect network finished")
 
 	selected, err := n.selected()
 	if err != nil {
 		n.ErrMessage(err.Error(), n.name)
-		n.Logger.Error(err)
+		common.Logger.Error(err)
 		return nil
 	}
 
 	net, err := n.Docker.InspectNetwork(selected.ID)
 	if err != nil {
 		n.ErrMessage(err.Error(), n.name)
-		n.Logger.Error(err)
+		common.Logger.Error(err)
 		return nil
 	}
 
@@ -305,7 +305,7 @@ func (n *NetworkList) Detail(g *gocui.Gui, v *gocui.View) error {
 
 	v, err = g.View(DetailPanel)
 	if err != nil {
-		n.Logger.Error(err)
+		common.Logger.Error(err)
 		return nil
 	}
 
@@ -322,18 +322,18 @@ func (n *NetworkList) RemoveNetwork(g *gocui.Gui, v *gocui.View) error {
 	selected, err := n.selected()
 	if err != nil {
 		n.ErrMessage(err.Error(), n.name)
-		n.Logger.Error(err)
+		common.Logger.Error(err)
 		return nil
 	}
 
 	n.ConfirmMessage("Are you sure you want to remove this network?", n.name, func() error {
 		n.AddTask(fmt.Sprintf("Remove network %s", selected.Name), func() error {
-			n.Logger.Info("remove network start")
-			defer n.Logger.Info("remove network finished")
+			common.Logger.Info("remove network start")
+			defer common.Logger.Info("remove network finished")
 
 			if err := n.Docker.RemoveNetwork(selected.ID); err != nil {
 				n.ErrMessage(err.Error(), n.name)
-				n.Logger.Error(err, n.name)
+				common.Logger.Error(err, n.name)
 				return err
 			}
 			return n.Refresh(g, v)

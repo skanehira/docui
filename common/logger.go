@@ -8,14 +8,22 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Logger logger
+var Logger *logger
+
 // Logger logger.
-type Logger struct {
+type logger struct {
 	*os.File
 	*log.Logger
 }
 
 // NewLogger create new logger.
-func NewLogger() *Logger {
+func NewLogger(logLevel string) {
+	level, err := log.ParseLevel(logLevel)
+	if err != nil {
+		panic(err)
+	}
+
 	home, err := homedir.Dir()
 	if err != nil {
 		panic(err)
@@ -32,17 +40,11 @@ func NewLogger() *Logger {
 		FullTimestamp: true,
 	})
 	log.SetOutput(logFile)
+	log.SetLevel(level)
 	log.SetReportCaller(true)
 
-	return &Logger{
+	Logger = &logger{
 		File:   logFile,
 		Logger: log.StandardLogger(),
-	}
-}
-
-// CloseLogger close logger.
-func (l *Logger) CloseLogger() {
-	if err := l.Close(); err != nil {
-		panic(err)
 	}
 }

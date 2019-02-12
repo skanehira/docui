@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/jroimartin/gocui"
-	"github.com/skanehira/docui/common"
 	"github.com/skanehira/docui/docker"
 	component "github.com/skanehira/gocui-component"
 )
@@ -83,7 +82,6 @@ type Gui struct {
 	NextPanel  string
 	active     int
 	modal      *component.Modal
-	Logger     *common.Logger
 }
 
 // Panel is a interface.
@@ -120,7 +118,6 @@ func New(mode gocui.OutputMode, d *docker.Docker) *Gui {
 		PanelNames: []string{},
 		NextPanel:  ImageListPanel,
 		active:     0,
-		Logger:     common.NewLogger(),
 	}
 
 	gui.init()

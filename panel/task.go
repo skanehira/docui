@@ -75,7 +75,7 @@ func (t *TaskList) SetView(g *gocui.Gui) error {
 	// set header panel
 	if v, err := common.SetViewWithValidPanelSize(g, TaskListHeaderPanel, t.x, t.y, t.w, t.h); err != nil {
 		if err != gocui.ErrUnknownView {
-			t.Logger.Error(err)
+			common.Logger.Error(err)
 			return err
 		}
 
@@ -90,7 +90,7 @@ func (t *TaskList) SetView(g *gocui.Gui) error {
 	v, err := common.SetViewWithValidPanelSize(g, t.name, t.x, t.y+1, t.w, t.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
-			t.Logger.Error(err)
+			common.Logger.Error(err)
 			return err
 		}
 		v.Frame = false
@@ -155,7 +155,7 @@ func (t *TaskList) SetKeyBinding() {
 
 // MonitorTaskList monitorling task status.
 func (t *TaskList) MonitorTaskList(stop chan int, g *gocui.Gui, v *gocui.View) {
-	t.Logger.Info("start monitoring task list.")
+	common.Logger.Info("start monitoring task list.")
 LOOP:
 	for {
 		select {
@@ -168,11 +168,11 @@ LOOP:
 
 			t.UpdateTask(task)
 		case <-stop:
-			t.Logger.Info("stop monitoring task list.")
+			common.Logger.Info("stop monitoring task list.")
 			break LOOP
 		}
 	}
-	t.Logger.Info("stopped monitoring taks list.")
+	common.Logger.Info("stopped monitoring taks list.")
 }
 
 // StartTask run the specified task.
