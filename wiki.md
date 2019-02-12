@@ -1,9 +1,8 @@
 # About docui
-docui is a simple GUI tool for docker running on terminal.  
-Supported OS is Linux / Mac only.  
+docui is a simple TUI Client for docker.  
+Supported OS is Linux/Mac only.  
 
-Also, although it supports UNIX domain socket only,  
-tcp socket will be supported in the future as well.  
+Also, although it supports UNIX domain socket, TCP, http/https.
 
 # Installation
 If you not install golang,  
@@ -97,8 +96,7 @@ $ docker run --rm -itv /var/run/docker.sock:/var/run/docker.sock skanehira/docui
 If you want to customize image.
 
 ```
-$ cd build
-$ bash build.sh
+$ make docker-build
 ```
 
 # How to use

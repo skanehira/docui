@@ -3,7 +3,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/skanehira/docui?)](https://goreportcard.com/report/github.com/skanehira/docui)
 
 ## About docui
-docui is TUI Tool for Docker Client.  
+docui is TUI Client for Docker.  
 docui can do as follows:
 
 - image
