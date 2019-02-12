@@ -1,6 +1,7 @@
 package docker
 
 import (
+	"bufio"
 	"context"
 	"fmt"
 	"io"
@@ -24,8 +25,22 @@ func (d *Docker) InspectImage(name string) (types.ImageInspect, error) {
 
 // PullImage pull image
 func (d *Docker) PullImage(name string) error {
-	_, err := d.ImagePull(context.TODO(), name, types.ImagePullOptions{})
-	return err
+	resp, err := d.ImagePull(context.TODO(), name, types.ImagePullOptions{})
+
+	if err != nil {
+		return err
+	}
+
+	// wait until pull is completed
+	scanner := bufio.NewScanner(resp)
+	for scanner.Scan() {
+	}
+
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // RemoveImage remove image
