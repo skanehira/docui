@@ -235,14 +235,14 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 	v.Clear()
 	n.Networks = make([]*Network, 0)
 
-	keys := make([]string, 0, len(n.Docker.Networks()))
-	tmpMap := make(map[string]*Network)
-
 	networks, err := n.Docker.Networks(types.NetworkListOptions{})
 	if err != nil {
 		n.Logger.Error("cannot get networks, " + err.Error())
 		return
 	}
+
+	keys := make([]string, 0, len(networks))
+	tmpMap := make(map[string]*Network)
 
 	for _, network := range networks {
 		if n.filter != "" {

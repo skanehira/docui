@@ -206,15 +206,15 @@ func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 	v.Clear()
 	vl.Volumes = make([]*Volume, 0)
 
-	keys := make([]string, 0, len(vl.Docker.Volumes()))
-	tmpMap := make(map[string]*Volume)
-
 	volumes, err := vl.Docker.Volumes()
 
 	if err != nil {
 		vl.Logger.Error(err)
 		return
 	}
+
+	keys := make([]string, 0, len(volumes))
+	tmpMap := make(map[string]*Volume)
 
 	for _, volume := range volumes {
 		if vl.filter != "" {
