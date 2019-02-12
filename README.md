@@ -1,6 +1,10 @@
 # docui - TUI Client for Docker Written in Go
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/skanehira/docui?)](https://goreportcard.com/report/github.com/skanehira/docui)
+[![CircleCI](https://img.shields.io/circleci/project/github/skanehira/docui.svg?style=flat-square)](https://goreportcard.com/report/github.com/skanehira/docui)
+[![CircleCI](https://img.shields.io/github/release/skanehira/docui.svg?style=flat-square)](https://github.com/skanehira/docui/releases)
+![GitHub All Releases](https://img.shields.io/github/downloads/skanehira/docui/total.svg?style=flat)
+![GitHub commits](https://img.shields.io/github/commits-since/skanehira/docui/1.0.0.svg?style=flat-square)
 
 ## About docui
 docui is TUI Client for Docker.  
