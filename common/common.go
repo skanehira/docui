@@ -15,7 +15,7 @@ import (
 	"time"
 	"unsafe"
 
-	docker "github.com/fsouza/go-dockerclient"
+	"github.com/docker/docker/api/types"
 	"github.com/jroimartin/gocui"
 )
 
@@ -136,7 +136,7 @@ func ParseSizeToString(size int64) string {
 }
 
 // ParsePortToString parse port tos tring.
-func ParsePortToString(ports []docker.APIPort) string {
+func ParsePortToString(ports []types.Port) string {
 	var port string
 	for _, p := range ports {
 		if p.PublicPort == 0 {

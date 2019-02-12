@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 
@@ -15,6 +16,7 @@ var (
 	cert     = flag.String("cert", "", "cert.pem file path")
 	key      = flag.String("key", "", "key.pem file path")
 	ca       = flag.String("ca", "", "ca.pem file path")
+	api      = flag.String("api", "1.39", "api version")
 )
 
 func main() {
@@ -26,12 +28,13 @@ func main() {
 	// parse flag
 	flag.Parse()
 
-	// new dcoker client
-	config := docker.NewClientConfig(*endpoint, *cert, *key, *ca)
+	// new docker client
+	config := docker.NewClientConfig(*endpoint, *cert, *key, *ca, *api)
 	dockerClient := docker.NewDocker(config)
 
 	// when docker client cannot connect engine exit
-	if err := dockerClient.Ping(); err != nil {
+	_, err := dockerClient.Ping(context.TODO())
+	if err != nil {
 		log.Println(err)
 		return
 	}

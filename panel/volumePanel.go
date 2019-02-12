@@ -29,7 +29,8 @@ type Volume struct {
 	Created    string `tag:"CREATED" len:"min:0.1 max:0.2"`
 }
 
-var location = time.FixedZone("Asia/Tokyo", 9*60*60)
+// replace date format
+var replacer = strings.NewReplacer("T", " ", "Z", "")
 
 // NewVolumeList create new volume list panel.
 func NewVolumeList(gui *Gui, name string, x, y, w, h int) *VolumeList {
@@ -205,10 +206,17 @@ func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 	v.Clear()
 	vl.Volumes = make([]*Volume, 0)
 
-	keys := make([]string, 0, len(vl.Docker.Volumes()))
+	volumes, err := vl.Docker.Volumes()
+
+	if err != nil {
+		vl.Logger.Error(err)
+		return
+	}
+
+	keys := make([]string, 0, len(volumes))
 	tmpMap := make(map[string]*Volume)
 
-	for _, volume := range vl.Docker.Volumes() {
+	for _, volume := range volumes {
 		if vl.filter != "" {
 			if strings.Index(strings.ToLower(volume.Name), strings.ToLower(vl.filter)) == -1 {
 				continue
@@ -219,7 +227,7 @@ func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 			Name:       volume.Name,
 			MountPoint: volume.Mountpoint,
 			Driver:     volume.Driver,
-			Created:    volume.CreatedAt.In(location).Format("2006/01/02 15:04:05"),
+			Created:    replacer.Replace(volume.CreatedAt),
 		}
 
 		keys = append(keys, volume.Name)
@@ -229,7 +237,6 @@ func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 		common.OutputFormatedLine(v, tmpMap[key])
 		vl.Volumes = append(vl.Volumes, tmpMap[key])
 	}
-
 }
 
 // CreateVolumePanel display create volume form.
@@ -270,15 +277,13 @@ func (vl *VolumeList) CreateVolumePanel(g *gocui.Gui, v *gocui.View) error {
 func (vl *VolumeList) CreateVolume(g *gocui.Gui, v *gocui.View) error {
 	data := vl.form.GetFieldTexts()
 
-	options := vl.Docker.NewCreateVolumeOptions(data)
-
 	vl.form.Close(g, v)
 
 	vl.AddTask(fmt.Sprintf("Volume create %s", data["Name"]), func() error {
 		vl.Logger.Info("create volume start")
 		defer vl.Logger.Info("create volume finished")
 
-		if err := vl.Docker.CreateVolumeWithOptions(options); err != nil {
+		if err := vl.Docker.CreateVolume(vl.Docker.NewCreateVolumeOptions(data)); err != nil {
 			vl.Logger.Error(err)
 			return nil
 		}
@@ -310,7 +315,7 @@ func (vl *VolumeList) RemoveVolume(g *gocui.Gui, v *gocui.View) error {
 			vl.Logger.Info("remove volume start")
 			defer vl.Logger.Info("remove volume finished")
 
-			if err := vl.Docker.RemoveVolumeWithName(selected.Name); err != nil {
+			if err := vl.Docker.RemoveVolume(selected.Name); err != nil {
 				vl.ErrMessage(err.Error(), vl.name)
 				vl.Logger.Error(err)
 				return err
