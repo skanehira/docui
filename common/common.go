@@ -199,7 +199,7 @@ func IsTerminalWindowSizeThanZero() bool {
 
 	defer out.Close()
 
-	signalCh := make(chan os.Signal)
+	signalCh := make(chan os.Signal, 1)
 	signal.Notify(signalCh, syscall.SIGWINCH, syscall.SIGINT)
 
 	for {
