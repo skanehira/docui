@@ -68,7 +68,7 @@ func (f *Form) AddButtonFuncs(buttonHandlers []ButtonHandler) *Form {
 	return f
 }
 
-// AddGlobalFuncs add the specified funtions to all form item.
+// AddGlobalFuncs add the specified functions to all form item.
 func (f *Form) AddGlobalFuncs(globalHandler []Handler) *Form {
 	for _, h := range globalHandler {
 		for _, c := range f.GetItems() {

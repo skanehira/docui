@@ -120,7 +120,7 @@ func NewHostInfo() *HostInfo {
 	}
 }
 
-// NewDockerInfo create dockeri nfo
+// NewDockerInfo create docker info
 func NewDockerInfo(gui *Gui) *DockerInfo {
 	info, err := gui.Docker.Info(context.TODO())
 	if err != nil {

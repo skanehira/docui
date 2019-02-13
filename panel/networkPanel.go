@@ -48,7 +48,7 @@ func (n *NetworkList) Name() string {
 	return n.name
 }
 
-// Edit filterling network list
+// Edit filtering network list
 func (n *NetworkList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
 	case ch != 0 && mod == 0:
@@ -85,7 +85,7 @@ func (n *NetworkList) SetView(g *gocui.Gui) error {
 		v.Frame = true
 		v.Title = v.Name()
 		v.FgColor = gocui.AttrBold | gocui.ColorWhite
-		common.OutputFormatedHeader(v, &Network{})
+		common.OutputFormattedHeader(v, &Network{})
 	}
 
 	// set scroll panel
@@ -155,7 +155,7 @@ func (n *NetworkList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-// SetKeyBinding set keybind to this panel.
+// SetKeyBinding set key bind to this panel.
 func (n *NetworkList) SetKeyBinding() {
 	n.SetKeyBindingToPanel(n.name)
 
@@ -192,7 +192,7 @@ func (n *NetworkList) selected() (*Network, error) {
 	return n.Networks[index], nil
 }
 
-// Filter filterling network list
+// Filter filtering network list
 func (n *NetworkList) Filter(g *gocui.Gui, nv *gocui.View) error {
 	isReset := false
 	closePanel := func(g *gocui.Gui, v *gocui.View) error {
@@ -276,7 +276,7 @@ func (n *NetworkList) GetNetworkList(v *gocui.View) {
 
 	for _, key := range common.SortKeys(keys) {
 		net := tmpMap[key]
-		common.OutputFormatedLine(v, net)
+		common.OutputFormattedLine(v, net)
 		n.Networks = append(n.Networks, net)
 	}
 }

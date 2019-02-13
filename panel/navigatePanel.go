@@ -55,7 +55,7 @@ func (n Navigate) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier
 	// do nothing
 }
 
-// Refresh chnage panel navigate when panel switched
+// Refresh change panel navigate when panel switched
 func (n Navigate) Refresh(g *gocui.Gui, v *gocui.View) error {
 	n.Update(func(g *gocui.Gui) error {
 		currentView := g.CurrentView().Name()
@@ -92,7 +92,7 @@ func newNavi() map[string]string {
 		LoadImagePanel:         "Esc/Ctrl+w: close panel, Enter: load image",
 		ExportContainerPanel:   "Esc/Ctrl+w: close panel, Enter: export container",
 		CommitContainerPanel:   "Ctrl+j/k: change input, Esc/Ctrl+w: close panel, Enter: commit container",
-		SearchImagePanel:       "Esc/Ctrl+w: close panel, Enter: serach image",
+		SearchImagePanel:       "Esc/Ctrl+w: close panel, Enter: search image",
 		SearchImageResultPanel: "j/k: select image, Esc/Ctrl+w: close panel, Enter: pull image",
 		VolumeListPanel:        "j/k: select volume, c: create volume, d: remove volume, p: prune volumes\nf: filter, Enter/o: inspect volume, Ctrl+r: refresh volume list",
 		CreateVolumePanel:      "Esc/Ctrl+w: close panel, Enter: create volume",

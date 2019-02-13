@@ -56,7 +56,7 @@ func (i *ImageList) Name() string {
 	return i.name
 }
 
-// Edit filterling image list.
+// Edit filtering image list.
 func (i *ImageList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
 	case ch != 0 && mod == 0:
@@ -93,7 +93,7 @@ func (i *ImageList) SetView(g *gocui.Gui) error {
 		v.Frame = true
 		v.Title = v.Name()
 		v.FgColor = gocui.AttrBold | gocui.ColorWhite
-		common.OutputFormatedHeader(v, &Image{})
+		common.OutputFormattedHeader(v, &Image{})
 	}
 
 	// set scroll panel
@@ -163,7 +163,7 @@ func (i *ImageList) Refresh(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-// SetKeyBinding set keybind to this panel.
+// SetKeyBinding set key bind to this panel.
 func (i *ImageList) SetKeyBinding() {
 	i.SetKeyBindingToPanel(i.name)
 
@@ -669,7 +669,7 @@ func (i *ImageList) GetImageList(v *gocui.View) {
 
 			i.Images = append(i.Images, image)
 
-			common.OutputFormatedLine(v, image)
+			common.OutputFormattedLine(v, image)
 		}
 	}
 }
