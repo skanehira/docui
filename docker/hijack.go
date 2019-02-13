@@ -11,6 +11,7 @@ import (
 	"github.com/docker/docker/pkg/ioutils"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/docker/docker/pkg/term"
+	"github.com/skanehira/docui/common"
 	"github.com/skanehira/docui/docker/streams"
 )
 
@@ -39,7 +40,9 @@ type hijackedIOStreamer struct {
 func (h *hijackedIOStreamer) stream(ctx context.Context) error {
 	restoreInput, err := h.setupInput()
 	if err != nil {
-		return fmt.Errorf("unable to setup input stream: %s", err)
+		err := fmt.Errorf("unable to setup input stream: %s", err)
+		common.Logger.Error(err)
+		return err
 	}
 
 	defer restoreInput()
@@ -76,7 +79,9 @@ func (h *hijackedIOStreamer) setupInput() (restore func(), err error) {
 	}
 
 	if err := setRawTerminal(h.streams); err != nil {
-		return nil, fmt.Errorf("unable to set IO streams as raw terminal: %s", err)
+		err := fmt.Errorf("unable to set IO streams as raw terminal: %s", err)
+		common.Logger.Error(err)
+		return nil, err
 	}
 
 	var restoreOnce sync.Once
@@ -90,7 +95,7 @@ func (h *hijackedIOStreamer) setupInput() (restore func(), err error) {
 	if h.detachKeys != "" {
 		customEscapeKeys, err := term.ToBytes(h.detachKeys)
 		if err != nil {
-			// TODO logrus.Warnf("invalid detach escape keys, using default: %s", err)
+			common.Logger.Warnf("invalid detach escape keys, using default: %s", err)
 		} else {
 			escapeKeys = customEscapeKeys
 		}
@@ -119,10 +124,10 @@ func (h *hijackedIOStreamer) beginOutputStream(restoreInput func()) <-chan error
 			_, err = stdcopy.StdCopy(h.outputStream, h.errorStream, h.resp.Reader)
 		}
 
-		// TODO logrus.Debug("[hijack] End of stdout")
+		common.Logger.Debug("[hijack] End of stdout")
 
 		if err != nil {
-			// TODO logrus.Debugf("Error receiveStdout: %s", err)
+			common.Logger.Debugf("Error receiveStdout: %s", err)
 		}
 
 		outputDone <- err
@@ -140,7 +145,7 @@ func (h *hijackedIOStreamer) beginInputStream(restoreInput func()) (doneC <-chan
 			_, err := io.Copy(h.resp.Conn, h.inputStream)
 			restoreInput()
 
-			// TODO logrus.Debug("[hijack] End of stdin")
+			common.Logger.Debug("[hijack] End of stdin")
 
 			if _, ok := err.(term.EscapeError); ok {
 				detached <- err
@@ -148,12 +153,12 @@ func (h *hijackedIOStreamer) beginInputStream(restoreInput func()) (doneC <-chan
 			}
 
 			if err != nil {
-				// TODO logrus.Debugf("Error sendStdin: %s", err)
+				common.Logger.Debugf("Error sendStdin: %s", err)
 			}
 		}
 
 		if err := h.resp.CloseWrite(); err != nil {
-			// TODO logrus.Debugf("Couldn't send EOF: %s", err)
+			common.Logger.Debugf("Couldn't send EOF: %s", err)
 		}
 
 		close(inputDone)
@@ -164,6 +169,7 @@ func (h *hijackedIOStreamer) beginInputStream(restoreInput func()) (doneC <-chan
 
 func setRawTerminal(streams Streams) error {
 	if err := streams.In().SetRawTerminal(); err != nil {
+		common.Logger.Error(err)
 		return err
 	}
 	return streams.Out().SetRawTerminal()

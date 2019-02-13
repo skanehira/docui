@@ -32,7 +32,7 @@ func NewSearchImage(g *Gui, name string, p Position) *SearchImage {
 	}
 
 	if err := s.SetView(g.Gui); err != nil {
-		s.Logger.Error(err)
+		common.Logger.Error(err)
 		panic(err)
 	}
 
@@ -51,7 +51,7 @@ func (s *SearchImage) SetView(g *gocui.Gui) error {
 	v, err := common.SetViewWithValidPanelSize(g, s.name, s.x, s.y, s.w, s.h)
 	if err != nil {
 		if err != gocui.ErrUnknownView {
-			s.Logger.Error(err)
+			common.Logger.Error(err)
 			return err
 		}
 
@@ -106,8 +106,8 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 			s.StateMessage("image searching...")
 
 			g.Update(func(g *gocui.Gui) error {
-				s.Logger.Info("search image start")
-				defer s.Logger.Info("search image finished")
+				common.Logger.Info("search image start")
+				defer common.Logger.Info("search image end")
 
 				s.CloseStateMessage()
 
@@ -118,7 +118,7 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 
 				if err != nil {
 					s.ErrMessage(err.Error(), s.name)
-					s.Logger.Error(err)
+					common.Logger.Error(err)
 					return nil
 				}
 
@@ -160,7 +160,7 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 				}
 
 				if err := s.resultPanel.SetView(g); err != nil {
-					s.Logger.Error(err)
+					common.Logger.Error(err)
 					return err
 				}
 
@@ -180,14 +180,14 @@ func (s *SearchImage) SearchImage(g *gocui.Gui, v *gocui.View) error {
 func (s *SearchImage) ClosePanel(g *gocui.Gui, v *gocui.View) error {
 	if err := s.resultPanel.ClosePanel(g, v); err != nil {
 		if err != gocui.ErrUnknownView {
-			s.Logger.Error(err)
+			common.Logger.Error(err)
 			return err
 		}
 	}
 
 	s.DeleteKeybindings(s.name)
 	if err := s.DeleteView(s.name); err != nil {
-		s.Logger.Error(err)
+		common.Logger.Error(err)
 		return err
 	}
 

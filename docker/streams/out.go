@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/docker/docker/pkg/term"
+	"github.com/skanehira/docui/common"
 )
 
 // Out is an output stream used by the DockerCli to write normal program
@@ -34,7 +35,7 @@ func (o *Out) GetTtySize() (uint, uint) {
 	}
 	ws, err := term.GetWinsize(o.fd)
 	if err != nil {
-		// logrus.Debugf("Error getting size: %s", err)
+		common.Logger.Debugf("Error getting size: %s", err)
 		if ws == nil {
 			return 0, 0
 		}

@@ -71,7 +71,7 @@ func (n Navigate) Refresh(g *gocui.Gui, v *gocui.View) error {
 func (n Navigate) SetNavigate(name string) *gocui.View {
 	v, err := n.View(n.name)
 	if err != nil {
-		n.Logger.Error(err)
+		common.Logger.Error(err)
 		panic(err)
 	}
 	v.Clear()

@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
 
 	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
@@ -17,6 +16,7 @@ var (
 	key      = flag.String("key", "", "key.pem file path")
 	ca       = flag.String("ca", "", "ca.pem file path")
 	api      = flag.String("api", "1.39", "api version")
+	logLevel = flag.String("log", "info", "log level")
 )
 
 func main() {
@@ -24,6 +24,9 @@ func main() {
 	if !common.IsTerminalWindowSizeThanZero() {
 		return
 	}
+
+	// create logger
+	common.NewLogger(*logLevel)
 
 	// parse flag
 	flag.Parse()
@@ -33,17 +36,19 @@ func main() {
 	dockerClient := docker.NewDocker(config)
 
 	// when docker client cannot connect engine exit
-	_, err := dockerClient.Ping(context.TODO())
+	info, err := dockerClient.Ping(context.TODO())
 	if err != nil {
-		log.Println(err)
-		return
+		common.Logger.Error(err)
+		panic(err)
 	}
+
+	common.Logger.Infof("docker engine info: %#+v", info)
 
 LOOP:
 	for {
 		// create new panel
 		gui := panel.New(gocui.Output256, dockerClient)
-		gui.Logger.Info("docui start")
+		common.Logger.Info("docui start")
 
 		// run docui
 		err := gui.MainLoop()
@@ -51,7 +56,7 @@ LOOP:
 		switch err {
 		case gocui.ErrQuit:
 			// exit
-			gui.Logger.Info("docui finished")
+			common.Logger.Info("docui end")
 			gui.Close()
 			break LOOP
 		case panel.ErrExecFlag:
