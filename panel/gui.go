@@ -22,19 +22,19 @@ const (
 	ContainerListHeaderPanel = "container list"
 	// DetailPanel detail panel name.
 	DetailPanel = "detail"
-	// CreateContainerPanel create contaienr panel name.
+	// CreateContainerPanel create container panel name.
 	CreateContainerPanel = "create container"
 	// SaveImagePanel save image panel name.
 	SaveImagePanel = "save image"
 	// ImportImagePanel import image panel name.
 	ImportImagePanel = "import image"
-	// LoadImagePanel loadi mage panel name.
+	// LoadImagePanel load image panel name.
 	LoadImagePanel = "load image"
 	// ExportContainerPanel export container panel name.
 	ExportContainerPanel = "export container"
 	// CommitContainerPanel commit container panel name.
 	CommitContainerPanel = "commit container"
-	// RenameContainerPanel rename contaienr panel name.
+	// RenameContainerPanel rename container panel name.
 	RenameContainerPanel = "rename container"
 	// SearchImagePanel search image panel name.
 	SearchImagePanel = "search images"
@@ -139,7 +139,7 @@ func (gui *Gui) AddPanelNames(panel Panel) {
 	gui.PanelNames = append(gui.PanelNames, name)
 }
 
-// SetKeyBindingToPanel set keybind to any panels.
+// SetKeyBindingToPanel set key bind to any panels.
 func (gui *Gui) SetKeyBindingToPanel(panel string) {
 	if err := gui.SetKeybinding(panel, 'q', gocui.ModNone, gui.quit); err != nil {
 		panic(err)
@@ -173,7 +173,7 @@ func (gui *Gui) SetKeyBindingToPanel(panel string) {
 	}
 }
 
-// SetGlobalKeyBinding set keybind to all panels.
+// SetGlobalKeyBinding set key bind to all panels.
 func (gui *Gui) SetGlobalKeyBinding() {
 	if err := gui.SetKeybinding("", gocui.KeyCtrlQ, gocui.ModNone, gui.quit); err != nil {
 		panic(err)
@@ -261,7 +261,7 @@ func (gui *Gui) StorePanels(panel Panel) {
 
 }
 
-// PopupDetailPanel desplay detail panel.
+// PopupDetailPanel display detail panel.
 func (gui *Gui) PopupDetailPanel(g *gocui.Gui, v *gocui.View) error {
 	gui.NextPanel = g.CurrentView().Name()
 
@@ -345,7 +345,7 @@ func (gui *Gui) NewModal(message string) *component.Modal {
 	return modal
 }
 
-// RefreshAllPanel refiresh all panel status
+// RefreshAllPanel refresh all panel status
 func (gui *Gui) RefreshAllPanel() {
 	for _, panel := range gui.Panels {
 		v, _ := gui.View(panel.Name())

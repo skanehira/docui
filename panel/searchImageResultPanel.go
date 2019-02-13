@@ -23,7 +23,7 @@ type SearchResult struct {
 	Description string `tag:"DESCRIPTION" len:"min:0.1 max:0.5"`
 }
 
-// NewSearchImageResult create nrew result panel.
+// NewSearchImageResult create new result panel.
 func NewSearchImageResult(g *Gui, name string, p Position) *SearchImageResult {
 	return &SearchImageResult{
 		Gui:      g,
@@ -49,7 +49,7 @@ func (s *SearchImageResult) SetView(g *gocui.Gui) error {
 		v.Wrap = true
 		v.Title = v.Name()
 		v.FgColor = gocui.AttrBold | gocui.ColorWhite
-		common.OutputFormatedHeader(v, &SearchResult{})
+		common.OutputFormattedHeader(v, &SearchResult{})
 	}
 
 	// set scroll panel
@@ -83,7 +83,7 @@ func (s *SearchImageResult) Refresh(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-// SetKeyBinding set keybind to this panel.
+// SetKeyBinding set key bind to this panel.
 func (s *SearchImageResult) SetKeyBinding() {
 	if err := s.SetKeybinding(s.name, gocui.KeyEnter, gocui.ModNone, s.PullImage); err != nil {
 		panic(err)
@@ -117,7 +117,7 @@ func (s *SearchImageResult) SetKeyBinding() {
 	}
 }
 
-// SwitchToSearch swtich to search panel.
+// SwitchToSearch switch to search panel.
 func (s *SearchImageResult) SwitchToSearch(g *gocui.Gui, v *gocui.View) error {
 	s.SwitchPanel(SearchImagePanel)
 	return nil
@@ -192,6 +192,6 @@ func (s *SearchImageResult) CloseResultHeaderPanel() {
 func (s *SearchImageResult) DisplayResult(v *gocui.View) {
 	v.Clear()
 	for _, image := range s.images {
-		common.OutputFormatedLine(v, image)
+		common.OutputFormattedLine(v, image)
 	}
 }

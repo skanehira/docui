@@ -50,8 +50,8 @@ func GetOSenv(env string) string {
 	return env
 }
 
-// OutputFormatedLine print formated panel info.
-func OutputFormatedLine(v *gocui.View, i interface{}) {
+// OutputFormattedLine print formatted panel info.
+func OutputFormattedLine(v *gocui.View, i interface{}) {
 
 	elem := reflect.ValueOf(i).Elem()
 	size := elem.NumField()
@@ -105,8 +105,8 @@ func OutputFormatedLine(v *gocui.View, i interface{}) {
 	fmt.Fprint(v, "\n")
 }
 
-// OutputFormatedHeader print formated panel header.
-func OutputFormatedHeader(v *gocui.View, i interface{}) {
+// OutputFormattedHeader print formatted panel header.
+func OutputFormattedHeader(v *gocui.View, i interface{}) {
 	elem := reflect.ValueOf(i).Elem()
 	size := elem.NumField()
 
@@ -120,7 +120,7 @@ func OutputFormatedHeader(v *gocui.View, i interface{}) {
 		}
 	}
 
-	OutputFormatedLine(v, i)
+	OutputFormattedLine(v, i)
 }
 
 // ParseDateToString parse date to string.
@@ -135,7 +135,7 @@ func ParseSizeToString(size int64) string {
 	return fmt.Sprintf("%.1fMB", mb)
 }
 
-// ParsePortToString parse port tos tring.
+// ParsePortToString parse port to string.
 func ParsePortToString(ports []types.Port) string {
 	var port string
 	for _, p := range ports {

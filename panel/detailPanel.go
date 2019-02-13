@@ -41,7 +41,7 @@ func (d Detail) SetView(g *gocui.Gui) error {
 	return nil
 }
 
-// SetKeyBinding set keybind to this panel.
+// SetKeyBinding set key bind to this panel.
 func (d Detail) SetKeyBinding() {
 
 	if err := d.SetKeybinding(d.name, 'j', gocui.ModNone, CursorDown); err != nil {
@@ -72,7 +72,7 @@ func (d Detail) Refresh(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-// CloseDetailPanel cloase the detail panel.
+// CloseDetailPanel close the detail panel.
 func (d Detail) CloseDetailPanel(g *gocui.Gui, v *gocui.View) error {
 
 	if err := d.DeleteView(d.Name()); err != nil {

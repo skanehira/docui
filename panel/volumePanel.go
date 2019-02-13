@@ -48,7 +48,7 @@ func (vl *VolumeList) Name() string {
 	return vl.name
 }
 
-// Edit filterling volume list.
+// Edit filtering volume list.
 func (vl *VolumeList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
 	case ch != 0 && mod == 0:
@@ -85,7 +85,7 @@ func (vl *VolumeList) SetView(g *gocui.Gui) error {
 		v.Frame = true
 		v.Title = v.Name()
 		v.FgColor = gocui.AttrBold | gocui.ColorWhite
-		common.OutputFormatedHeader(v, &Volume{})
+		common.OutputFormattedHeader(v, &Volume{})
 	}
 
 	// set scroll panel
@@ -141,7 +141,7 @@ func (vl *VolumeList) CloseView() {
 	close(vl.stop)
 }
 
-// SetKeyBinding set keybind to this panel.
+// SetKeyBinding set key bind to this panel.
 func (vl *VolumeList) SetKeyBinding() {
 	vl.SetKeyBindingToPanel(vl.name)
 
@@ -233,7 +233,7 @@ func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 	}
 
 	for _, key := range common.SortKeys(keys) {
-		common.OutputFormatedLine(v, tmpMap[key])
+		common.OutputFormattedLine(v, tmpMap[key])
 		vl.Volumes = append(vl.Volumes, tmpMap[key])
 	}
 }
@@ -390,7 +390,7 @@ func (vl *VolumeList) DetailVolume(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-// Filter filterling volume
+// Filter filtering volume
 func (vl *VolumeList) Filter(g *gocui.Gui, lv *gocui.View) error {
 	isReset := false
 	closePanel := func(g *gocui.Gui, v *gocui.View) error {

@@ -48,7 +48,7 @@ func (c *ContainerList) Name() string {
 	return c.name
 }
 
-// Edit filterling container list.
+// Edit filtering container list.
 func (c *ContainerList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifier) {
 	switch {
 	case ch != 0 && mod == 0:
@@ -85,7 +85,7 @@ func (c *ContainerList) SetView(g *gocui.Gui) error {
 		v.Frame = true
 		v.Title = v.Name()
 		v.FgColor = gocui.AttrBold | gocui.ColorWhite
-		common.OutputFormatedHeader(v, &Container{})
+		common.OutputFormattedHeader(v, &Container{})
 	}
 
 	// set scroll panel
@@ -141,7 +141,7 @@ func (c *ContainerList) CloseView() {
 	close(c.stop)
 }
 
-// SetKeyBinding set keybind to this panel.
+// SetKeyBinding set key bind to this panel.
 func (c *ContainerList) SetKeyBinding() {
 	c.SetKeyBindingToPanel(c.name)
 
@@ -180,7 +180,7 @@ func (c *ContainerList) SetKeyBinding() {
 	}
 }
 
-// selected return selectd container info
+// selected return selected container info
 func (c *ContainerList) selected() (*Container, error) {
 	v, _ := c.View(c.name)
 	_, cy := v.Cursor()
@@ -565,7 +565,7 @@ func (c *ContainerList) GetContainerList(v *gocui.View) {
 
 		c.Containers = append(c.Containers, container)
 
-		common.OutputFormatedLine(v, container)
+		common.OutputFormattedLine(v, container)
 	}
 }
 

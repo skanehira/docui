@@ -162,10 +162,10 @@ It must be absolute path.
 Selected image id.
 
 - Attach  
-If you want to attach contaienr, please Enter.
+If you want to attach container, please Enter.
 
 - User  
-If you want to attach contaienr, please input user name.
+If you want to attach container, please input user name.
 
 - Env  
 The environment variable setting value can be defined by variables like `$PATH`.

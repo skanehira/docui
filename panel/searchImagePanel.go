@@ -71,7 +71,7 @@ func (s *SearchImage) Refresh(g *gocui.Gui, v *gocui.View) error {
 	return nil
 }
 
-// SetKeyBinding set keybind to this panel.
+// SetKeyBinding set key bind to this panel.
 func (s *SearchImage) SetKeyBinding() {
 	if err := s.SetKeybinding(s.name, gocui.KeyCtrlW, gocui.ModNone, s.ClosePanel); err != nil {
 		panic(err)
@@ -87,7 +87,7 @@ func (s *SearchImage) SetKeyBinding() {
 	}
 }
 
-// SwitchToResult swtitch resulit panel.
+// SwitchToResult stitch result panel.
 func (s *SearchImage) SwitchToResult(g *gocui.Gui, v *gocui.View) error {
 	if !s.IsSetView(SearchImageResultPanel) {
 		return nil

@@ -83,7 +83,7 @@ func (t *TaskList) SetView(g *gocui.Gui) error {
 		v.Frame = true
 		v.Title = v.Name()
 		v.FgColor = gocui.AttrBold | gocui.ColorWhite
-		common.OutputFormatedHeader(v, &Task{})
+		common.OutputFormattedHeader(v, &Task{})
 	}
 
 	// set scroll panel
@@ -147,13 +147,13 @@ func (t *TaskList) Edit(v *gocui.View, key gocui.Key, ch rune, mod gocui.Modifie
 	}
 }
 
-// SetKeyBinding set keybind to this panel.
+// SetKeyBinding set key bind to this panel.
 func (t *TaskList) SetKeyBinding() {
 	t.SetKeyBindingToPanel(t.name)
 	// TODO add detail and cancel key mapping
 }
 
-// MonitorTaskList monitorling task status.
+// MonitorTaskList monitoring task status.
 func (t *TaskList) MonitorTaskList(stop chan int, g *gocui.Gui, v *gocui.View) {
 	common.Logger.Info("monitoring task list start")
 LOOP:
@@ -171,7 +171,7 @@ LOOP:
 			break LOOP
 		}
 	}
-	common.Logger.Info("monitoring taks list stop")
+	common.Logger.Info("monitoring tasks list stop")
 }
 
 // StartTask run the specified task.
@@ -197,14 +197,14 @@ func (t *TaskList) UpdateTask(task *Task) {
 	t.Update(func(g *gocui.Gui) error {
 		t.view.Clear()
 		for _, task := range t.ViewTask {
-			common.OutputFormatedLine(t.view, task)
+			common.OutputFormattedLine(t.view, task)
 		}
 
 		return nil
 	})
 }
 
-// CancelTask this feature will add in the futre
+// CancelTask this feature will add in the future
 func (t *TaskList) CancelTask(id string) error {
 	// TODO cancel task
 
