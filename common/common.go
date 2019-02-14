@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"reflect"
@@ -193,7 +192,7 @@ func getTermSize(fd uintptr) (int, int) {
 func IsTerminalWindowSizeThanZero() bool {
 	out, err := os.OpenFile("/dev/tty", os.O_RDWR, 0)
 	if err != nil {
-		log.Println(err)
+		Logger.Error(err)
 		return false
 	}
 
