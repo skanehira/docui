@@ -178,7 +178,8 @@ LOOP:
 func (t *TaskList) StartTask(task *Task) {
 	task.ID = strconv.Itoa(len(t.ViewTask))
 
-	t.ViewTask = append(t.ViewTask, task)
+	// push front
+	t.ViewTask = append([]*Task{task}, t.ViewTask...)
 
 	// status update executing
 	t.UpdateTask(task)
