@@ -93,6 +93,13 @@ jobs:
           name: Build Docker Image
           command: docker build -t skanehira/docui .
 
+      - run:
+          name: Login Docker Hub
+          command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+
+      - run:
+          name: Push Image
+          command: docker push skanehira/docui
 workflows:
   stable-build:
     jobs:
