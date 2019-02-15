@@ -123,3 +123,6 @@ workflows:
     jobs:
       - build-docker-image:
           docker-version: "18.06.0-ce"
+          filters:
+            branches:
+              only: master
