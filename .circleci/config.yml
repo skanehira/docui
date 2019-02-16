@@ -122,7 +122,7 @@ workflows:
   docker-image-build:
     jobs:
       - build-docker-image:
-          docker-version: "18.09.2-ce"
+          docker-version: "18.09.2"
           filters:
             branches:
               only: master
