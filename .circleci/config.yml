@@ -115,4 +115,4 @@ workflows:
   docker-image-build:
     jobs:
       - build-docker-image:
-          docker-version: "18.06.0-ce"
+          docker-version: "18.09.2-ce"
