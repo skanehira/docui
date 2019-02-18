@@ -1,0 +1,34 @@
+project_name: docui
+builds:
+- env:
+  - CGO_ENABLED=0
+  - GO111MODULE=on
+archive:
+  replacements:
+    darwin: Darwin
+    linux: Linux
+    386: i386
+    amd64: x86_64
+checksum:
+  name_template: 'checksums.txt'
+snapshot:
+  name_template: "{{ .Tag }}-next"
+changelog:
+  skip: true
+brew:
+  name: docui
+  github:
+    owner: skanehira
+    name: homebrew-docui
+  folder: Formula
+  description: "TUI Client for Docker"
+  homepage: "https://github.com/skanehira/docui"
+  commit_author:
+    name: goreleaserbot
+    email: goreleaser@carlosbecker.com
+  dependencies:
+    - go
+  install: |
+    bin.install "docui"
+  test: |
+    system "#{bin}/docui", "version"

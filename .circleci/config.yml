@@ -53,7 +53,6 @@ jobs:
       - run:
           name: Run build
           command: go build
-
   lint:
     parameters:
       go-version:
@@ -100,6 +99,23 @@ jobs:
       - run:
           name: Push Image
           command: docker push skanehira/docui
+
+  release:
+    parameters:
+      go-version:
+        type: string
+
+    executor:
+      name: build
+      go-version: << parameters.go-version >>
+
+    steps:
+      - checkout
+      - go_mod_download
+      - run:
+          name: Run goreleaser
+          command: curl -sL https://git.io/goreleaser | bash -s -- --rm-dist
+
 workflows:
   stable-build:
     jobs:
@@ -109,7 +125,6 @@ workflows:
           go-version: "1.11.4"
           requires:
             - lint
-
   latest-build:
     jobs:
       - lint:
@@ -126,3 +141,15 @@ workflows:
           filters:
             branches:
               only: master
+
+  release:
+    jobs:
+      - lint:
+          go-version: "1.11.4"
+      - release:
+          go-version: "1.11.4"
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /[0-9]+(\.[0-9]+)(\.[0-9]+)/
