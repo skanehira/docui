@@ -42,6 +42,9 @@ docui can do as follows:
 - Git
 
 ## Installation
+
+### From Source
+
 If you have not installed go and set GOPATH/GOBIN,  
 you must install and set env before install docui.
 
@@ -65,6 +68,13 @@ Make sure your PATH includes the $GOPATH/bin directory so your commands can be e
 
 ```sh
 export PATH=$PATH:$GOPATH/bin
+```
+
+### Homebrew
+
+```sh
+$ brew tap skanehira/docui
+& brew install docui
 ```
 
 ## Update
