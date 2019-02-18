@@ -31,4 +31,4 @@ brew:
   install: |
     bin.install "docui"
   test: |
-    system "#{bin}/docui", "version"
+    system "#{bin}/docui"

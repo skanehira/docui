@@ -74,7 +74,7 @@ export PATH=$PATH:$GOPATH/bin
 
 ```sh
 $ brew tap skanehira/docui
-& brew install docui
+$ brew install docui
 ```
 
 ## Update
