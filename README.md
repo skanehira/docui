@@ -77,6 +77,12 @@ $ brew tap skanehira/docui
 $ brew install docui
 ```
 
+### Snapd
+
+```sh
+$ snap install docui --classic
+```
+
 ## Update
 
 Use git pull:

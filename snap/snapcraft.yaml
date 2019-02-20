@@ -1,0 +1,25 @@
+name: docui
+version-script: |
+  git describe --tag | awk -F'-([1-9]|g)' '{print $1}'
+version: latest
+summary:  docui is TUI Client for Docker.
+description: |
+  docui is TUI Client for Docker.
+grade: stable
+confinement: classic
+
+build-packages:
+  - git
+  - gcc
+
+parts:
+  docui:
+    source: .
+    plugin: go
+    go-importpath: github.com/skanehira/docui
+    build-snaps:
+      - go/latest/stable
+
+apps:
+  docui:
+    command: docui

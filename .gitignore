@@ -1,4 +1,7 @@
 *.swp
+*.snap
 .idea
 dist/
-
+/prime/
+/stage/
+/parts/
