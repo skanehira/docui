@@ -11,17 +11,17 @@ you have to install go and set $GOPATH and $GOBIN to ~/.bashrc.
 ## 1. Install go
 
 ### Mac
-```
+```sh
 brew intall golang
 ```
 
 ### Linux
-```
+```sh
 yum install golang
 ```
 
 ### Add ~/.bashrc
-```
+```sh
 # add thises to ~/.bashrc
 export GOPATH=/to/your/path
 export GOBIN=$GOPATH/bin
@@ -29,7 +29,7 @@ export PATH=$PATH:$GOBIN
 ```
 
 ### Reload ~/.bashrc
-```
+```sh
 resource ~/.bashrc
 ```
 
@@ -41,12 +41,12 @@ https://www.docker.com/get-started
 
 ## 3. Install Git
 ### Mac
-```
+```sh
 brew install git
 ```
 
 ### Linux
-```
+```sh
 yum install git
 ```
 
@@ -57,13 +57,13 @@ Please use Go version 1.11.4 higher.
 
 Use go get or git clone:
 
-```
+```sh
 $ go get -d github.com/skanehira/docui
 $ cd $GOPATH/src/github.com/skanehira/docui
 $ GO111MODULE=on go install
 ```
 
-```
+```sh
 $ git clone https://github.com/skanehira/docui.git
 $ cd docui/
 $ GO111MODULE=on go install
@@ -88,14 +88,14 @@ $ GO111MODULE=on go install
 ## 5. Use on Docker
 If you want to use docui on docker.
 
-```
+```sh
 $ docker run --rm -itv /var/run/docker.sock:/var/run/docker.sock skanehira/docui
 ```
 
 ## 6. Build Docker Image
 If you want to customize image.
 
-```
+```sh
 $ make docker-build
 ```
 
@@ -227,7 +227,7 @@ type=nfs o=addr=192.168.1.1,rw device=:/path/to/dir
 
 Support custom endpoint:
 
-```shell
+```sh
 $ docui -h
 Usage of docui:
   -api string

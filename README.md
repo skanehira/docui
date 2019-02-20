@@ -93,7 +93,7 @@ $ GO111MODULE=on go install
 ```
 
 ## Log file
-```
+```sh
 ~/docui.log
 ```
 
@@ -103,9 +103,8 @@ $ docker run --rm -itv /var/run/docker.sock:/var/run/docker.sock skanehira/docui
 ```
 
 ## Build Docker Image
-```
-$ cd build
-$ bash build.sh
+```sh
+$ make docker-build
 ```
 
 ## Keybindings
