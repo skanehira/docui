@@ -5,20 +5,21 @@ version: latest
 summary:  docui is TUI Client for Docker.
 description: |
   docui is TUI Client for Docker.
+
 grade: stable
 confinement: classic
 
-build-packages:
-  - git
-  - gcc
-
 parts:
   docui:
-    source: .
     plugin: go
     go-importpath: github.com/skanehira/docui
+    source: .
+    build-packages:
+      - gcc
     build-snaps:
       - go/latest/stable
+    override-build: |
+      go build -o $SNAPCRAFT_PART_INSTALL/bin/docui .
 
 apps:
   docui:
