@@ -130,9 +130,9 @@ workflows:
   latest-build:
     jobs:
       - lint:
-          go-version: "1.11.5"
+          go-version: "1.12.0"
       - build:
-          go-version: "1.11.5"
+          go-version: "1.12.0"
           requires:
             - lint
 
