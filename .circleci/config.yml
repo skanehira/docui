@@ -51,12 +51,14 @@ jobs:
       - go_mod_download
 
       - run:
-          name: Run build
-          command: go build
+          name: Run tests
+          command: go test -race -v ./...
 
   lint:
     parameters:
       go-version:
+        type: string
+      golangci-lint-version:
         type: string
 
     executor:
@@ -66,13 +68,15 @@ jobs:
     steps:
       - checkout
 
-      - run:
-          name: Install golint
-          command: go get github.com/golang/lint/golint
+      - go_mod_download
 
       - run:
-          name: Run golint
-          command: golint -set_exit_status=1 ./...
+          name: Install GolangCI-Lint
+          command: curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s v<< parameters.golangci-lint-version >>
+
+      - run:
+          name: Run GolangCI-Lint
+          command: ./bin/golangci-lint run --tests --disable-all --enable=goimports --enable=golint --enable=govet
 
   build-docker-image:
     parameters:
@@ -122,6 +126,7 @@ workflows:
     jobs:
       - lint:
           go-version: "1.11.4"
+          golangci-lint-version: "1.15.0"
       - build:
           go-version: "1.11.4"
           requires:
@@ -131,6 +136,7 @@ workflows:
     jobs:
       - lint:
           go-version: "1.12.0"
+          golangci-lint-version: "1.15.0"
       - build:
           go-version: "1.12.0"
           requires:
@@ -148,6 +154,7 @@ workflows:
     jobs:
       - lint:
           go-version: "1.11.4"
+          golangci-lint-version: "1.15.0"
       - release:
           go-version: "1.11.4"
           filters:
