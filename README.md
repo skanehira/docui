@@ -136,6 +136,7 @@ $ make docker-build
 | container list   | refresh container list | <kbd>Ctrl</kbd> + <kbd>r</kbd>  |
 | container list   | filter image           | <kbd>f</kbd>                    |
 | container list   | exec container cmd     | <kbd>Ctrl</kbd> + <kbd>c</kbd>  |
+| container logs   | show container logs    | <kbd>Ctrl</kbd> + <kbd>l</kbd>  |
 | volume list      | create volume          | <kbd>c</kbd>                    |
 | volume list      | remove volume          | <kbd>d</kbd>                    |
 | volume list      | prune volume           | <kbd>p</kbd>                    |

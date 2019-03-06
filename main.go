@@ -63,6 +63,10 @@ LOOP:
 			// when exec container gui will return ExecFlag
 			gui.Close()
 			gui.Panels[panel.ContainerListPanel].(*panel.ContainerList).Exec()
+		case panel.ErrLogsFlag:
+			// when show container logs gui will return ExecFlag
+			gui.Close()
+			gui.Panels[panel.ContainerListPanel].(*panel.ContainerList).ShowContainerLogs()
 		}
 	}
 }

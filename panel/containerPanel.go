@@ -2,10 +2,13 @@ package panel
 
 import (
 	"fmt"
+	"os"
+	"os/signal"
 	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/jroimartin/gocui"
 	"github.com/skanehira/docui/common"
 )
@@ -176,6 +179,9 @@ func (c *ContainerList) SetKeyBinding() {
 		panic(err)
 	}
 	if err := c.SetKeybinding(c.name, gocui.KeyCtrlC, gocui.ModNone, c.ExecContainerCmd); err != nil {
+		panic(err)
+	}
+	if err := c.SetKeybinding(c.name, gocui.KeyCtrlL, gocui.ModNone, c.ShowContainerLogsCmd); err != nil {
 		panic(err)
 	}
 }
@@ -683,4 +689,56 @@ func (c *ContainerList) Exec() error {
 	}
 
 	return nil
+}
+
+// ShowContainerLogsCmd run display container logs.
+func (c *ContainerList) ShowContainerLogsCmd(g *gocui.Gui, v *gocui.View) error {
+	return ErrLogsFlag
+}
+
+// ShowContainerLogs display container logs.
+func (c *ContainerList) ShowContainerLogs() error {
+	common.Logger.Info("show container logs start")
+	defer common.Logger.Info("show container logs end")
+
+	sigint := make(chan os.Signal, 1)
+	signal.Notify(sigint, os.Interrupt)
+	errCh := make(chan error)
+
+	go func() {
+		selected, err := c.selected()
+		if err != nil {
+			c.ErrMessage(err.Error(), c.name)
+			common.Logger.Error(err)
+			errCh <- err
+		}
+
+		reader, err := c.Docker.ContainerLogStream(selected.ID)
+		if err != nil {
+			c.ErrMessage(err.Error(), c.name)
+			common.Logger.Error(err)
+			errCh <- err
+		}
+		defer reader.Close()
+
+		container, err := c.Docker.InspectContainer(selected.ID)
+		if err != nil {
+			c.ErrMessage(err.Error(), container.ID)
+			common.Logger.Error(err)
+			errCh <- err
+		}
+
+		_, err = stdcopy.StdCopy(os.Stdout, os.Stderr, reader)
+		if err != nil {
+			errCh <- err
+		}
+		return
+	}()
+
+	select {
+	case err := <-errCh:
+		return err
+	case <-sigint:
+		return nil
+	}
 }

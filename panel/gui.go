@@ -68,9 +68,13 @@ const (
 	ExecContainerCmd = "exec container cmd"
 )
 
-// ErrExecFlag use to attach container
 // TODO improvement this logic
-var ErrExecFlag = errors.New("exec")
+var (
+	// ErrExecFlag use to attach container
+	ErrExecFlag = errors.New("exec")
+	// ErrLogsFlag use to show container logs
+	ErrLogsFlag = errors.New("logs")
+)
 
 // Gui have panels and docker client, logger, etc...
 // The fields here can be used in the panel.
