@@ -84,7 +84,7 @@ func newNavi() map[string]string {
 	return map[string]string{
 		ImageListPanel:         "j/k: select image, p: pull image, i: import image, s: save image, Ctrl+l: load image, ctrl+f: search image, f: filter\nd: remove image, Ctrl+d: remove dangling images, c: create container, Enter/o: inspect image, Ctrl+r: refresh images list",
 		PullImagePanel:         "Esc/Ctrl+w: close panel, Enter: pull image",
-		ContainerListPanel:     "j/k: select container, e: export container, c: commit container, f: filter, Ctrl+c: exec container cmd\nu: start container, s: stop container, d: remove container, Enter/o: inspect container, Ctrl+r: refresh container list",
+		ContainerListPanel:     "j/k: select container, e: export container, c: commit container, f: filter, Ctrl+c: exec container cmd\nu: start container, s: stop container, d: remove container, Enter/o: inspect container, Ctrl+r: refresh container list, Ctrl+l: show container logs",
 		DetailPanel:            "j/k: cursor down/up, d/u: page down/up",
 		CreateContainerPanel:   "Ctrl+j/k: change input, Esc/Ctrl+w: close panel, Enter: create container",
 		SaveImagePanel:         "Esc/Ctrl+w: close panel, Enter: save image",
