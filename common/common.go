@@ -149,8 +149,10 @@ func ParsePortToString(ports []types.Port) string {
 
 // ParseRepoTag parse image repo and tag.
 func ParseRepoTag(repoTag string) (string, string) {
-	tmp := strings.SplitN(repoTag, ":", 2)
-	return tmp[0], tmp[1]
+	tmp := strings.Split(repoTag, ":")
+	tag := tmp[len(tmp)-1]
+	repo := strings.Join(tmp[0:len(tmp)-1], ":")
+	return repo, tag
 }
 
 // ParseLabels parse image labels.
