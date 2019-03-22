@@ -698,8 +698,8 @@ func (c *ContainerList) ShowContainerLogsCmd(g *gocui.Gui, v *gocui.View) error 
 
 // ShowContainerLogs display container logs.
 func (c *ContainerList) ShowContainerLogs() error {
-	common.Logger.Info("show container logs start")
-	defer common.Logger.Info("show container logs end")
+	common.Logger.Info("tail container logs start")
+	defer common.Logger.Info("tail container logs end")
 
 	sigint := make(chan os.Signal, 1)
 	signal.Notify(sigint, os.Interrupt)
@@ -720,13 +720,6 @@ func (c *ContainerList) ShowContainerLogs() error {
 			errCh <- err
 		}
 		defer reader.Close()
-
-		container, err := c.Docker.InspectContainer(selected.ID)
-		if err != nil {
-			c.ErrMessage(err.Error(), container.ID)
-			common.Logger.Error(err)
-			errCh <- err
-		}
 
 		_, err = stdcopy.StdCopy(os.Stdout, os.Stderr, reader)
 		if err != nil {
