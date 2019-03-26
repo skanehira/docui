@@ -14,11 +14,7 @@ you have to install go and set $GOPATH and $GOBIN to ~/.bashrc.
 ```sh
 brew intall golang
 ```
-
-### Linuxbrew
-```sh
-brew intall golang
-```
+If you use `Linuxbrew` on Linux, you can install via the above command.  
 
 ### CentOS
 ```sh
@@ -59,11 +55,7 @@ https://www.docker.com/get-started
 ```sh
 brew install git
 ```
-
-### Linuxbrew
-```sh
-brew install git
-```
+If you use `Linuxbrew` on Linux, you can install via the above command.  
 
 ### CentOS
 ```sh
