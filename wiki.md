@@ -15,9 +15,19 @@ you have to install go and set $GOPATH and $GOBIN to ~/.bashrc.
 brew intall golang
 ```
 
-### Linux
+### CentOS
 ```sh
 yum install golang
+```
+
+### Debian/Ubuntu
+```sh
+apt install golang
+```
+
+### Fedora
+```sh
+dnf install golang
 ```
 
 ### Add ~/.bashrc
@@ -45,9 +55,19 @@ https://www.docker.com/get-started
 brew install git
 ```
 
-### Linux
+### CentOS
 ```sh
 yum install git
+```
+
+### Debian/Ubuntu
+```sh
+apt install git
+```
+
+### Fedora
+```sh
+dnf install git
 ```
 
 ## 3. Install docui
