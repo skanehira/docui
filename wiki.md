@@ -10,7 +10,7 @@ you have to install go and set $GOPATH and $GOBIN to ~/.bashrc.
 
 ## 1. Install go
 
-### Mac
+### Mac/Linuxbrew
 ```sh
 brew intall golang
 ```
@@ -50,7 +50,7 @@ please see docker official install guide and install docker.
 https://www.docker.com/get-started  
 
 ## 3. Install Git
-### Mac
+### Mac/Linuxbrew
 ```sh
 brew install git
 ```
