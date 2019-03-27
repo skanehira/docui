@@ -14,7 +14,7 @@ you have to install go and set $GOPATH and $GOBIN to ~/.bashrc.
 ```sh
 brew intall golang
 ```
-If you use `Linuxbrew` on Linux, you can install via the above command.  
+If you use [`Linuxbrew`](https://docs.brew.sh/Homebrew-on-Linux) on Linux, you can install via the above command.  
 
 ### CentOS
 ```sh
