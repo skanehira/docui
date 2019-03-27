@@ -55,7 +55,7 @@ https://www.docker.com/get-started
 ```sh
 brew install git
 ```
-If you use `Linuxbrew` on Linux, you can install via the above command.  
+If you use [`Linuxbrew`](https://docs.brew.sh/Homebrew-on-Linux) on Linux, you can install via the above command.  
 
 ### CentOS
 ```sh
