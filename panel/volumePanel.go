@@ -222,17 +222,17 @@ func (vl *VolumeList) GetVolumeList(v *gocui.View) {
 			}
 		}
 
-		tmpMap[volume.Name] = &Volume{
+		tmpMap[volume.CreatedAt] = &Volume{
 			Name:       volume.Name,
 			MountPoint: volume.Mountpoint,
 			Driver:     volume.Driver,
 			Created:    replacer.Replace(volume.CreatedAt),
 		}
 
-		keys = append(keys, volume.Name)
+		keys = append(keys, volume.CreatedAt)
 	}
 
-	for _, key := range common.SortKeys(keys) {
+	for _, key := range common.ReverseKeys(keys) {
 		common.OutputFormattedLine(v, tmpMap[key])
 		vl.Volumes = append(vl.Volumes, tmpMap[key])
 	}

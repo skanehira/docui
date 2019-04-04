@@ -38,6 +38,12 @@ func SortKeys(keys []string) []string {
 	return keys
 }
 
+// ReverseKeys reverse keys.
+func ReverseKeys(keys []string) []string {
+	sort.Sort(sort.Reverse(sort.StringSlice(keys)))
+	return keys
+}
+
 // GetOSenv get os environment.
 func GetOSenv(env string) string {
 	keyval := strings.SplitN(env, "=", 2)
