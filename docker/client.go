@@ -6,6 +6,9 @@ import (
 	"github.com/docker/docker/client"
 )
 
+// Client docker client
+var Client *Docker
+
 // Docker docker client
 type Docker struct {
 	*client.Client
