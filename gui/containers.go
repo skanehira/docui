@@ -76,8 +76,9 @@ func (c *containers) setEntries(g *Gui) {
 			Text:            header,
 			NotSelectable:   true,
 			Align:           tview.AlignLeft,
-			Color:           tcell.ColorYellow,
+			Color:           tcell.ColorWhite,
 			BackgroundColor: tcell.ColorDefault,
+			Attributes:      tcell.AttrBold,
 		})
 	}
 
