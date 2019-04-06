@@ -85,27 +85,27 @@ func (i *images) setEntries(g *Gui) {
 
 	for i, image := range g.state.resources.images {
 		table.SetCell(i+1, 0, tview.NewTableCell(image.ID).
-			SetTextColor(tcell.ColorLightCyan).
+			SetTextColor(tcell.ColorLightYellow).
 			SetMaxWidth(1).
 			SetExpansion(1))
 
 		table.SetCell(i+1, 1, tview.NewTableCell(image.Repo).
-			SetTextColor(tcell.ColorLightCyan).
+			SetTextColor(tcell.ColorLightYellow).
 			SetMaxWidth(1).
 			SetExpansion(1))
 
 		table.SetCell(i+1, 2, tview.NewTableCell(image.Tag).
-			SetTextColor(tcell.ColorLightCyan).
+			SetTextColor(tcell.ColorLightYellow).
 			SetMaxWidth(1).
 			SetExpansion(1))
 
 		table.SetCell(i+1, 3, tview.NewTableCell(image.Created).
-			SetTextColor(tcell.ColorLightCyan).
+			SetTextColor(tcell.ColorLightYellow).
 			SetMaxWidth(1).
 			SetExpansion(1))
 
 		table.SetCell(i+1, 4, tview.NewTableCell(image.Size).
-			SetTextColor(tcell.ColorLightCyan).
+			SetTextColor(tcell.ColorLightYellow).
 			SetMaxWidth(1).
 			SetExpansion(1))
 	}
