@@ -14,6 +14,7 @@ type resources struct {
 	containers []*container
 	networks   []*network
 	volumes    []*volume
+	tasks      []*task
 }
 
 type keybinding struct {
@@ -64,23 +65,26 @@ func (g *Gui) containerPanel() *containers {
 }
 
 func (g *Gui) initPanels() {
+	tasks := newTasks(g)
 	images := newImages(g)
 	containers := newContainers(g)
 	volumes := newVolumes(g)
 	networks := newNetworks(g)
 	info := newInfo()
 
+	g.state.panels.panel = append(g.state.panels.panel, tasks)
 	g.state.panels.panel = append(g.state.panels.panel, images)
 	g.state.panels.panel = append(g.state.panels.panel, containers)
 	g.state.panels.panel = append(g.state.panels.panel, volumes)
 	g.state.panels.panel = append(g.state.panels.panel, networks)
 
-	grid := tview.NewGrid().SetRows(2, 0, 0, 0, 0).
+	grid := tview.NewGrid().SetRows(2, 0, 0, 0, 0, 0).
 		AddItem(info, 0, 0, 1, 1, 0, 0, true).
-		AddItem(images, 1, 0, 1, 1, 0, 0, true).
-		AddItem(containers, 2, 0, 1, 1, 0, 0, true).
-		AddItem(volumes, 3, 0, 1, 1, 0, 0, true).
-		AddItem(networks, 4, 0, 1, 1, 0, 0, true)
+		AddItem(tasks, 1, 0, 1, 1, 0, 0, true).
+		AddItem(images, 2, 0, 1, 1, 0, 0, true).
+		AddItem(containers, 3, 0, 1, 1, 0, 0, true).
+		AddItem(volumes, 4, 0, 1, 1, 0, 0, true).
+		AddItem(networks, 5, 0, 1, 1, 0, 0, true)
 
 	g.app.SetRoot(grid, true)
 	g.switchPanel("images")
