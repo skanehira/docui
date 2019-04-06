@@ -2,7 +2,6 @@ package gui
 
 import (
 	"github.com/gdamore/tcell"
-	"github.com/rivo/tview"
 )
 
 func (g *Gui) addKeybinding(p panel, key interface{}, f func()) {
@@ -63,28 +62,36 @@ func (g *Gui) setKeybindings() {
 }
 
 func (g *Gui) nextPanel() {
+	for _, panel := range g.state.panels.panel {
+		panel.unfocus()
+	}
+
 	idx := (g.state.panels.currentPanel + 1) % len(g.state.panels.panel)
 	g.state.panels.currentPanel = idx
-	g.app.SetFocus(g.state.panels.panel[idx].(tview.Primitive))
+	g.state.panels.panel[idx].focus(g)
 }
 
 func (g *Gui) prevPanel() {
+	for _, panel := range g.state.panels.panel {
+		panel.unfocus()
+	}
 	g.state.panels.currentPanel--
 
 	if g.state.panels.currentPanel < 0 {
 		g.state.panels.currentPanel = len(g.state.panels.panel) - 1
-	} else {
 	}
 
 	idx := (g.state.panels.currentPanel) % len(g.state.panels.panel)
 	g.state.panels.currentPanel = idx
-	g.app.SetFocus(g.state.panels.panel[idx].(tview.Primitive))
+	g.state.panels.panel[idx].focus(g)
 }
 
 func (g *Gui) switchPanel(panelName string) {
 	for _, panel := range g.state.panels.panel {
 		if panel.name() == panelName {
-			g.app.SetFocus(panel.(tview.Primitive))
+			panel.focus(g)
+		} else {
+			panel.unfocus()
 		}
 	}
 }

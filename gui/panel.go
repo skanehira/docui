@@ -7,4 +7,6 @@ type panel interface {
 	entries(*Gui)
 	setEntries(*Gui)
 	setKeybinding(func(event *tcell.EventKey) *tcell.EventKey)
+	focus(*Gui)
+	unfocus()
 }

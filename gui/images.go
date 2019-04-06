@@ -109,3 +109,12 @@ func (i *images) setEntries(g *Gui) {
 			SetExpansion(1))
 	}
 }
+
+func (i *images) focus(g *Gui) {
+	i.SetSelectable(true, false)
+	g.app.SetFocus(i)
+}
+
+func (i *images) unfocus() {
+	i.SetSelectable(false, false)
+}

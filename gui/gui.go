@@ -75,14 +75,15 @@ func (g *Gui) initPanels() {
 	g.state.panels.panel = append(g.state.panels.panel, volumes)
 	g.state.panels.panel = append(g.state.panels.panel, networks)
 
-	grid := tview.NewGrid().SetRows(2, 0, 0, 0, 0)
-	grid.AddItem(info, 0, 0, 1, 1, 0, 0, true)
-	grid.AddItem(images, 1, 0, 1, 1, 0, 0, true)
-	grid.AddItem(containers, 2, 0, 1, 1, 0, 0, true)
-	grid.AddItem(volumes, 3, 0, 1, 1, 0, 0, true)
-	grid.AddItem(networks, 4, 0, 1, 1, 0, 0, true)
+	grid := tview.NewGrid().SetRows(2, 0, 0, 0, 0).
+		AddItem(info, 0, 0, 1, 1, 0, 0, true).
+		AddItem(images, 1, 0, 1, 1, 0, 0, true).
+		AddItem(containers, 2, 0, 1, 1, 0, 0, true).
+		AddItem(volumes, 3, 0, 1, 1, 0, 0, true).
+		AddItem(networks, 4, 0, 1, 1, 0, 0, true)
 
-	g.app.SetRoot(grid, true).SetFocus(images)
+	g.app.SetRoot(grid, true)
+	g.switchPanel("images")
 }
 
 // Start start application

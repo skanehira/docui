@@ -130,3 +130,12 @@ func (n *networks) setEntries(g *Gui) {
 			SetExpansion(1))
 	}
 }
+
+func (n *networks) focus(g *Gui) {
+	n.SetSelectable(true, false)
+	g.app.SetFocus(n)
+}
+
+func (n *networks) unfocus() {
+	n.SetSelectable(false, false)
+}

@@ -113,3 +113,12 @@ func (c *containers) setEntries(g *Gui) {
 			SetExpansion(1))
 	}
 }
+
+func (c *containers) focus(g *Gui) {
+	c.SetSelectable(true, false)
+	g.app.SetFocus(c)
+}
+
+func (c *containers) unfocus() {
+	c.SetSelectable(false, false)
+}

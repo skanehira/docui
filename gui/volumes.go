@@ -110,3 +110,12 @@ func (v *volumes) setEntries(g *Gui) {
 			SetExpansion(1))
 	}
 }
+
+func (v *volumes) focus(g *Gui) {
+	v.SetSelectable(true, false)
+	g.app.SetFocus(v)
+}
+
+func (v *volumes) unfocus() {
+	v.SetSelectable(false, false)
+}
