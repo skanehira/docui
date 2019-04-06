@@ -87,9 +87,10 @@ func (g *Gui) prevPanel() {
 }
 
 func (g *Gui) switchPanel(panelName string) {
-	for _, panel := range g.state.panels.panel {
+	for i, panel := range g.state.panels.panel {
 		if panel.name() == panelName {
 			panel.focus(g)
+			g.state.panels.currentPanel = i
 		} else {
 			panel.unfocus()
 		}
