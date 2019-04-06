@@ -26,7 +26,7 @@ func newContainers(g *Gui) *containers {
 		Table: tview.NewTable().SetSelectable(true, false),
 	}
 
-	containers.SetTitle("image list").SetTitleAlign(tview.AlignLeft)
+	containers.SetTitle("container list").SetTitleAlign(tview.AlignLeft)
 	containers.SetBorder(true)
 	containers.setEntries(g)
 	return containers
