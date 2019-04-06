@@ -113,7 +113,3 @@ func (c *containers) setEntries(g *Gui) {
 			SetExpansion(1))
 	}
 }
-
-func (c *containers) setKeybindings() {
-
-}
