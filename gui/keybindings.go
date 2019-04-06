@@ -62,19 +62,11 @@ func (g *Gui) setKeybindings() {
 }
 
 func (g *Gui) nextPanel() {
-	for _, panel := range g.state.panels.panel {
-		panel.unfocus()
-	}
-
 	idx := (g.state.panels.currentPanel + 1) % len(g.state.panels.panel)
-	g.state.panels.currentPanel = idx
-	g.state.panels.panel[idx].focus(g)
+	g.switchPanel(g.state.panels.panel[idx].name())
 }
 
 func (g *Gui) prevPanel() {
-	for _, panel := range g.state.panels.panel {
-		panel.unfocus()
-	}
 	g.state.panels.currentPanel--
 
 	if g.state.panels.currentPanel < 0 {
@@ -82,8 +74,7 @@ func (g *Gui) prevPanel() {
 	}
 
 	idx := (g.state.panels.currentPanel) % len(g.state.panels.panel)
-	g.state.panels.currentPanel = idx
-	g.state.panels.panel[idx].focus(g)
+	g.switchPanel(g.state.panels.panel[idx].name())
 }
 
 func (g *Gui) switchPanel(panelName string) {
