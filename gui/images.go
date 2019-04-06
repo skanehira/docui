@@ -8,7 +8,6 @@ import (
 	"github.com/skanehira/docui/docker"
 )
 
-// image image info.
 type image struct {
 	ID      string
 	Repo    string
@@ -19,31 +18,28 @@ type image struct {
 
 type images struct {
 	*tview.Table
-	images []*image
 }
 
-func newImages() *images {
+func newImages(g *Gui) *images {
 	images := &images{
 		Table: tview.NewTable().SetSelectable(true, false),
 	}
 
 	images.SetTitle("image list").SetTitleAlign(tview.AlignLeft)
 	images.SetBorder(true)
-
-	images.getEntries()
-	images.setEntries()
+	images.setEntries(g)
 	return images
 }
 
-func (i *images) getSelected() interface{} {
-	row, _ := i.GetSelection()
-	if len(i.images) == 0 {
-		return nil
-	}
-	return i.images[row-1]
+func (i *images) name() string {
+	return "images"
 }
 
-func (i *images) getEntries() {
+func (i *images) setKeybinding(f func(event *tcell.EventKey) *tcell.EventKey) {
+	i.SetInputCapture(f)
+}
+
+func (i *images) entries(g *Gui) {
 	images, err := docker.Client.Images(types.ImageListOptions{})
 	if err != nil {
 		return
@@ -53,7 +49,7 @@ func (i *images) getEntries() {
 		for _, repoTag := range imgInfo.RepoTags {
 			repo, tag := common.ParseRepoTag(repoTag)
 
-			i.images = append(i.images, &image{
+			g.state.resources.images = append(g.state.resources.images, &image{
 				ID:      imgInfo.ID[7:19],
 				Repo:    repo,
 				Tag:     tag,
@@ -64,8 +60,9 @@ func (i *images) getEntries() {
 	}
 }
 
-func (i *images) setEntries() {
-	table := i.Clear().Select(0, 0).SetFixed(1, 1).SetSeparator('|')
+func (i *images) setEntries(g *Gui) {
+	i.entries(g)
+	table := i.Clear().Select(0, 0).SetFixed(1, 1)
 
 	headers := []string{
 		"ID",
@@ -85,29 +82,29 @@ func (i *images) setEntries() {
 		})
 	}
 
-	for i, image := range i.images {
+	for i, image := range g.state.resources.images {
 		table.SetCell(i+1, 0, tview.NewTableCell(image.ID).
-			SetTextColor(tcell.ColorDarkCyan).
+			SetTextColor(tcell.ColorLightCyan).
 			SetMaxWidth(1).
 			SetExpansion(1))
 
 		table.SetCell(i+1, 1, tview.NewTableCell(image.Repo).
-			SetTextColor(tcell.ColorDarkCyan).
+			SetTextColor(tcell.ColorLightCyan).
 			SetMaxWidth(1).
 			SetExpansion(1))
 
 		table.SetCell(i+1, 2, tview.NewTableCell(image.Tag).
-			SetTextColor(tcell.ColorDarkCyan).
+			SetTextColor(tcell.ColorLightCyan).
 			SetMaxWidth(1).
 			SetExpansion(1))
 
 		table.SetCell(i+1, 3, tview.NewTableCell(image.Created).
-			SetTextColor(tcell.ColorDarkCyan).
+			SetTextColor(tcell.ColorLightCyan).
 			SetMaxWidth(1).
 			SetExpansion(1))
 
 		table.SetCell(i+1, 4, tview.NewTableCell(image.Size).
-			SetTextColor(tcell.ColorDarkCyan).
+			SetTextColor(tcell.ColorLightCyan).
 			SetMaxWidth(1).
 			SetExpansion(1))
 	}

@@ -62,5 +62,7 @@ func NewDocker(config *ClientConfig) *Docker {
 		panic(err)
 	}
 
-	return &Docker{client}
+	Client = &Docker{client}
+
+	return Client
 }

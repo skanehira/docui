@@ -4,6 +4,7 @@ import (
 	"flag"
 	"os"
 
+	"github.com/skanehira/docui/common"
 	"github.com/skanehira/docui/docker"
 	"github.com/skanehira/docui/gui"
 )
@@ -18,8 +19,10 @@ var (
 )
 
 func run() int {
-	docker.Client = docker.NewDocker(docker.NewClientConfig(*endpoint, *cert, *key, *ca, *api))
+	docker.NewDocker(docker.NewClientConfig(*endpoint, *cert, *key, *ca, *api))
+	common.NewLogger(*logLevel)
 	gui := gui.New()
+
 	if err := gui.Start(); err != nil {
 		return 2
 	}
