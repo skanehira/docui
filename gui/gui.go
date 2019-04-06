@@ -13,6 +13,7 @@ type resources struct {
 	images     []*image
 	containers []*container
 	networks   []*network
+	volumes    []*volume
 }
 
 type keybinding struct {
@@ -65,16 +66,19 @@ func (g *Gui) containerPanel() *containers {
 func (g *Gui) initPanels() {
 	images := newImages(g)
 	containers := newContainers(g)
+	volumes := newVolumes(g)
 	networks := newNetworks(g)
 
 	g.state.panels.panel = append(g.state.panels.panel, images)
 	g.state.panels.panel = append(g.state.panels.panel, containers)
+	g.state.panels.panel = append(g.state.panels.panel, volumes)
 	g.state.panels.panel = append(g.state.panels.panel, networks)
 
 	grid := tview.NewGrid().SetRows(0, 0, 0, 0, 0)
 	grid.AddItem(images, 0, 0, 1, 1, 0, 0, true)
 	grid.AddItem(containers, 1, 0, 1, 1, 0, 0, true)
-	grid.AddItem(networks, 2, 0, 1, 1, 0, 0, true)
+	grid.AddItem(volumes, 2, 0, 1, 1, 0, 0, true)
+	grid.AddItem(networks, 3, 0, 1, 1, 0, 0, true)
 
 	g.app.SetRoot(grid, true).SetFocus(images)
 }
