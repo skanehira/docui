@@ -105,27 +105,27 @@ func (n *networks) setEntries(g *Gui) {
 
 	for i, network := range g.state.resources.networks {
 		table.SetCell(i+1, 0, tview.NewTableCell(network.ID).
-			SetTextColor(tcell.ColorLightSalmon).
+			SetTextColor(tcell.ColorLightSkyBlue).
 			SetMaxWidth(1).
 			SetExpansion(1))
 
 		table.SetCell(i+1, 1, tview.NewTableCell(network.Name).
-			SetTextColor(tcell.ColorLightSalmon).
+			SetTextColor(tcell.ColorLightSkyBlue).
 			SetMaxWidth(1).
 			SetExpansion(1))
 
 		table.SetCell(i+1, 2, tview.NewTableCell(network.Driver).
-			SetTextColor(tcell.ColorLightSalmon).
+			SetTextColor(tcell.ColorLightSkyBlue).
 			SetMaxWidth(1).
 			SetExpansion(1))
 
 		table.SetCell(i+1, 3, tview.NewTableCell(network.Scope).
-			SetTextColor(tcell.ColorLightSalmon).
+			SetTextColor(tcell.ColorLightSkyBlue).
 			SetMaxWidth(1).
 			SetExpansion(1))
 
 		table.SetCell(i+1, 4, tview.NewTableCell(network.containers).
-			SetTextColor(tcell.ColorLightSalmon).
+			SetTextColor(tcell.ColorLightSkyBlue).
 			SetMaxWidth(1).
 			SetExpansion(1))
 	}
