@@ -14,6 +14,11 @@ type resources struct {
 	containers []*container
 }
 
+type keybinding struct {
+	key interface{}
+	f   func()
+}
+
 type state struct {
 	panels      panels
 	resources   resources

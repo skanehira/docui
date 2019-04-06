@@ -5,11 +5,6 @@ import (
 	"github.com/rivo/tview"
 )
 
-type keybinding struct {
-	key interface{}
-	f   func()
-}
-
 func (g *Gui) addKeybinding(p panel, key interface{}, f func()) {
 	keybindings, ok := g.state.keybindings[p]
 	if !ok {
@@ -20,20 +15,28 @@ func (g *Gui) addKeybinding(p panel, key interface{}, f func()) {
 	}
 }
 
-func (g *Gui) addKeybindings() {
-	g.addKeybinding(g.imagePanel(), 'l', func() { g.nextPanel() })
-	g.addKeybinding(g.imagePanel(), 'h', func() { g.prevPanel() })
-	g.addKeybinding(g.imagePanel(), tcell.KeyTab, func() { g.nextPanel() })
-	g.addKeybinding(g.imagePanel(), tcell.KeyBacktab, func() { g.prevPanel() })
-	g.addKeybinding(g.imagePanel(), tcell.KeyLeft, func() { g.prevPanel() })
-	g.addKeybinding(g.imagePanel(), tcell.KeyRight, func() { g.nextPanel() })
+func (g *Gui) addGlobalKeybindings() {
+	keybindings := []struct {
+		key interface{}
+		f   func()
+	}{
+		{'l', func() { g.nextPanel() }},
+		{'h', func() { g.prevPanel() }},
+		{tcell.KeyTab, func() { g.nextPanel() }},
+		{tcell.KeyBacktab, func() { g.prevPanel() }},
+		{tcell.KeyLeft, func() { g.prevPanel() }},
+		{tcell.KeyRight, func() { g.nextPanel() }},
+	}
 
-	g.addKeybinding(g.containerPanel(), 'l', func() { g.nextPanel() })
-	g.addKeybinding(g.containerPanel(), 'h', func() { g.prevPanel() })
-	g.addKeybinding(g.containerPanel(), tcell.KeyTab, func() { g.nextPanel() })
-	g.addKeybinding(g.containerPanel(), tcell.KeyBacktab, func() { g.prevPanel() })
-	g.addKeybinding(g.containerPanel(), tcell.KeyLeft, func() { g.prevPanel() })
-	g.addKeybinding(g.containerPanel(), tcell.KeyRight, func() { g.nextPanel() })
+	for _, keybind := range keybindings {
+		for _, panel := range g.state.panels.panel {
+			g.addKeybinding(panel, keybind.key, keybind.f)
+		}
+	}
+}
+
+func (g *Gui) addKeybindings() {
+	g.addGlobalKeybindings()
 }
 
 func (g *Gui) setKeybindings() {
