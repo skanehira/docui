@@ -33,15 +33,15 @@ func newVolumes(g *Gui) *volumes {
 	return volumes
 }
 
-func (n *volumes) name() string {
+func (v *volumes) name() string {
 	return "volumes"
 }
 
-func (n *volumes) setKeybinding(f func(event *tcell.EventKey) *tcell.EventKey) {
-	n.SetInputCapture(f)
+func (v *volumes) setKeybinding(f func(event *tcell.EventKey) *tcell.EventKey) {
+	v.SetInputCapture(f)
 }
 
-func (n *volumes) entries(g *Gui) {
+func (v *volumes) entries(g *Gui) {
 	volumes, err := docker.Client.Volumes()
 	if err != nil {
 		common.Logger.Error(err)
@@ -67,9 +67,9 @@ func (n *volumes) entries(g *Gui) {
 	}
 }
 
-func (n *volumes) setEntries(g *Gui) {
-	n.entries(g)
-	table := n.Clear().Select(0, 0).SetFixed(1, 1)
+func (v *volumes) setEntries(g *Gui) {
+	v.entries(g)
+	table := v.Clear().Select(0, 0).SetFixed(1, 1)
 
 	headers := []string{
 		"Name",
