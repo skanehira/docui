@@ -4,6 +4,11 @@ import (
 	"github.com/gdamore/tcell"
 )
 
+type keybinding struct {
+	key interface{}
+	f   func()
+}
+
 func (g *Gui) addKeybinding(p panel, key interface{}, f func()) {
 	keybindings, ok := g.state.keybindings[p]
 	if !ok {
@@ -15,10 +20,7 @@ func (g *Gui) addKeybinding(p panel, key interface{}, f func()) {
 }
 
 func (g *Gui) addGlobalKeybindings() {
-	keybindings := []struct {
-		key interface{}
-		f   func()
-	}{
+	keybindings := []keybinding{
 		{'l', func() { g.nextPanel() }},
 		{'h', func() { g.prevPanel() }},
 		{tcell.KeyTab, func() { g.nextPanel() }},
@@ -35,11 +37,12 @@ func (g *Gui) addGlobalKeybindings() {
 }
 
 func (g *Gui) addKeybindings() {
-	g.addGlobalKeybindings()
+
 }
 
 func (g *Gui) setKeybindings() {
 	g.addKeybindings()
+	g.addGlobalKeybindings()
 
 	for panel, keybindings := range g.state.keybindings {
 		panel.setKeybinding(func(event *tcell.EventKey) *tcell.EventKey {
