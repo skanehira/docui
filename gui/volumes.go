@@ -30,6 +30,7 @@ func newVolumes(g *Gui) *volumes {
 	volumes.SetTitle("volume list").SetTitleAlign(tview.AlignLeft)
 	volumes.SetBorder(true)
 	volumes.setEntries(g)
+	volumes.setKeybinding(g)
 	return volumes
 }
 
@@ -37,8 +38,19 @@ func (v *volumes) name() string {
 	return "volumes"
 }
 
-func (v *volumes) setKeybinding(f func(event *tcell.EventKey) *tcell.EventKey) {
-	v.SetInputCapture(f)
+func (v *volumes) setKeybinding(g *Gui) {
+	v.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		g.setGlobalKeybinding(event)
+		switch event.Key() {
+
+		}
+
+		switch event.Rune() {
+
+		}
+
+		return event
+	})
 }
 
 func (v *volumes) entries(g *Gui) {

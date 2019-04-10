@@ -1,7 +1,10 @@
 package gui
 
 import (
+	"context"
+
 	"github.com/rivo/tview"
+	"github.com/skanehira/docui/common"
 )
 
 type panels struct {
@@ -9,6 +12,7 @@ type panels struct {
 	panel        []panel
 }
 
+// docker resources
 type resources struct {
 	images     []*image
 	containers []*container
@@ -18,13 +22,15 @@ type resources struct {
 }
 
 type state struct {
-	panels      panels
-	resources   resources
-	keybindings map[panel][]keybinding
+	panels    panels
+	resources resources
+	stopChans map[string]chan int
 }
 
 func newState() *state {
-	return &state{keybindings: make(map[panel][]keybinding)}
+	return &state{
+		stopChans: make(map[string]chan int),
+	}
 }
 
 // Gui have all panels
@@ -59,6 +65,68 @@ func (g *Gui) containerPanel() *containers {
 	return nil
 }
 
+func (g *Gui) taskPanel() *tasks {
+	for _, panel := range g.state.panels.panel {
+		if panel.name() == "tasks" {
+			return panel.(*tasks)
+		}
+	}
+	return nil
+}
+
+func (g *Gui) monitoringTask(stop chan int) {
+
+LOOP:
+	for {
+		select {
+		case task := <-g.taskPanel().tasks:
+			if err := task.Func(task.Ctx); err != nil {
+				task.Status = err.Error()
+			} else {
+				task.Status = success
+			}
+			g.updateTask(task)
+		case <-stop:
+			break LOOP
+		}
+	}
+}
+
+func (g *Gui) startTask(taskName string, f func(ctx context.Context) error) {
+	ctx, cancel := context.WithCancel(context.Background())
+
+	task := &task{
+		Name:    taskName,
+		Status:  executing,
+		Created: common.DateNow(),
+		Func:    f,
+		Ctx:     ctx,
+		Cancel:  cancel,
+	}
+
+	g.state.resources.tasks = append(g.state.resources.tasks, task)
+	g.updateTask(task)
+	g.taskPanel().tasks <- task
+}
+
+func (g *Gui) cancelTask() {
+	taskPanel := g.taskPanel()
+	row, _ := taskPanel.GetSelection()
+
+	task := g.state.resources.tasks[row-1]
+	if task.Status == executing {
+		task.Cancel()
+		task.Status = cancel
+		g.updateTask(task)
+	}
+}
+
+func (g *Gui) updateTask(task *task) {
+	g.app.QueueUpdateDraw(func() {
+		g.taskPanel().setEntries(g)
+	})
+}
+
 func (g *Gui) initPanels() {
 	tasks := newTasks(g)
 	images := newImages(g)
@@ -88,7 +156,9 @@ func (g *Gui) initPanels() {
 // Start start application
 func (g *Gui) Start() error {
 	g.initPanels()
-	g.setKeybindings()
+	stop := make(chan int, 1)
+	g.state.stopChans["task"] = stop
+	go g.monitoringTask(stop)
 
 	if err := g.app.Run(); err != nil {
 		g.app.Stop()

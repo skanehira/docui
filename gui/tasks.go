@@ -1,48 +1,70 @@
 package gui
 
 import (
+	"context"
+
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 )
 
+var (
+	success   = "Success"
+	executing = "Executing"
+	cancel    = "canceled"
+)
+
 type task struct {
-	ID      string
 	Name    string
 	Status  string
 	Created string
-	Func    func() error
+	Func    func(ctx context.Context) error
+	Ctx     context.Context
+	Cancel  context.CancelFunc
 }
 
 type tasks struct {
 	*tview.Table
+	tasks chan *task
 }
 
 func newTasks(g *Gui) *tasks {
 	tasks := &tasks{
-		Table: tview.NewTable().SetSelectable(true, false),
+		Table: tview.NewTable().SetSelectable(true, false).Select(0, 0).SetFixed(1, 1),
+		tasks: make(chan *task),
 	}
 
 	tasks.SetTitle("tasks").SetTitleAlign(tview.AlignLeft)
 	tasks.SetBorder(true)
 	tasks.setEntries(g)
+	tasks.setKeybinding(g)
 	return tasks
 }
 
-func (c *tasks) name() string {
+func (t *tasks) name() string {
 	return "tasks"
 }
 
-func (c *tasks) setKeybinding(f func(event *tcell.EventKey) *tcell.EventKey) {
-	c.SetInputCapture(f)
+func (t *tasks) setKeybinding(g *Gui) {
+	t.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		g.setGlobalKeybinding(event)
+
+		switch event.Key() {
+		}
+
+		switch event.Rune() {
+		}
+
+		return event
+	})
 }
 
-func (c *tasks) entries(g *Gui) {
+func (t *tasks) entries(g *Gui) {
 	// do nothing
 }
 
-func (c *tasks) setEntries(g *Gui) {
-	c.entries(g)
-	table := c.Clear().Select(0, 0).SetFixed(1, 1)
+func (t *tasks) setEntries(g *Gui) {
+	t.entries(g)
+	table := t.Clear()
 
 	headers := []string{
 		"Name",
@@ -80,11 +102,11 @@ func (c *tasks) setEntries(g *Gui) {
 	}
 }
 
-func (c *tasks) focus(g *Gui) {
-	c.SetSelectable(true, false)
-	g.app.SetFocus(c)
+func (t *tasks) focus(g *Gui) {
+	t.SetSelectable(true, false)
+	g.app.SetFocus(t)
 }
 
-func (c *tasks) unfocus() {
-	c.SetSelectable(false, false)
+func (t *tasks) unfocus() {
+	t.SetSelectable(false, false)
 }

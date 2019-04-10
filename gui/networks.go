@@ -30,6 +30,7 @@ func newNetworks(g *Gui) *networks {
 	networks.SetTitle("network list").SetTitleAlign(tview.AlignLeft)
 	networks.SetBorder(true)
 	networks.setEntries(g)
+	networks.setKeybinding(g)
 	return networks
 }
 
@@ -37,8 +38,19 @@ func (n *networks) name() string {
 	return "networks"
 }
 
-func (n *networks) setKeybinding(f func(event *tcell.EventKey) *tcell.EventKey) {
-	n.SetInputCapture(f)
+func (n *networks) setKeybinding(g *Gui) {
+	n.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		g.setGlobalKeybinding(event)
+		switch event.Key() {
+
+		}
+
+		switch event.Rune() {
+
+		}
+
+		return event
+	})
 }
 
 func (n *networks) entries(g *Gui) {

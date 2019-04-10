@@ -29,6 +29,7 @@ func newContainers(g *Gui) *containers {
 	containers.SetTitle("container list").SetTitleAlign(tview.AlignLeft)
 	containers.SetBorder(true)
 	containers.setEntries(g)
+	containers.setKeybinding(g)
 	return containers
 }
 
@@ -36,8 +37,19 @@ func (c *containers) name() string {
 	return "containers"
 }
 
-func (c *containers) setKeybinding(f func(event *tcell.EventKey) *tcell.EventKey) {
-	c.SetInputCapture(f)
+func (c *containers) setKeybinding(g *Gui) {
+	c.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		g.setGlobalKeybinding(event)
+		switch event.Key() {
+
+		}
+
+		switch event.Rune() {
+
+		}
+
+		return event
+	})
 }
 
 func (c *containers) entries(g *Gui) {

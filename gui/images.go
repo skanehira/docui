@@ -28,6 +28,7 @@ func newImages(g *Gui) *images {
 	images.SetTitle("image list").SetTitleAlign(tview.AlignLeft)
 	images.SetBorder(true)
 	images.setEntries(g)
+	images.setKeybinding(g)
 	return images
 }
 
@@ -35,8 +36,17 @@ func (i *images) name() string {
 	return "images"
 }
 
-func (i *images) setKeybinding(f func(event *tcell.EventKey) *tcell.EventKey) {
-	i.SetInputCapture(f)
+func (i *images) setKeybinding(g *Gui) {
+	i.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		g.setGlobalKeybinding(event)
+		switch event.Key() {
+		}
+
+		switch event.Rune() {
+		}
+
+		return event
+	})
 }
 
 func (i *images) entries(g *Gui) {
