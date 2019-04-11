@@ -36,6 +36,7 @@ func newState() *state {
 // Gui have all panels
 type Gui struct {
 	app   *tview.Application
+	pages *tview.Pages
 	state *state
 }
 
@@ -149,7 +150,10 @@ func (g *Gui) initPanels() {
 		AddItem(volumes, 4, 0, 1, 1, 0, 0, true).
 		AddItem(networks, 5, 0, 1, 1, 0, 0, true)
 
-	g.app.SetRoot(grid, true)
+	g.pages = tview.NewPages().
+		AddAndSwitchToPage("main", grid, true)
+
+	g.app.SetRoot(g.pages, true)
 	g.switchPanel("images")
 }
 

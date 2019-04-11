@@ -43,6 +43,8 @@ func (i *images) setKeybinding(g *Gui) {
 		}
 
 		switch event.Rune() {
+		case 'c':
+			g.createContainer()
 		}
 
 		return event
