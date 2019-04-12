@@ -58,6 +58,8 @@ func (c *containers) entries(g *Gui) {
 		return
 	}
 
+	g.state.resources.containers = make([]*container, 0)
+
 	for _, con := range containers {
 		g.state.resources.containers = append(g.state.resources.containers, &container{
 			ID:      con.ID[:12],

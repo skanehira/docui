@@ -88,6 +88,7 @@ func (n *networks) entries(g *Gui) {
 
 	}
 
+	g.state.resources.networks = make([]*network, 0)
 	for _, key := range common.SortKeys(keys) {
 		g.state.resources.networks = append(g.state.resources.networks, tmpMap[key])
 	}

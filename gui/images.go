@@ -57,6 +57,8 @@ func (i *images) entries(g *Gui) {
 		return
 	}
 
+	g.state.resources.images = make([]*image, 0)
+
 	for _, imgInfo := range images {
 		for _, repoTag := range imgInfo.RepoTags {
 			repo, tag := common.ParseRepoTag(repoTag)

@@ -74,6 +74,7 @@ func (v *volumes) entries(g *Gui) {
 		keys = append(keys, v.Name)
 	}
 
+	g.state.resources.volumes = make([]*volume, 0)
 	for _, key := range common.SortKeys(keys) {
 		g.state.resources.volumes = append(g.state.resources.volumes, tmpMap[key])
 	}
