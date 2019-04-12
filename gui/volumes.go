@@ -24,7 +24,7 @@ type volumes struct {
 
 func newVolumes(g *Gui) *volumes {
 	volumes := &volumes{
-		Table: tview.NewTable().SetSelectable(true, false),
+		Table: tview.NewTable().SetSelectable(true, false).Select(0, 0).SetFixed(1, 1),
 	}
 
 	volumes.SetTitle("volume list").SetTitleAlign(tview.AlignLeft)
@@ -47,7 +47,8 @@ func (v *volumes) setKeybinding(g *Gui) {
 		}
 
 		switch event.Rune() {
-
+		case 'd':
+			g.removeVolume()
 		}
 
 		return event
@@ -83,7 +84,7 @@ func (v *volumes) entries(g *Gui) {
 
 func (v *volumes) setEntries(g *Gui) {
 	v.entries(g)
-	table := v.Clear().Select(0, 0).SetFixed(1, 1)
+	table := v.Clear()
 
 	headers := []string{
 		"Name",
@@ -133,4 +134,10 @@ func (v *volumes) focus(g *Gui) {
 
 func (v *volumes) unfocus() {
 	v.SetSelectable(false, false)
+}
+
+func (v *volumes) updateEntries(g *Gui) {
+	g.app.QueueUpdateDraw(func() {
+		v.setEntries(g)
+	})
 }

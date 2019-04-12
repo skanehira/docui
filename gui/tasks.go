@@ -110,3 +110,7 @@ func (t *tasks) focus(g *Gui) {
 func (t *tasks) unfocus() {
 	t.SetSelectable(false, false)
 }
+
+func (t *tasks) updateEntries(g *Gui) {
+	// do nothings
+}

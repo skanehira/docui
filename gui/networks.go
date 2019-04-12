@@ -24,7 +24,7 @@ type networks struct {
 
 func newNetworks(g *Gui) *networks {
 	networks := &networks{
-		Table: tview.NewTable().SetSelectable(true, false),
+		Table: tview.NewTable().SetSelectable(true, false).Select(0, 0).SetFixed(1, 1),
 	}
 
 	networks.SetTitle("network list").SetTitleAlign(tview.AlignLeft)
@@ -47,7 +47,8 @@ func (n *networks) setKeybinding(g *Gui) {
 		}
 
 		switch event.Rune() {
-
+		case 'd':
+			g.removeNetwork()
 		}
 
 		return event
@@ -97,7 +98,7 @@ func (n *networks) entries(g *Gui) {
 
 func (n *networks) setEntries(g *Gui) {
 	n.entries(g)
-	table := n.Clear().Select(0, 0).SetFixed(1, 1)
+	table := n.Clear()
 
 	headers := []string{
 		"ID",
@@ -153,4 +154,10 @@ func (n *networks) focus(g *Gui) {
 
 func (n *networks) unfocus() {
 	n.SetSelectable(false, false)
+}
+
+func (n *networks) updateEntries(g *Gui) {
+	g.app.QueueUpdateDraw(func() {
+		n.setEntries(g)
+	})
 }

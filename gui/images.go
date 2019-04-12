@@ -22,7 +22,7 @@ type images struct {
 
 func newImages(g *Gui) *images {
 	images := &images{
-		Table: tview.NewTable().SetSelectable(true, false),
+		Table: tview.NewTable().SetSelectable(true, false).Select(0, 0).SetFixed(1, 1),
 	}
 
 	images.SetTitle("image list").SetTitleAlign(tview.AlignLeft)
@@ -49,6 +49,8 @@ func (i *images) setKeybinding(g *Gui) {
 			g.createContainerForm()
 		case 'p':
 			g.pullImageForm()
+		case 'd':
+			g.removeImage()
 		}
 
 		return event
@@ -80,7 +82,7 @@ func (i *images) entries(g *Gui) {
 
 func (i *images) setEntries(g *Gui) {
 	i.entries(g)
-	table := i.Clear().Select(0, 0).SetFixed(1, 1)
+	table := i.Clear()
 
 	headers := []string{
 		"ID",
@@ -127,6 +129,12 @@ func (i *images) setEntries(g *Gui) {
 			SetMaxWidth(1).
 			SetExpansion(1))
 	}
+}
+
+func (i *images) updateEntries(g *Gui) {
+	g.app.QueueUpdateDraw(func() {
+		i.setEntries(g)
+	})
 }
 
 func (i *images) focus(g *Gui) {

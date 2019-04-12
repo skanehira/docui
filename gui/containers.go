@@ -23,7 +23,7 @@ type containers struct {
 
 func newContainers(g *Gui) *containers {
 	containers := &containers{
-		Table: tview.NewTable().SetSelectable(true, false),
+		Table: tview.NewTable().SetSelectable(true, false).Select(0, 0).SetFixed(1, 1),
 	}
 
 	containers.SetTitle("container list").SetTitleAlign(tview.AlignLeft)
@@ -46,7 +46,8 @@ func (c *containers) setKeybinding(g *Gui) {
 		}
 
 		switch event.Rune() {
-
+		case 'd':
+			g.removeContainer()
 		}
 
 		return event
@@ -75,7 +76,7 @@ func (c *containers) entries(g *Gui) {
 
 func (c *containers) setEntries(g *Gui) {
 	c.entries(g)
-	table := c.Clear().Select(0, 0).SetFixed(1, 1)
+	table := c.Clear()
 
 	headers := []string{
 		"ID",
@@ -137,4 +138,10 @@ func (c *containers) focus(g *Gui) {
 
 func (c *containers) unfocus() {
 	c.SetSelectable(false, false)
+}
+
+func (c *containers) updateEntries(g *Gui) {
+	g.app.QueueUpdateDraw(func() {
+		c.setEntries(g)
+	})
 }
