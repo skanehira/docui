@@ -66,6 +66,24 @@ func (g *Gui) containerPanel() *containers {
 	return nil
 }
 
+func (g *Gui) volumePanel() *volumes {
+	for _, panel := range g.state.panels.panel {
+		if panel.name() == "volumes" {
+			return panel.(*volumes)
+		}
+	}
+	return nil
+}
+
+func (g *Gui) networkPanel() *networks {
+	for _, panel := range g.state.panels.panel {
+		if panel.name() == "networks" {
+			return panel.(*networks)
+		}
+	}
+	return nil
+}
+
 func (g *Gui) taskPanel() *tasks {
 	for _, panel := range g.state.panels.panel {
 		if panel.name() == "tasks" {
@@ -176,4 +194,52 @@ func (g *Gui) Start() error {
 func (g *Gui) Stop() error {
 	g.app.Stop()
 	return nil
+}
+
+func (g *Gui) selectedImage() *image {
+	row, _ := g.imagePanel().GetSelection()
+	if len(g.state.resources.images) == 0 {
+		return nil
+	}
+	if row-1 < 0 {
+		return nil
+	}
+
+	return g.state.resources.images[row-1]
+}
+
+func (g *Gui) selectedContainer() *container {
+	row, _ := g.containerPanel().GetSelection()
+	if len(g.state.resources.containers) == 0 {
+		return nil
+	}
+	if row-1 < 0 {
+		return nil
+	}
+
+	return g.state.resources.containers[row-1]
+}
+
+func (g *Gui) selectedVolume() *volume {
+	row, _ := g.volumePanel().GetSelection()
+	if len(g.state.resources.volumes) == 0 {
+		return nil
+	}
+	if row-1 < 0 {
+		return nil
+	}
+
+	return g.state.resources.volumes[row-1]
+}
+
+func (g *Gui) selectedNetwork() *network {
+	row, _ := g.networkPanel().GetSelection()
+	if len(g.state.resources.networks) == 0 {
+		return nil
+	}
+	if row-1 < 0 {
+		return nil
+	}
+
+	return g.state.resources.networks[row-1]
 }

@@ -42,7 +42,8 @@ func (v *volumes) setKeybinding(g *Gui) {
 	v.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		g.setGlobalKeybinding(event)
 		switch event.Key() {
-
+		case tcell.KeyEnter:
+			g.inspectVolume()
 		}
 
 		switch event.Rune() {

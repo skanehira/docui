@@ -42,7 +42,8 @@ func (n *networks) setKeybinding(g *Gui) {
 	n.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		g.setGlobalKeybinding(event)
 		switch event.Key() {
-
+		case tcell.KeyEnter:
+			g.inspectNetwork()
 		}
 
 		switch event.Rune() {

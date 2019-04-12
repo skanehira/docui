@@ -40,11 +40,15 @@ func (i *images) setKeybinding(g *Gui) {
 	i.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		g.setGlobalKeybinding(event)
 		switch event.Key() {
+		case tcell.KeyEnter:
+			g.inspectImage()
 		}
 
 		switch event.Rune() {
 		case 'c':
-			g.createContainer()
+			g.createContainerForm()
+		case 'p':
+			g.pullImageForm()
 		}
 
 		return event

@@ -41,7 +41,8 @@ func (c *containers) setKeybinding(g *Gui) {
 	c.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		g.setGlobalKeybinding(event)
 		switch event.Key() {
-
+		case tcell.KeyEnter:
+			g.inspectContainer()
 		}
 
 		switch event.Rune() {
