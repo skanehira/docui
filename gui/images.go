@@ -42,6 +42,8 @@ func (i *images) setKeybinding(g *Gui) {
 		switch event.Key() {
 		case tcell.KeyEnter:
 			g.inspectImage()
+		case tcell.KeyCtrlL:
+			g.loadImageForm()
 		}
 
 		switch event.Rune() {
@@ -51,6 +53,10 @@ func (i *images) setKeybinding(g *Gui) {
 			g.pullImageForm()
 		case 'd':
 			g.removeImage()
+		case 'i':
+			g.importImageForm()
+		case 's':
+			g.saveImageForm()
 		}
 
 		return event

@@ -48,6 +48,12 @@ func (c *containers) setKeybinding(g *Gui) {
 		switch event.Rune() {
 		case 'd':
 			g.removeContainer()
+		case 'u':
+			g.startContainer()
+		case 's':
+			g.stopContainer()
+		case 'e':
+			g.exportContainerForm()
 		}
 
 		return event

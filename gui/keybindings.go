@@ -3,6 +3,7 @@ package gui
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
@@ -69,11 +70,11 @@ func (g *Gui) message(message, doneLabel, page string, doneFunc func()) {
 		SetText(message).
 		AddButtons([]string{doneLabel, "Cancel"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			g.pages.RemovePage("modal")
+			g.switchPanel(page)
 			if buttonLabel == doneLabel {
 				doneFunc()
 			}
-			g.pages.RemovePage("modal")
-			g.switchPanel(page)
 		})
 
 	g.pages.AddAndSwitchToPage("modal", g.modal(modal, 80, 29), true).ShowPage("main")
@@ -319,4 +320,177 @@ func (g *Gui) removeNetwork() {
 			return nil
 		})
 	})
+}
+
+func (g *Gui) startContainer() {
+	container := g.selectedContainer()
+
+	g.startTask(fmt.Sprintf("start container %s", container.Name), func(ctx context.Context) error {
+		if err := docker.Client.StartContainer(container.ID); err != nil {
+			common.Logger.Errorf("cannot start container %s", err)
+			return err
+		}
+
+		g.containerPanel().updateEntries(g)
+		return nil
+	})
+}
+
+func (g *Gui) stopContainer() {
+	container := g.selectedContainer()
+
+	g.startTask(fmt.Sprintf("stop container %s", container.Name), func(ctx context.Context) error {
+
+		if err := docker.Client.StopContainer(container.ID); err != nil {
+			common.Logger.Errorf("cannot stop container %s", err)
+			return err
+		}
+
+		g.containerPanel().updateEntries(g)
+		return nil
+	})
+}
+
+func (g *Gui) exportContainerForm() {
+	container := g.selectedContainer()
+
+	form := tview.NewForm()
+	form.SetBorder(true)
+	form.SetTitleAlign(tview.AlignLeft)
+	form.SetTitle("export container")
+	form.AddInputField("path", "", 70, nil, nil).
+		AddInputField("container", container.Name, 70, nil, nil).
+		AddButton("Create", func() {
+			path := form.GetFormItemByLabel("path").(*tview.InputField).GetText()
+			container := form.GetFormItemByLabel("container").(*tview.InputField).GetText()
+
+			g.exportContainer(path, container)
+		}).
+		AddButton("Cancel", func() {
+			g.pages.RemovePage("form")
+			g.switchPanel("images")
+		})
+
+	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 9), true).ShowPage("main")
+}
+
+func (g *Gui) exportContainer(path, container string) {
+	g.startTask("export container "+container, func(ctx context.Context) error {
+		g.pages.RemovePage("form")
+		g.switchPanel("containers")
+		err := docker.Client.ExportContainer(container, path)
+		if err != nil {
+			common.Logger.Errorf("cannot export container %s", err)
+			return err
+		}
+
+		return nil
+	})
+}
+
+func (g *Gui) loadImageForm() {
+	form := tview.NewForm()
+	form.SetBorder(true)
+	form.SetTitleAlign(tview.AlignLeft)
+	form.SetTitle("load image")
+	form.AddInputField("path", "", 70, nil, nil).
+		AddButton("Load", func() {
+			path := form.GetFormItemByLabel("path").(*tview.InputField).GetText()
+			g.loadImage(path)
+		}).
+		AddButton("Cancel", func() {
+			g.pages.RemovePage("form")
+			g.switchPanel("images")
+		})
+
+	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 7), true).ShowPage("main")
+}
+
+func (g *Gui) loadImage(path string) {
+	g.startTask("load image "+filepath.Base(path), func(ctx context.Context) error {
+		g.pages.RemovePage("form")
+		g.switchPanel("images")
+		if err := docker.Client.LoadImage(path); err != nil {
+			common.Logger.Errorf("cannot load image %s", err)
+			return err
+		}
+
+		g.imagePanel().updateEntries(g)
+		return nil
+	})
+}
+
+func (g *Gui) importImageForm() {
+	form := tview.NewForm()
+	form.SetBorder(true)
+	form.SetTitleAlign(tview.AlignLeft)
+	form.SetTitle("load image")
+	form.AddInputField("repository", "", 70, nil, nil).
+		AddInputField("tag", "", 70, nil, nil).
+		AddInputField("path", "", 70, nil, nil).
+		AddButton("Load", func() {
+			repository := form.GetFormItemByLabel("repository").(*tview.InputField).GetText()
+			tag := form.GetFormItemByLabel("tag").(*tview.InputField).GetText()
+			path := form.GetFormItemByLabel("path").(*tview.InputField).GetText()
+			g.importImage(path, repository, tag)
+		}).
+		AddButton("Cancel", func() {
+			g.pages.RemovePage("form")
+			g.switchPanel("images")
+		})
+
+	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 11), true).ShowPage("main")
+}
+
+func (g *Gui) importImage(file, repo, tag string) {
+	g.startTask("import image "+file, func(ctx context.Context) error {
+		g.pages.RemovePage("form")
+		g.switchPanel("images")
+
+		if err := docker.Client.ImportImage(repo, tag, file); err != nil {
+			common.Logger.Errorf("cannot load image %s", err)
+			return err
+		}
+
+		g.imagePanel().updateEntries(g)
+		return nil
+	})
+}
+
+func (g *Gui) saveImageForm() {
+	image := g.selectedImage()
+	imageName := fmt.Sprintf("%s:%s", image.Repo, image.Tag)
+
+	form := tview.NewForm()
+	form.SetBorder(true)
+	form.SetTitleAlign(tview.AlignLeft)
+	form.SetTitle("save image")
+	form.AddInputField("path", "", 70, nil, nil).
+		AddInputField("image", imageName, 70, nil, nil).
+		AddButton("Save", func() {
+			image := form.GetFormItemByLabel("image").(*tview.InputField).GetText()
+			path := form.GetFormItemByLabel("path").(*tview.InputField).GetText()
+			g.saveImage(image, path)
+		}).
+		AddButton("Cancel", func() {
+			g.pages.RemovePage("form")
+			g.switchPanel("images")
+		})
+
+	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 9), true).ShowPage("main")
+
+}
+
+func (g *Gui) saveImage(image, path string) {
+	g.startTask("save image "+image, func(ctx context.Context) error {
+		g.pages.RemovePage("form")
+		g.switchPanel("images")
+
+		if err := docker.Client.SaveImage([]string{image}, path); err != nil {
+			common.Logger.Errorf("cannot save image %s", err)
+			return err
+		}
+		return nil
+	})
+
 }
