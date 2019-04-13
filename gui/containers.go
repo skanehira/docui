@@ -43,6 +43,8 @@ func (c *containers) setKeybinding(g *Gui) {
 		switch event.Key() {
 		case tcell.KeyEnter:
 			g.inspectContainer()
+		case tcell.KeyCtrlE:
+			g.attachContainerForm()
 		}
 
 		switch event.Rune() {
@@ -54,6 +56,8 @@ func (c *containers) setKeybinding(g *Gui) {
 			g.stopContainer()
 		case 'e':
 			g.exportContainerForm()
+		case 'c':
+			g.commitContainerForm()
 		}
 
 		return event

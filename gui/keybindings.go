@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 
+	"github.com/docker/docker/api/types"
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 	"github.com/skanehira/docui/common"
@@ -493,4 +494,74 @@ func (g *Gui) saveImage(image, path string) {
 		return nil
 	})
 
+}
+
+func (g *Gui) commitContainerForm() {
+	container := g.selectedContainer()
+
+	form := tview.NewForm()
+	form.SetBorder(true)
+	form.SetTitleAlign(tview.AlignLeft)
+	form.SetTitle("commit container")
+	form.AddInputField("repository", "", 70, nil, nil).
+		AddInputField("tag", "", 70, nil, nil).
+		AddInputField("container", container.Name, 70, nil, nil).
+		AddButton("Commit", func() {
+			repo := form.GetFormItemByLabel("repository").(*tview.InputField).GetText()
+			tag := form.GetFormItemByLabel("tag").(*tview.InputField).GetText()
+			con := form.GetFormItemByLabel("container").(*tview.InputField).GetText()
+			g.commitContainer(repo, tag, con)
+		}).
+		AddButton("Cancel", func() {
+			g.pages.RemovePage("form")
+			g.switchPanel("containers")
+		})
+
+	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 11), true).ShowPage("main")
+}
+
+func (g *Gui) commitContainer(repo, tag, container string) {
+	g.startTask("commit container "+container, func(ctx context.Context) error {
+		g.pages.RemovePage("form")
+		g.switchPanel("containers")
+
+		if err := docker.Client.CommitContainer(container, types.ContainerCommitOptions{Reference: repo + ":" + tag}); err != nil {
+			common.Logger.Errorf("cannot commit container %s", err)
+			return err
+		}
+
+		g.imagePanel().updateEntries(g)
+		return nil
+	})
+}
+
+func (g *Gui) attachContainerForm() {
+	form := tview.NewForm()
+	form.SetBorder(true)
+	form.SetTitleAlign(tview.AlignLeft)
+	form.SetTitle("commit container")
+	form.AddInputField("cmd", "", 70, nil, nil).
+		AddButton("Exec", func() {
+			cmd := form.GetFormItemByLabel("cmd").(*tview.InputField).GetText()
+			g.attachContainer(g.selectedContainer().ID, cmd)
+		}).
+		AddButton("Cancel", func() {
+			g.pages.RemovePage("form")
+			g.switchPanel("containers")
+		})
+
+	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 7), true).ShowPage("main")
+}
+
+func (g *Gui) attachContainer(container, cmd string) {
+	g.pages.RemovePage("form")
+	g.switchPanel("containers")
+
+	if !g.app.Suspend(func() {
+		if err := docker.Client.AttachExecContainer(container, cmd); err != nil {
+			common.Logger.Errorf("cannot attach container %s", err)
+		}
+	}) {
+		common.Logger.Error("cannot suspend tview")
+	}
 }
