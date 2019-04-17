@@ -565,3 +565,54 @@ func (g *Gui) attachContainer(container, cmd string) {
 		common.Logger.Error("cannot suspend tview")
 	}
 }
+
+func (g *Gui) createVolumeForm() {
+	form := tview.NewForm()
+	form.SetBorder(true)
+	form.SetTitleAlign(tview.AlignLeft)
+	form.SetTitle("create volume")
+	form.AddInputField("name", "", 70, nil, nil).
+		AddInputField("labels", "", 70, nil, nil).
+		AddInputField("driver", "", 70, nil, nil).
+		AddInputField("options", "", 70, nil, nil).
+		AddButton("Create", func() {
+			g.createVolume(form)
+		}).
+		AddButton("Cancel", func() {
+			g.pages.RemovePage("form")
+			g.switchPanel("volumes")
+		})
+
+	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 13), true).ShowPage("main")
+}
+
+func (g *Gui) createVolume(form *tview.Form) {
+	g.startTask("create container", func(ctx context.Context) error {
+		inputLabels := []string{
+			"name",
+			"labels",
+			"driver",
+			"options",
+		}
+
+		var data = make(map[string]string)
+
+		for _, label := range inputLabels {
+			data[label] = form.GetFormItemByLabel(label).(*tview.InputField).GetText()
+		}
+		options := docker.Client.NewCreateVolumeOptions(data)
+
+		if err := docker.Client.CreateVolume(options); err != nil {
+			common.Logger.Errorf("cannot create container %s", err)
+			return err
+		}
+
+		g.pages.RemovePage("form")
+		g.switchPanel("volumes")
+		g.app.QueueUpdateDraw(func() {
+			g.volumePanel().setEntries(g)
+		})
+
+		return nil
+	})
+}

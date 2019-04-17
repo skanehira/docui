@@ -49,6 +49,8 @@ func (v *volumes) setKeybinding(g *Gui) {
 		switch event.Rune() {
 		case 'd':
 			g.removeVolume()
+		case 'c':
+			g.createVolumeForm()
 		}
 
 		return event
