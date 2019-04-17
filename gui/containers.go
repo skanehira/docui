@@ -43,7 +43,7 @@ func (c *containers) setKeybinding(g *Gui) {
 		switch event.Key() {
 		case tcell.KeyEnter:
 			g.inspectContainer()
-		case tcell.KeyCtrlE:
+		case tcell.KeyCtrlA:
 			g.attachContainerForm()
 		}
 
