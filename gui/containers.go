@@ -45,6 +45,8 @@ func (c *containers) setKeybinding(g *Gui) {
 			g.inspectContainer()
 		case tcell.KeyCtrlA:
 			g.attachContainerForm()
+		case tcell.KeyCtrlL:
+			g.tailContainerLog()
 		}
 
 		switch event.Rune() {

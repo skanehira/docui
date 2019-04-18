@@ -3,9 +3,12 @@ package gui
 import (
 	"context"
 	"fmt"
+	"os"
+	"os/signal"
 	"path/filepath"
 
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 	"github.com/skanehira/docui/common"
@@ -615,4 +618,39 @@ func (g *Gui) createVolume(form *tview.Form) {
 
 		return nil
 	})
+}
+
+func (g *Gui) tailContainerLog() {
+	if !g.app.Suspend(func() {
+		sigint := make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt)
+		errCh := make(chan error)
+
+		go func() {
+			selected := g.selectedContainer()
+
+			reader, err := docker.Client.ContainerLogStream(selected.ID)
+			if err != nil {
+				common.Logger.Error(err)
+				errCh <- err
+			}
+			defer reader.Close()
+
+			_, err = stdcopy.StdCopy(os.Stdout, os.Stderr, reader)
+			if err != nil {
+				errCh <- err
+			}
+			return
+		}()
+
+		select {
+		case err := <-errCh:
+			common.Logger.Error(err)
+			return
+		case <-sigint:
+			return
+		}
+	}) {
+		common.Logger.Error("cannot suspend tview")
+	}
 }
