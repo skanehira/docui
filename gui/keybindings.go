@@ -369,7 +369,7 @@ func (g *Gui) exportContainerForm() {
 		}).
 		AddButton("Cancel", func() {
 			g.pages.RemovePage("form")
-			g.switchPanel("images")
+			g.switchPanel("containers")
 		})
 
 	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 9), true).ShowPage("main")
