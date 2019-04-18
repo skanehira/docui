@@ -92,7 +92,7 @@ func (g *Gui) createContainerForm() {
 
 	form := tview.NewForm()
 	form.SetBorder(true)
-	form.SetTitle("create container")
+	form.SetTitle("Create container")
 	form.SetTitleAlign(tview.AlignLeft)
 
 	form.AddInputField("Name", "", 70, nil, nil).
@@ -168,8 +168,8 @@ func (g *Gui) pullImageForm() {
 	form := tview.NewForm()
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
-	form.SetTitle("pull image")
-	form.AddInputField("image", "", 70, nil, nil).
+	form.SetTitle("Pull image")
+	form.AddInputField("Image", "", 70, nil, nil).
 		AddButton("Pull", func() {
 			image := form.GetFormItemByLabel("image").(*tview.InputField).GetText()
 			g.pullImage(image)
@@ -183,7 +183,7 @@ func (g *Gui) pullImageForm() {
 }
 
 func (g *Gui) pullImage(image string) {
-	g.startTask("pull image "+image, func(ctx context.Context) error {
+	g.startTask("Pull image "+image, func(ctx context.Context) error {
 		g.pages.RemovePage("form")
 		g.switchPanel("images")
 		err := docker.Client.PullImage(image)
@@ -200,7 +200,7 @@ func (g *Gui) pullImage(image string) {
 
 func (g *Gui) displayInspect(data, page string) {
 	text := tview.NewTextView()
-	text.SetTitle("detail").SetTitleAlign(tview.AlignLeft)
+	text.SetTitle("Detail").SetTitleAlign(tview.AlignLeft)
 	text.SetBorder(true)
 	text.SetText(data)
 
@@ -358,11 +358,11 @@ func (g *Gui) exportContainerForm() {
 	form := tview.NewForm()
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
-	form.SetTitle("export container")
-	form.AddInputField("path", "", 70, nil, nil).
-		AddInputField("container", container.Name, 70, nil, nil).
+	form.SetTitle("Export container")
+	form.AddInputField("Path", "", 70, nil, nil).
+		AddInputField("Container", container.Name, 70, nil, nil).
 		AddButton("Create", func() {
-			path := form.GetFormItemByLabel("path").(*tview.InputField).GetText()
+			path := form.GetFormItemByLabel("Path").(*tview.InputField).GetText()
 			container := form.GetFormItemByLabel("container").(*tview.InputField).GetText()
 
 			g.exportContainer(path, container)
@@ -393,10 +393,10 @@ func (g *Gui) loadImageForm() {
 	form := tview.NewForm()
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
-	form.SetTitle("load image")
-	form.AddInputField("path", "", 70, nil, nil).
+	form.SetTitle("Load image")
+	form.AddInputField("Path", "", 70, nil, nil).
 		AddButton("Load", func() {
-			path := form.GetFormItemByLabel("path").(*tview.InputField).GetText()
+			path := form.GetFormItemByLabel("Path").(*tview.InputField).GetText()
 			g.loadImage(path)
 		}).
 		AddButton("Cancel", func() {
@@ -425,14 +425,14 @@ func (g *Gui) importImageForm() {
 	form := tview.NewForm()
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
-	form.SetTitle("load image")
-	form.AddInputField("repository", "", 70, nil, nil).
-		AddInputField("tag", "", 70, nil, nil).
-		AddInputField("path", "", 70, nil, nil).
+	form.SetTitle("Import image")
+	form.AddInputField("Repository", "", 70, nil, nil).
+		AddInputField("Tag", "", 70, nil, nil).
+		AddInputField("Path", "", 70, nil, nil).
 		AddButton("Load", func() {
-			repository := form.GetFormItemByLabel("repository").(*tview.InputField).GetText()
-			tag := form.GetFormItemByLabel("tag").(*tview.InputField).GetText()
-			path := form.GetFormItemByLabel("path").(*tview.InputField).GetText()
+			repository := form.GetFormItemByLabel("Repository").(*tview.InputField).GetText()
+			tag := form.GetFormItemByLabel("Tag").(*tview.InputField).GetText()
+			path := form.GetFormItemByLabel("Path").(*tview.InputField).GetText()
 			g.importImage(path, repository, tag)
 		}).
 		AddButton("Cancel", func() {
@@ -465,12 +465,12 @@ func (g *Gui) saveImageForm() {
 	form := tview.NewForm()
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
-	form.SetTitle("save image")
-	form.AddInputField("path", "", 70, nil, nil).
-		AddInputField("image", imageName, 70, nil, nil).
+	form.SetTitle("Save image")
+	form.AddInputField("Path", "", 70, nil, nil).
+		AddInputField("Image", imageName, 70, nil, nil).
 		AddButton("Save", func() {
-			image := form.GetFormItemByLabel("image").(*tview.InputField).GetText()
-			path := form.GetFormItemByLabel("path").(*tview.InputField).GetText()
+			image := form.GetFormItemByLabel("Image").(*tview.InputField).GetText()
+			path := form.GetFormItemByLabel("Path").(*tview.InputField).GetText()
 			g.saveImage(image, path)
 		}).
 		AddButton("Cancel", func() {
@@ -502,14 +502,14 @@ func (g *Gui) commitContainerForm() {
 	form := tview.NewForm()
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
-	form.SetTitle("commit container")
-	form.AddInputField("repository", "", 70, nil, nil).
-		AddInputField("tag", "", 70, nil, nil).
-		AddInputField("container", container.Name, 70, nil, nil).
+	form.SetTitle("Commit container")
+	form.AddInputField("Repository", "", 70, nil, nil).
+		AddInputField("Tag", "", 70, nil, nil).
+		AddInputField("Container", container.Name, 70, nil, nil).
 		AddButton("Commit", func() {
-			repo := form.GetFormItemByLabel("repository").(*tview.InputField).GetText()
-			tag := form.GetFormItemByLabel("tag").(*tview.InputField).GetText()
-			con := form.GetFormItemByLabel("container").(*tview.InputField).GetText()
+			repo := form.GetFormItemByLabel("Repository").(*tview.InputField).GetText()
+			tag := form.GetFormItemByLabel("Tag").(*tview.InputField).GetText()
+			con := form.GetFormItemByLabel("Container").(*tview.InputField).GetText()
 			g.commitContainer(repo, tag, con)
 		}).
 		AddButton("Cancel", func() {
@@ -539,10 +539,10 @@ func (g *Gui) attachContainerForm() {
 	form := tview.NewForm()
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
-	form.SetTitle("commit container")
-	form.AddInputField("cmd", "", 70, nil, nil).
+	form.SetTitle("Commit container")
+	form.AddInputField("Cmd", "", 70, nil, nil).
 		AddButton("Exec", func() {
-			cmd := form.GetFormItemByLabel("cmd").(*tview.InputField).GetText()
+			cmd := form.GetFormItemByLabel("Cmd").(*tview.InputField).GetText()
 			g.attachContainer(g.selectedContainer().ID, cmd)
 		}).
 		AddButton("Cancel", func() {
@@ -570,11 +570,11 @@ func (g *Gui) createVolumeForm() {
 	form := tview.NewForm()
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
-	form.SetTitle("create volume")
-	form.AddInputField("name", "", 70, nil, nil).
-		AddInputField("labels", "", 70, nil, nil).
-		AddInputField("driver", "", 70, nil, nil).
-		AddInputField("options", "", 70, nil, nil).
+	form.SetTitle("Create volume")
+	form.AddInputField("Name", "", 70, nil, nil).
+		AddInputField("Labels", "", 70, nil, nil).
+		AddInputField("Driver", "", 70, nil, nil).
+		AddInputField("Options", "", 70, nil, nil).
 		AddButton("Create", func() {
 			g.createVolume(form)
 		}).
@@ -587,23 +587,23 @@ func (g *Gui) createVolumeForm() {
 }
 
 func (g *Gui) createVolume(form *tview.Form) {
-	g.startTask("create container", func(ctx context.Context) error {
-		inputLabels := []string{
-			"name",
-			"labels",
-			"driver",
-			"options",
-		}
+	var data = make(map[string]string)
+	inputLabels := []string{
+		"Name",
+		"Labels",
+		"Driver",
+		"Options",
+	}
 
-		var data = make(map[string]string)
+	for _, label := range inputLabels {
+		data[label] = form.GetFormItemByLabel(label).(*tview.InputField).GetText()
+	}
 
-		for _, label := range inputLabels {
-			data[label] = form.GetFormItemByLabel(label).(*tview.InputField).GetText()
-		}
+	g.startTask("create volume "+data["Name"], func(ctx context.Context) error {
 		options := docker.Client.NewCreateVolumeOptions(data)
 
 		if err := docker.Client.CreateVolume(options); err != nil {
-			common.Logger.Errorf("cannot create container %s", err)
+			common.Logger.Errorf("cannot create volume %s", err)
 			return err
 		}
 
