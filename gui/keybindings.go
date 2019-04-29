@@ -15,6 +15,8 @@ import (
 	"github.com/skanehira/docui/docker"
 )
 
+var inputWidth = 70
+
 func (g *Gui) setGlobalKeybinding(event *tcell.EventKey) {
 	switch event.Rune() {
 	case 'h':
@@ -62,6 +64,11 @@ func (g *Gui) switchPanel(panelName string) {
 	}
 }
 
+func (g *Gui) closeAndSwitchPanel(removePanel, switchPanel string) {
+	g.pages.RemovePage(removePanel).ShowPage("main")
+	g.switchPanel(switchPanel)
+}
+
 func (g *Gui) modal(p tview.Primitive, width, height int) tview.Primitive {
 	return tview.NewGrid().
 		SetColumns(0, width, 0).
@@ -74,8 +81,7 @@ func (g *Gui) message(message, doneLabel, page string, doneFunc func()) {
 		SetText(message).
 		AddButtons([]string{doneLabel, "Cancel"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
-			g.pages.RemovePage("modal")
-			g.switchPanel(page)
+			g.closeAndSwitchPanel("modal", page)
 			if buttonLabel == doneLabel {
 				doneFunc()
 			}
@@ -98,24 +104,23 @@ func (g *Gui) createContainerForm() {
 	form.SetTitle("Create container")
 	form.SetTitleAlign(tview.AlignLeft)
 
-	form.AddInputField("Name", "", 70, nil, nil).
-		AddInputField("HostIP", "", 70, nil, nil).
-		AddInputField("HostPort", "", 70, nil, nil).
-		AddInputField("Port", "", 70, nil, nil).
+	form.AddInputField("Name", "", inputWidth, nil, nil).
+		AddInputField("HostIP", "", inputWidth, nil, nil).
+		AddInputField("HostPort", "", inputWidth, nil, nil).
+		AddInputField("Port", "", inputWidth, nil, nil).
 		AddDropDown("VolumeType", []string{"bind", "volume"}, 0, func(option string, optionIndex int) {}).
-		AddInputField("HostVolume", "", 70, nil, nil).
-		AddInputField("Volume", "", 70, nil, nil).
-		AddInputField("Image", image, 70, nil, nil).
-		AddInputField("User", "", 70, nil, nil).
+		AddInputField("HostVolume", "", inputWidth, nil, nil).
+		AddInputField("Volume", "", inputWidth, nil, nil).
+		AddInputField("Image", image, inputWidth, nil, nil).
+		AddInputField("User", "", inputWidth, nil, nil).
 		AddCheckbox("Attach", false, nil).
-		AddInputField("Env", "", 70, nil, nil).
-		AddInputField("Cmd", "", 70, nil, nil).
+		AddInputField("Env", "", inputWidth, nil, nil).
+		AddInputField("Cmd", "", inputWidth, nil, nil).
 		AddButton("Save", func() {
 			g.createContainer(form, image)
 		}).
 		AddButton("Cancel", func() {
-			g.pages.RemovePage("form")
-			g.switchPanel("images")
+			g.closeAndSwitchPanel("form", "images")
 		})
 
 	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 29), true).ShowPage("main")
@@ -157,8 +162,7 @@ func (g *Gui) createContainer(form *tview.Form, image string) {
 			return err
 		}
 
-		g.pages.RemovePage("form")
-		g.switchPanel("images")
+		g.closeAndSwitchPanel("form", "images")
 		g.app.QueueUpdateDraw(func() {
 			g.containerPanel().setEntries(g)
 		})
@@ -172,14 +176,13 @@ func (g *Gui) pullImageForm() {
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
 	form.SetTitle("Pull image")
-	form.AddInputField("Image", "", 70, nil, nil).
+	form.AddInputField("Image", "", inputWidth, nil, nil).
 		AddButton("Pull", func() {
-			image := form.GetFormItemByLabel("image").(*tview.InputField).GetText()
+			image := form.GetFormItemByLabel("Image").(*tview.InputField).GetText()
 			g.pullImage(image)
 		}).
 		AddButton("Cancel", func() {
-			g.pages.RemovePage("form")
-			g.switchPanel("images")
+			g.closeAndSwitchPanel("form", "images")
 		})
 
 	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 7), true).ShowPage("main")
@@ -187,8 +190,7 @@ func (g *Gui) pullImageForm() {
 
 func (g *Gui) pullImage(image string) {
 	g.startTask("Pull image "+image, func(ctx context.Context) error {
-		g.pages.RemovePage("form")
-		g.switchPanel("images")
+		g.closeAndSwitchPanel("form", "images")
 		err := docker.Client.PullImage(image)
 		if err != nil {
 			common.Logger.Errorf("cannot create container %s", err)
@@ -209,8 +211,7 @@ func (g *Gui) displayInspect(data, page string) {
 
 	text.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEsc || event.Rune() == 'q' {
-			g.pages.RemovePage("detail").ShowPage("main")
-			g.switchPanel(page)
+			g.closeAndSwitchPanel("detail", page)
 		}
 		return event
 	})
@@ -356,14 +357,15 @@ func (g *Gui) stopContainer() {
 }
 
 func (g *Gui) exportContainerForm() {
-	container := g.selectedContainer()
+	inputWidth := 70
 
+	container := g.selectedContainer()
 	form := tview.NewForm()
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
 	form.SetTitle("Export container")
-	form.AddInputField("Path", "", 70, nil, nil).
-		AddInputField("Container", container.Name, 70, nil, nil).
+	form.AddInputField("Path", "", inputWidth, nil, nil).
+		AddInputField("Container", container.Name, inputWidth, nil, nil).
 		AddButton("Create", func() {
 			path := form.GetFormItemByLabel("Path").(*tview.InputField).GetText()
 			container := form.GetFormItemByLabel("container").(*tview.InputField).GetText()
@@ -371,8 +373,7 @@ func (g *Gui) exportContainerForm() {
 			g.exportContainer(path, container)
 		}).
 		AddButton("Cancel", func() {
-			g.pages.RemovePage("form")
-			g.switchPanel("containers")
+			g.closeAndSwitchPanel("form", "containers")
 		})
 
 	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 9), true).ShowPage("main")
@@ -380,8 +381,7 @@ func (g *Gui) exportContainerForm() {
 
 func (g *Gui) exportContainer(path, container string) {
 	g.startTask("export container "+container, func(ctx context.Context) error {
-		g.pages.RemovePage("form")
-		g.switchPanel("containers")
+		g.closeAndSwitchPanel("form", "containers")
 		err := docker.Client.ExportContainer(container, path)
 		if err != nil {
 			common.Logger.Errorf("cannot export container %s", err)
@@ -397,14 +397,13 @@ func (g *Gui) loadImageForm() {
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
 	form.SetTitle("Load image")
-	form.AddInputField("Path", "", 70, nil, nil).
+	form.AddInputField("Path", "", inputWidth, nil, nil).
 		AddButton("Load", func() {
 			path := form.GetFormItemByLabel("Path").(*tview.InputField).GetText()
 			g.loadImage(path)
 		}).
 		AddButton("Cancel", func() {
-			g.pages.RemovePage("form")
-			g.switchPanel("images")
+			g.closeAndSwitchPanel("form", "images")
 		})
 
 	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 7), true).ShowPage("main")
@@ -412,8 +411,7 @@ func (g *Gui) loadImageForm() {
 
 func (g *Gui) loadImage(path string) {
 	g.startTask("load image "+filepath.Base(path), func(ctx context.Context) error {
-		g.pages.RemovePage("form")
-		g.switchPanel("images")
+		g.closeAndSwitchPanel("form", "images")
 		if err := docker.Client.LoadImage(path); err != nil {
 			common.Logger.Errorf("cannot load image %s", err)
 			return err
@@ -429,9 +427,9 @@ func (g *Gui) importImageForm() {
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
 	form.SetTitle("Import image")
-	form.AddInputField("Repository", "", 70, nil, nil).
-		AddInputField("Tag", "", 70, nil, nil).
-		AddInputField("Path", "", 70, nil, nil).
+	form.AddInputField("Repository", "", inputWidth, nil, nil).
+		AddInputField("Tag", "", inputWidth, nil, nil).
+		AddInputField("Path", "", inputWidth, nil, nil).
 		AddButton("Load", func() {
 			repository := form.GetFormItemByLabel("Repository").(*tview.InputField).GetText()
 			tag := form.GetFormItemByLabel("Tag").(*tview.InputField).GetText()
@@ -439,8 +437,7 @@ func (g *Gui) importImageForm() {
 			g.importImage(path, repository, tag)
 		}).
 		AddButton("Cancel", func() {
-			g.pages.RemovePage("form")
-			g.switchPanel("images")
+			g.closeAndSwitchPanel("form", "images")
 		})
 
 	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 11), true).ShowPage("main")
@@ -448,8 +445,7 @@ func (g *Gui) importImageForm() {
 
 func (g *Gui) importImage(file, repo, tag string) {
 	g.startTask("import image "+file, func(ctx context.Context) error {
-		g.pages.RemovePage("form")
-		g.switchPanel("images")
+		g.closeAndSwitchPanel("form", "images")
 
 		if err := docker.Client.ImportImage(repo, tag, file); err != nil {
 			common.Logger.Errorf("cannot load image %s", err)
@@ -469,16 +465,15 @@ func (g *Gui) saveImageForm() {
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
 	form.SetTitle("Save image")
-	form.AddInputField("Path", "", 70, nil, nil).
-		AddInputField("Image", imageName, 70, nil, nil).
+	form.AddInputField("Path", "", inputWidth, nil, nil).
+		AddInputField("Image", imageName, inputWidth, nil, nil).
 		AddButton("Save", func() {
 			image := form.GetFormItemByLabel("Image").(*tview.InputField).GetText()
 			path := form.GetFormItemByLabel("Path").(*tview.InputField).GetText()
 			g.saveImage(image, path)
 		}).
 		AddButton("Cancel", func() {
-			g.pages.RemovePage("form")
-			g.switchPanel("images")
+			g.closeAndSwitchPanel("form", "images")
 		})
 
 	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 9), true).ShowPage("main")
@@ -487,8 +482,7 @@ func (g *Gui) saveImageForm() {
 
 func (g *Gui) saveImage(image, path string) {
 	g.startTask("save image "+image, func(ctx context.Context) error {
-		g.pages.RemovePage("form")
-		g.switchPanel("images")
+		g.closeAndSwitchPanel("form", "images")
 
 		if err := docker.Client.SaveImage([]string{image}, path); err != nil {
 			common.Logger.Errorf("cannot save image %s", err)
@@ -506,9 +500,9 @@ func (g *Gui) commitContainerForm() {
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
 	form.SetTitle("Commit container")
-	form.AddInputField("Repository", "", 70, nil, nil).
-		AddInputField("Tag", "", 70, nil, nil).
-		AddInputField("Container", container.Name, 70, nil, nil).
+	form.AddInputField("Repository", "", inputWidth, nil, nil).
+		AddInputField("Tag", "", inputWidth, nil, nil).
+		AddInputField("Container", container.Name, inputWidth, nil, nil).
 		AddButton("Commit", func() {
 			repo := form.GetFormItemByLabel("Repository").(*tview.InputField).GetText()
 			tag := form.GetFormItemByLabel("Tag").(*tview.InputField).GetText()
@@ -516,8 +510,7 @@ func (g *Gui) commitContainerForm() {
 			g.commitContainer(repo, tag, con)
 		}).
 		AddButton("Cancel", func() {
-			g.pages.RemovePage("form")
-			g.switchPanel("containers")
+			g.closeAndSwitchPanel("form", "containers")
 		})
 
 	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 11), true).ShowPage("main")
@@ -525,8 +518,7 @@ func (g *Gui) commitContainerForm() {
 
 func (g *Gui) commitContainer(repo, tag, container string) {
 	g.startTask("commit container "+container, func(ctx context.Context) error {
-		g.pages.RemovePage("form")
-		g.switchPanel("containers")
+		g.closeAndSwitchPanel("form", "containers")
 
 		if err := docker.Client.CommitContainer(container, types.ContainerCommitOptions{Reference: repo + ":" + tag}); err != nil {
 			common.Logger.Errorf("cannot commit container %s", err)
@@ -542,23 +534,21 @@ func (g *Gui) attachContainerForm() {
 	form := tview.NewForm()
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
-	form.SetTitle("Commit container")
-	form.AddInputField("Cmd", "", 70, nil, nil).
+	form.SetTitle("Exec container")
+	form.AddInputField("Cmd", "", inputWidth, nil, nil).
 		AddButton("Exec", func() {
 			cmd := form.GetFormItemByLabel("Cmd").(*tview.InputField).GetText()
 			g.attachContainer(g.selectedContainer().ID, cmd)
 		}).
 		AddButton("Cancel", func() {
-			g.pages.RemovePage("form")
-			g.switchPanel("containers")
+			g.closeAndSwitchPanel("form", "containers")
 		})
 
 	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 7), true).ShowPage("main")
 }
 
 func (g *Gui) attachContainer(container, cmd string) {
-	g.pages.RemovePage("form")
-	g.switchPanel("containers")
+	g.closeAndSwitchPanel("form", "containers")
 
 	if !g.app.Suspend(func() {
 		if err := docker.Client.AttachExecContainer(container, cmd); err != nil {
@@ -574,16 +564,15 @@ func (g *Gui) createVolumeForm() {
 	form.SetBorder(true)
 	form.SetTitleAlign(tview.AlignLeft)
 	form.SetTitle("Create volume")
-	form.AddInputField("Name", "", 70, nil, nil).
-		AddInputField("Labels", "", 70, nil, nil).
-		AddInputField("Driver", "", 70, nil, nil).
-		AddInputField("Options", "", 70, nil, nil).
+	form.AddInputField("Name", "", inputWidth, nil, nil).
+		AddInputField("Labels", "", inputWidth, nil, nil).
+		AddInputField("Driver", "", inputWidth, nil, nil).
+		AddInputField("Options", "", inputWidth, nil, nil).
 		AddButton("Create", func() {
 			g.createVolume(form)
 		}).
 		AddButton("Cancel", func() {
-			g.pages.RemovePage("form")
-			g.switchPanel("volumes")
+			g.closeAndSwitchPanel("form", "volumes")
 		})
 
 	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 13), true).ShowPage("main")
@@ -610,8 +599,7 @@ func (g *Gui) createVolume(form *tview.Form) {
 			return err
 		}
 
-		g.pages.RemovePage("form")
-		g.switchPanel("volumes")
+		g.closeAndSwitchPanel("form", "volumes")
 		g.app.QueueUpdateDraw(func() {
 			g.volumePanel().setEntries(g)
 		})
