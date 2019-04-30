@@ -101,5 +101,5 @@ func (i *info) display() {
 	docuiVersion := fmt.Sprintf("version:%s", i.Docui.Version)
 
 	i.SetTextColor(tcell.ColorYellow)
-	i.SetText(fmt.Sprintf(" docker	| %s %s %s\n docui	 | %s", dockerAPI, dockerVersion, dockerEndpoint, docuiVersion))
+	i.SetText(fmt.Sprintf(" docker\t| %s %s %s\n docui\t | %s", dockerAPI, dockerVersion, dockerEndpoint, docuiVersion))
 }
