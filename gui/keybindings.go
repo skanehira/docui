@@ -179,7 +179,7 @@ func (g *Gui) pullImageForm() {
 	form.AddInputField("Image", "", inputWidth, nil, nil).
 		AddButton("Pull", func() {
 			image := form.GetFormItemByLabel("Image").(*tview.InputField).GetText()
-			g.pullImage(image)
+			g.pullImage(image, "form", "images")
 		}).
 		AddButton("Cancel", func() {
 			g.closeAndSwitchPanel("form", "images")
@@ -188,9 +188,9 @@ func (g *Gui) pullImageForm() {
 	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 7), true).ShowPage("main")
 }
 
-func (g *Gui) pullImage(image string) {
+func (g *Gui) pullImage(image, closePanel, switchPanel string) {
 	g.startTask("Pull image "+image, func(ctx context.Context) error {
-		g.closeAndSwitchPanel("form", "images")
+		g.closeAndSwitchPanel(closePanel, switchPanel)
 		err := docker.Client.PullImage(image)
 		if err != nil {
 			common.Logger.Errorf("cannot create container %s", err)

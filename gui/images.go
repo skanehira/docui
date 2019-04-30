@@ -57,6 +57,8 @@ func (i *images) setKeybinding(g *Gui) {
 			g.importImageForm()
 		case 's':
 			g.saveImageForm()
+		case 'f':
+			newSearchInputField(g)
 		}
 
 		return event
