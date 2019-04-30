@@ -56,6 +56,7 @@ func (g *Gui) prevPanel() {
 func (g *Gui) switchPanel(panelName string) {
 	for i, panel := range g.state.panels.panel {
 		if panel.name() == panelName {
+			g.state.navigate.update(panelName)
 			panel.focus(g)
 			g.state.panels.currentPanel = i
 		} else {

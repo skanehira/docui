@@ -23,6 +23,7 @@ type resources struct {
 
 type state struct {
 	panels    panels
+	navigate  *navigate
 	resources resources
 	stopChans map[string]chan int
 }
@@ -153,20 +154,23 @@ func (g *Gui) initPanels() {
 	volumes := newVolumes(g)
 	networks := newNetworks(g)
 	info := newInfo()
+	navi := newNavigate()
 
 	g.state.panels.panel = append(g.state.panels.panel, tasks)
 	g.state.panels.panel = append(g.state.panels.panel, images)
 	g.state.panels.panel = append(g.state.panels.panel, containers)
 	g.state.panels.panel = append(g.state.panels.panel, volumes)
 	g.state.panels.panel = append(g.state.panels.panel, networks)
+	g.state.navigate = navi
 
-	grid := tview.NewGrid().SetRows(2, 0, 0, 0, 0, 0).
+	grid := tview.NewGrid().SetRows(2, 0, 0, 0, 0, 0, 2).
 		AddItem(info, 0, 0, 1, 1, 0, 0, true).
 		AddItem(tasks, 1, 0, 1, 1, 0, 0, true).
 		AddItem(images, 2, 0, 1, 1, 0, 0, true).
 		AddItem(containers, 3, 0, 1, 1, 0, 0, true).
 		AddItem(volumes, 4, 0, 1, 1, 0, 0, true).
-		AddItem(networks, 5, 0, 1, 1, 0, 0, true)
+		AddItem(networks, 5, 0, 1, 1, 0, 0, true).
+		AddItem(navi, 6, 0, 1, 1, 0, 0, true)
 
 	g.pages = tview.NewPages().
 		AddAndSwitchToPage("main", grid, true)
