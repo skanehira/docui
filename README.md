@@ -7,8 +7,8 @@
 ![GitHub commits](https://img.shields.io/github/commits-since/skanehira/docui/1.0.0.svg?style=flat-square)
 
 ## About docui
-docui is TUI Client for Docker.  
-docui can do as follows:
+docui is a TUI Client for Docker.
+docui can do the following:
 
 - image
     - search/pull/remove
@@ -32,7 +32,7 @@ docui can do as follows:
 
 [![asciicast](https://asciinema.org/a/223035.svg)](https://asciinema.org/a/223035)
 
-## Support OS
+## Supported OSes
 - Mac
 - Linux
 
@@ -45,8 +45,8 @@ docui can do as follows:
 
 ### From Source
 
-If you have not installed go and set GOPATH/GOBIN,  
-you must install and set env before install docui.
+If you have not installed go and set GOPATH/GOBIN,
+you must install and set env before installing docui.
 
 This project uses [Go Modules](https://github.com/golang/go/wiki/Modules) for dependencies introduced in Go 1.11.
 
@@ -81,6 +81,14 @@ $ brew install docui
 
 ```sh
 $ snap install docui --classic
+```
+
+### Nix
+
+docui is available on nixpkgs unstable channel:
+
+```sh
+$ nix-env -i docui
 ```
 
 ## Update
