@@ -1,12 +1,11 @@
 # About docui
-docui is a simple TUI Client for docker.  
-Supported OS is Linux/Mac only.  
+docui is a simple TUI Client for docker.
+Supported OS is Linux/Mac only.
 
-Also, although it supports UNIX domain socket, TCP, http/https.
+Also, it supports UNIX domain socket, TCP, http/https.
 
 # Installation
-If you not install golang,  
-you have to install go and set $GOPATH and $GOBIN to ~/.bashrc.
+You have to install golang and set $GOPATH and $GOBIN to ~/.bashrc.
 
 ## 1. Install go
 
@@ -14,7 +13,7 @@ you have to install go and set $GOPATH and $GOBIN to ~/.bashrc.
 ```sh
 brew intall golang
 ```
-If you use [`Linuxbrew`](https://docs.brew.sh/Homebrew-on-Linux) on Linux, you can install via the above command.  
+If you use [`Linuxbrew`](https://docs.brew.sh/Homebrew-on-Linux) on Linux, you can install via the command above.
 
 ### CentOS
 ```sh
@@ -33,7 +32,7 @@ dnf install golang
 
 ### Add ~/.bashrc
 ```sh
-# add thises to ~/.bashrc
+# add the following to ~/.bashrc
 export GOPATH=/to/your/path
 export GOBIN=$GOPATH/bin
 export PATH=$PATH:$GOBIN
@@ -45,17 +44,17 @@ resource ~/.bashrc
 ```
 
 ## 2. Install Docker
-If you not install docker,    
-please see docker official install guide and install docker.
+If you don't have docker installed,
+please see docker official install guide for installion instructions.
 
-https://www.docker.com/get-started  
+https://www.docker.com/get-started
 
 ## 3. Install Git
 ### Mac
 ```sh
 brew install git
 ```
-If you use [`Linuxbrew`](https://docs.brew.sh/Homebrew-on-Linux) on Linux, you can install via the above command.  
+If you use [`Linuxbrew`](https://docs.brew.sh/Homebrew-on-Linux) on Linux, you can install via the above command.
 
 ### CentOS
 ```sh
@@ -74,8 +73,8 @@ dnf install git
 
 ## 3. Install docui
 
-This project uses [Go Modules](https://github.com/golang/go/wiki/Modules).  
-Please use Go version 1.11.4 higher.
+This project uses [Go Modules](https://github.com/golang/go/wiki/Modules).
+Please use Go version 1.11.4 or higher.
 
 Use go get or git clone:
 
@@ -122,13 +121,13 @@ $ make docker-build
 ```
 
 # How to use
-Refer to the [keybinding](https://github.com/skanehira/docui#Keybindings) for panel operation.  
+Refer to the [keybinding](https://github.com/skanehira/docui#Keybindings) for panel operations.
 I will explain the items of each panel here.
 
 ## pull image panel
 
-- Name  
-Please enter the docker image name you want to pull.  
+- Name
+Please enter the docker image name you want to pull.
 If you want to specify the version, please input as below.
 
 ```
@@ -137,59 +136,59 @@ mysql:5.7
 
 ## search images panel
 
-Please enter the image name on the Docker Hub you want to search.  
+Please enter the image name on the Docker Hub you want to search.
 This operation works like `docker search`
 
 ## save image panel
 
-Please enter the file path to save the selected image.  
+Please enter the file path to save the selected image.
 It must be absolute path or relative path.
 
 ## import image panel
 
-Please enter the path of the image you want to import.  
+Please enter the path of the image you want to import.
 It must be absolute path or relative path.
 
 ## load image panel
 
-Please enter the path of the image you want to load.   
+Please enter the path of the image you want to load.
 It must be absolute path or relative path.
 
 ## create container panel
-- Name  
+- Name
 Container name.
 
-- HostPort  
+- HostPort
 Port of container to be mapping.
 
-- Port  
+- Port
 Port of the host OS to be mapped.
 
-- VolumeType  
+- VolumeType
 Specify VolumeType bind or volume.
 
-- HostVolume  
+- HostVolume
 If VolumeType is bind, path of the host OS that you want to mount.
 It's must be absolute path.
-It's similar docker command `docker -v /to/host/path:/to/container/path`.
+It's similar to docker command `docker -v /to/host/path:/to/container/path`.
 
 If VolumeType is volume, specify the docker volume.
-It's similar docker command `docker -v docekr/volume:/to/container/path`.
+It's similar to docker command `docker -v docekr/volume:/to/container/path`.
 
-- Volume  
+- Volume
 Path of the container that you want to mount.
-It must be absolute path.
+It must be an absolute path.
 
-- Image  
+- Image
 Selected image id.
 
-- Attach  
+- Attach
 If you want to attach container, please Enter.
 
-- User  
+- User
 If you want to attach container, please input user name.
 
-- Env  
+- Env
 The environment variable setting value can be defined by variables like `$PATH`.
 In that case, we will obtain the value from the OS environment variable.
 If you want to add multiple environment variables, please input as below.
@@ -199,7 +198,7 @@ GOPATH=~/go,GOBIN=~/go/bin,PATH=$PATH
 ```
 
 - Cmd
-If you want to add command arguments,  
+If you want to add command arguments,
 please input as below.
 
 ```
@@ -207,37 +206,37 @@ please input as below.
 ```
 
 ## export container panel
-Please enter the file path to save the selected container.  
-It must be absolute path or relative path.
+Please enter the file path to save the selected container.
+It must be an absolute or a relative path.
 
 ## commit container panel
-- Container  
-Selected container id.  
+- Container
+Selected container id.
 
-- Repository  
-Please enter the image name of the committed container.  
+- Repository
+Please enter the image name of the committed container.
 
-- Tag  
-If tag is empty it will be latest.
+- Tag
+If tag is empty, latest will be used.
 
 ## create volume panel
-- Name  
+- Name
 Specify volume name.
 
-- Driver  
+- Driver
 Specify volume driver name.
 
-- Labels  
-Set metadata for a volume.  
-If you want to specify multiple labels, please enter as below.  
+- Labels
+Set metadata for a volume.
+If you want to specify multiple labels, please enter as below.
 
 ```
 OS=Linux TYPE=nfs
 ```
 
-- Options  
-Set driver specific options.  
-If you want to specify multiple options, please enter as below.  
+- Options
+Set driver specific options.
+If you want to specify multiple options, please enter as below.
 
 ```
 type=nfs o=addr=192.168.1.1,rw device=:/path/to/dir
@@ -264,7 +263,7 @@ Usage of docui:
         key.pem file path
 ```
 
-Or set environment variable:
+Or set environment variables:
 
 - `DOCKER_HOST`
 - `DOCKER_TLS_VERIFY`
