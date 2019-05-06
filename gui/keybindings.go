@@ -117,7 +117,7 @@ func (g *Gui) createContainerForm() {
 		AddCheckbox("Attach", false, nil).
 		AddInputField("Env", "", inputWidth, nil, nil).
 		AddInputField("Cmd", "", inputWidth, nil, nil).
-		AddButton("Save", func() {
+		AddButton("Create", func() {
 			g.createContainer(form, image)
 		}).
 		AddButton("Cancel", func() {
