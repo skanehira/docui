@@ -705,14 +705,14 @@ func (c *ContainerList) ShowContainerLogs() error {
 	signal.Notify(sigint, os.Interrupt)
 	errCh := make(chan error)
 
-	go func() {
-		selected, err := c.selected()
-		if err != nil {
-			c.ErrMessage(err.Error(), c.name)
-			common.Logger.Error(err)
-			errCh <- err
-		}
+	selected, err := c.selected()
+	if err != nil {
+		c.ErrMessage(err.Error(), c.name)
+		common.Logger.Error(err)
+		return err
+	}
 
+	go func() {
 		reader, err := c.Docker.ContainerLogStream(selected.ID)
 		if err != nil {
 			c.ErrMessage(err.Error(), c.name)
