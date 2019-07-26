@@ -2,6 +2,7 @@ package gui
 
 import (
 	"strings"
+	"time"
 
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
@@ -44,6 +45,8 @@ func (v *volumes) setKeybinding(g *Gui) {
 		switch event.Key() {
 		case tcell.KeyEnter:
 			g.inspectVolume()
+		case tcell.KeyCtrlR:
+			v.setEntries(g)
 		}
 
 		switch event.Rune() {
@@ -142,4 +145,21 @@ func (v *volumes) updateEntries(g *Gui) {
 	g.app.QueueUpdateDraw(func() {
 		v.setEntries(g)
 	})
+}
+
+func (v *volumes) monitoringVolumes(g *Gui) {
+	common.Logger.Info("start monitoring volumes")
+	ticker := time.NewTicker(5 * time.Second)
+
+LOOP:
+	for {
+		select {
+		case <-ticker.C:
+			v.updateEntries(g)
+		case <-g.state.stopChans["volume"]:
+			ticker.Stop()
+			break LOOP
+		}
+	}
+	common.Logger.Info("stop monitoring volumes")
 }

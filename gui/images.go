@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"time"
+
 	"github.com/docker/docker/api/types"
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
@@ -44,6 +46,8 @@ func (i *images) setKeybinding(g *Gui) {
 			g.inspectImage()
 		case tcell.KeyCtrlL:
 			g.loadImageForm()
+		case tcell.KeyCtrlR:
+			i.setEntries(g)
 		}
 
 		switch event.Rune() {
@@ -152,4 +156,21 @@ func (i *images) focus(g *Gui) {
 
 func (i *images) unfocus() {
 	i.SetSelectable(false, false)
+}
+
+func (i *images) monitoringImages(g *Gui) {
+	common.Logger.Info("start monitoring images")
+	ticker := time.NewTicker(5 * time.Second)
+
+LOOP:
+	for {
+		select {
+		case <-ticker.C:
+			i.updateEntries(g)
+		case <-g.state.stopChans["image"]:
+			ticker.Stop()
+			break LOOP
+		}
+	}
+	common.Logger.Info("stop monitoring images")
 }

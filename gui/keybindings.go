@@ -23,6 +23,8 @@ func (g *Gui) setGlobalKeybinding(event *tcell.EventKey) {
 		g.prevPanel()
 	case 'l':
 		g.nextPanel()
+	case 'q':
+		g.Stop()
 	}
 
 	switch event.Key() {
@@ -552,9 +554,11 @@ func (g *Gui) attachContainer(container, cmd string) {
 	g.closeAndSwitchPanel("form", "containers")
 
 	if !g.app.Suspend(func() {
+		g.stopMonitoring()
 		if err := docker.Client.AttachExecContainer(container, cmd); err != nil {
 			common.Logger.Errorf("cannot attach container %s", err)
 		}
+		g.startMonitoring()
 	}) {
 		common.Logger.Error("cannot suspend tview")
 	}

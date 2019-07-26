@@ -94,8 +94,8 @@ func (g *Gui) taskPanel() *tasks {
 	return nil
 }
 
-func (g *Gui) monitoringTask(stop chan int) {
-
+func (g *Gui) monitoringTask() {
+	common.Logger.Info("start monitoring task")
 LOOP:
 	for {
 		select {
@@ -106,7 +106,8 @@ LOOP:
 				task.Status = success
 			}
 			g.updateTask(task)
-		case <-stop:
+		case <-g.state.stopChans["task"]:
+			common.Logger.Info("stop monitoring task")
 			break LOOP
 		}
 	}
@@ -179,13 +180,32 @@ func (g *Gui) initPanels() {
 	g.switchPanel("images")
 }
 
+func (g *Gui) startMonitoring() {
+	stop := make(chan int, 1)
+	g.state.stopChans["task"] = stop
+	g.state.stopChans["image"] = stop
+	g.state.stopChans["volume"] = stop
+	g.state.stopChans["network"] = stop
+	g.state.stopChans["container"] = stop
+	go g.monitoringTask()
+	go g.imagePanel().monitoringImages(g)
+	go g.networkPanel().monitoringNetworks(g)
+	go g.volumePanel().monitoringVolumes(g)
+	go g.containerPanel().monitoringContainers(g)
+}
+
+func (g *Gui) stopMonitoring() {
+	g.state.stopChans["task"] <- 1
+	g.state.stopChans["image"] <- 1
+	g.state.stopChans["volume"] <- 1
+	g.state.stopChans["network"] <- 1
+	g.state.stopChans["container"] <- 1
+}
+
 // Start start application
 func (g *Gui) Start() error {
 	g.initPanels()
-	stop := make(chan int, 1)
-	g.state.stopChans["task"] = stop
-	go g.monitoringTask(stop)
-
+	g.startMonitoring()
 	if err := g.app.Run(); err != nil {
 		g.app.Stop()
 		return err
@@ -196,6 +216,7 @@ func (g *Gui) Start() error {
 
 // Stop stop application
 func (g *Gui) Stop() error {
+	g.stopMonitoring()
 	g.app.Stop()
 	return nil
 }

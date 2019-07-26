@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/gdamore/tcell"
@@ -44,6 +45,8 @@ func (n *networks) setKeybinding(g *Gui) {
 		switch event.Key() {
 		case tcell.KeyEnter:
 			g.inspectNetwork()
+		case tcell.KeyCtrlR:
+			n.setEntries(g)
 		}
 
 		switch event.Rune() {
@@ -160,4 +163,21 @@ func (n *networks) updateEntries(g *Gui) {
 	g.app.QueueUpdateDraw(func() {
 		n.setEntries(g)
 	})
+}
+
+func (n *networks) monitoringNetworks(g *Gui) {
+	common.Logger.Info("start monitoring networks")
+	ticker := time.NewTicker(5 * time.Second)
+
+LOOP:
+	for {
+		select {
+		case <-ticker.C:
+			n.updateEntries(g)
+		case <-g.state.stopChans["network"]:
+			ticker.Stop()
+			break LOOP
+		}
+	}
+	common.Logger.Info("stop monitoring networks")
 }

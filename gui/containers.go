@@ -1,6 +1,8 @@
 package gui
 
 import (
+	"time"
+
 	"github.com/docker/docker/api/types"
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
@@ -47,6 +49,8 @@ func (c *containers) setKeybinding(g *Gui) {
 			g.attachContainerForm()
 		case tcell.KeyCtrlL:
 			g.tailContainerLog()
+		case tcell.KeyCtrlR:
+			c.setEntries(g)
 		}
 
 		switch event.Rune() {
@@ -156,4 +160,21 @@ func (c *containers) updateEntries(g *Gui) {
 	g.app.QueueUpdateDraw(func() {
 		c.setEntries(g)
 	})
+}
+
+func (c *containers) monitoringContainers(g *Gui) {
+	common.Logger.Info("start monitoring containers")
+	ticker := time.NewTicker(5 * time.Second)
+
+LOOP:
+	for {
+		select {
+		case <-ticker.C:
+			c.updateEntries(g)
+		case <-g.state.stopChans["container"]:
+			ticker.Stop()
+			break LOOP
+		}
+	}
+	common.Logger.Info("stop monitoring containers")
 }
