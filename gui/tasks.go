@@ -48,6 +48,7 @@ func (t *tasks) setKeybinding(g *Gui) {
 	t.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		g.setGlobalKeybinding(event)
 
+		// TODO cancel task
 		switch event.Key() {
 		}
 
@@ -109,6 +110,10 @@ func (t *tasks) focus(g *Gui) {
 
 func (t *tasks) unfocus() {
 	t.SetSelectable(false, false)
+}
+
+func (t *tasks) setFilterWord(word string) {
+	// do nothings
 }
 
 func (t *tasks) updateEntries(g *Gui) {

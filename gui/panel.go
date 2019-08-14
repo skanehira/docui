@@ -8,4 +8,5 @@ type panel interface {
 	setKeybinding(*Gui)
 	focus(*Gui)
 	unfocus()
+	setFilterWord(string)
 }

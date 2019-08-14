@@ -21,6 +21,7 @@ type volume struct {
 
 type volumes struct {
 	*tview.Table
+	filterWord string
 }
 
 func newVolumes(g *Gui) *volumes {
@@ -70,15 +71,19 @@ func (v *volumes) entries(g *Gui) {
 	keys := make([]string, 0, len(volumes))
 	tmpMap := make(map[string]*volume)
 
-	for _, v := range volumes {
-		tmpMap[v.Name] = &volume{
-			Name:       v.Name,
-			MountPoint: v.Mountpoint,
-			Driver:     v.Driver,
-			Created:    replacer.Replace(v.CreatedAt),
+	for _, vo := range volumes {
+		if strings.Index(vo.Name, v.filterWord) == -1 {
+			continue
 		}
 
-		keys = append(keys, v.Name)
+		tmpMap[vo.Name] = &volume{
+			Name:       vo.Name,
+			MountPoint: vo.Mountpoint,
+			Driver:     vo.Driver,
+			Created:    replacer.Replace(vo.CreatedAt),
+		}
+
+		keys = append(keys, vo.Name)
 	}
 
 	g.state.resources.volumes = make([]*volume, 0)
@@ -145,6 +150,10 @@ func (v *volumes) updateEntries(g *Gui) {
 	g.app.QueueUpdateDraw(func() {
 		v.setEntries(g)
 	})
+}
+
+func (v *volumes) setFilterWord(word string) {
+	v.filterWord = word
 }
 
 func (v *volumes) monitoringVolumes(g *Gui) {

@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -21,6 +22,7 @@ type container struct {
 
 type containers struct {
 	*tview.Table
+	filterWord string
 }
 
 func newContainers(g *Gui) *containers {
@@ -79,6 +81,10 @@ func (c *containers) entries(g *Gui) {
 	g.state.resources.containers = make([]*container, 0)
 
 	for _, con := range containers {
+		if strings.Index(con.Names[0][1:], c.filterWord) == -1 {
+			continue
+		}
+
 		g.state.resources.containers = append(g.state.resources.containers, &container{
 			ID:      con.ID[:12],
 			Image:   con.Image,
@@ -160,6 +166,10 @@ func (c *containers) updateEntries(g *Gui) {
 	g.app.QueueUpdateDraw(func() {
 		c.setEntries(g)
 	})
+}
+
+func (c *containers) setFilterWord(word string) {
+	c.filterWord = word
 }
 
 func (c *containers) monitoringContainers(g *Gui) {

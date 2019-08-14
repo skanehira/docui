@@ -2,6 +2,7 @@ package gui
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -21,6 +22,7 @@ type network struct {
 
 type networks struct {
 	*tview.Table
+	filterWord string
 }
 
 func newNetworks(g *Gui) *networks {
@@ -69,6 +71,10 @@ func (n *networks) entries(g *Gui) {
 	tmpMap := make(map[string]*network)
 
 	for _, net := range networks {
+		if strings.Index(net.Name, n.filterWord) == -1 {
+			continue
+		}
+
 		var containers string
 
 		net, err := docker.Client.InspectNetwork(net.ID)
@@ -163,6 +169,10 @@ func (n *networks) updateEntries(g *Gui) {
 	g.app.QueueUpdateDraw(func() {
 		n.setEntries(g)
 	})
+}
+
+func (n *networks) setFilterWord(word string) {
+	n.filterWord = word
 }
 
 func (n *networks) monitoringNetworks(g *Gui) {

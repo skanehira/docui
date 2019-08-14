@@ -1,6 +1,7 @@
 package gui
 
 import (
+	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -20,6 +21,7 @@ type image struct {
 
 type images struct {
 	*tview.Table
+	filterWord string
 }
 
 func newImages(g *Gui) *images {
@@ -80,6 +82,9 @@ func (i *images) entries(g *Gui) {
 	for _, imgInfo := range images {
 		for _, repoTag := range imgInfo.RepoTags {
 			repo, tag := common.ParseRepoTag(repoTag)
+			if strings.Index(repo, i.filterWord) == -1 {
+				continue
+			}
 
 			g.state.resources.images = append(g.state.resources.images, &image{
 				ID:      imgInfo.ID[7:19],
@@ -156,6 +161,10 @@ func (i *images) focus(g *Gui) {
 
 func (i *images) unfocus() {
 	i.SetSelectable(false, false)
+}
+
+func (i *images) setFilterWord(word string) {
+	i.filterWord = word
 }
 
 func (i *images) monitoringImages(g *Gui) {

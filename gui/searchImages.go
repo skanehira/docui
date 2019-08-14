@@ -66,7 +66,7 @@ func newSearchInputField(g *Gui) {
 		return event
 	})
 
-	g.pages.AddAndSwitchToPage("searchImageInput", g.modal(searchInput, 80, 3), true).ShowPage("main")
+	g.pages.AddAndSwitchToPage(viewName, g.modal(searchInput, 80, 3), true).ShowPage("main")
 }
 
 func (s *searchImageResults) name() string {

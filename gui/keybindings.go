@@ -25,6 +25,8 @@ func (g *Gui) setGlobalKeybinding(event *tcell.EventKey) {
 		g.nextPanel()
 	case 'q':
 		g.Stop()
+	case '/':
+		g.filter()
 	}
 
 	switch event.Key() {
@@ -37,6 +39,47 @@ func (g *Gui) setGlobalKeybinding(event *tcell.EventKey) {
 	case tcell.KeyLeft:
 		g.prevPanel()
 	}
+}
+
+func (g *Gui) filter() {
+	currentPanel := g.state.panels.panel[g.state.panels.currentPanel]
+	if currentPanel.name() == "tasks" {
+		return
+	}
+	currentPanel.setFilterWord("")
+	currentPanel.updateEntries(g)
+
+	viewName := "filter"
+	searchInput := tview.NewInputField().SetLabel("Word")
+	searchInput.SetLabelWidth(6)
+	searchInput.SetTitle("filter")
+	searchInput.SetTitleAlign(tview.AlignLeft)
+	searchInput.SetBorder(true)
+
+	closeSearchInput := func() {
+		g.closeAndSwitchPanel(viewName, g.state.panels.panel[g.state.panels.currentPanel].name())
+	}
+
+	searchInput.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			closeSearchInput()
+		}
+	})
+
+	searchInput.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEsc {
+			closeSearchInput()
+		}
+		return event
+	})
+
+	searchInput.SetChangedFunc(func(text string) {
+		common.Logger.Info(text)
+		currentPanel.setFilterWord(text)
+		currentPanel.updateEntries(g)
+	})
+
+	g.pages.AddAndSwitchToPage(viewName, g.modal(searchInput, 80, 3), true).ShowPage("main")
 }
 
 func (g *Gui) nextPanel() {
