@@ -614,15 +614,19 @@ func (g *Gui) createVolume(form *tview.Form) {
 }
 
 func (g *Gui) tailContainerLog() {
+	container := g.selectedContainer()
+	if container == nil {
+		common.Logger.Errorf("cannot start tail container: selected container is null")
+		return
+	}
+
 	if !g.app.Suspend(func() {
 		sigint := make(chan os.Signal, 1)
 		signal.Notify(sigint, os.Interrupt)
 		errCh := make(chan error)
 
 		go func() {
-			selected := g.selectedContainer()
-
-			reader, err := docker.Client.ContainerLogStream(selected.ID)
+			reader, err := docker.Client.ContainerLogStream(container.ID)
 			if err != nil {
 				common.Logger.Error(err)
 				errCh <- err
