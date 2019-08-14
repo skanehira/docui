@@ -78,6 +78,29 @@ jobs:
           name: Run GolangCI-Lint
           command: ./bin/golangci-lint run --tests --disable-all --enable=goimports --enable=golint --enable=govet
 
+  build-docker-image-not-push:
+    parameters:
+      docker-version:
+        type: string
+
+    executor:
+      name: docker
+      docker-version: << parameters.docker-version >>
+
+    steps:
+      - checkout
+
+      - setup_remote_docker:
+          version: << parameters.docker-version >>
+
+      - run:
+          name: Build Docker Image
+          command: docker build -t skanehira/docui .
+
+      - run:
+          name: Login Docker Hub
+          command: docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}
+
   build-docker-image:
     parameters:
       docker-version:
@@ -141,6 +164,11 @@ workflows:
           go-version: "1.12.8"
           requires:
             - lint
+
+  docker-image-build-only:
+    jobs:
+      - build-docker-image-not-push:
+          docker-version: "18.09.3"
 
   docker-image-build:
     jobs:
