@@ -125,10 +125,10 @@ workflows:
   stable-build:
     jobs:
       - lint:
-          go-version: "1.11.4"
+          go-version: "1.12.8"
           golangci-lint-version: "1.17.1"
       - build:
-          go-version: "1.11.4"
+          go-version: "1.12.8"
           requires:
             - lint
 
@@ -153,10 +153,10 @@ workflows:
   release:
     jobs:
       - lint:
-          go-version: "1.11.4"
+          go-version: "1.12.8"
           golangci-lint-version: "1.17.1"
       - release:
-          go-version: "1.11.4"
+          go-version: "1.12.8"
           filters:
             branches:
               ignore: /.*/
