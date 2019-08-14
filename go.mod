@@ -24,7 +24,6 @@ require (
 	github.com/rivo/tview v0.0.0-20190324182152-8a9e26fab0ff
 	github.com/rivo/uniseg v0.0.0-20190313204849-f699dde9c340 // indirect
 	github.com/sirupsen/logrus v1.4.1
-	github.com/skanehira/gocui-component v0.0.0-20190103120946-5f5ba7f77c3b
 	github.com/stretchr/testify v1.3.0 // indirect
 	golang.org/x/net v0.0.0-20190424112056-4829fb13d2c6 // indirect
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect
