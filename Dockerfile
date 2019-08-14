@@ -1,10 +1,11 @@
 # build docui
-FROM golang:1.11.5 AS build-docui
+FROM golang:1.12.8 AS build-docui
 ENV GOPATH /go
 ENV GOOS linux
 ENV GOARCH amd64
 ENV CGO_ENABLED 0
 ENV GO111MODULE on
+ENV TERM xterm-256color
 COPY . ./src/github.com/skanehira/docui
 WORKDIR /go/src/github.com/skanehira/docui
 RUN go build

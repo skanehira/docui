@@ -126,7 +126,7 @@ workflows:
     jobs:
       - lint:
           go-version: "1.11.4"
-          golangci-lint-version: "1.15.0"
+          golangci-lint-version: "1.17.1"
       - build:
           go-version: "1.11.4"
           requires:
@@ -135,10 +135,10 @@ workflows:
   latest-build:
     jobs:
       - lint:
-          go-version: "1.12.1"
-          golangci-lint-version: "1.15.0"
+          go-version: "1.12.8"
+          golangci-lint-version: "1.17.1"
       - build:
-          go-version: "1.12.1"
+          go-version: "1.12.8"
           requires:
             - lint
 
@@ -154,7 +154,7 @@ workflows:
     jobs:
       - lint:
           go-version: "1.11.4"
-          golangci-lint-version: "1.15.0"
+          golangci-lint-version: "1.17.1"
       - release:
           go-version: "1.11.4"
           filters:
