@@ -31,5 +31,6 @@ func run() int {
 }
 
 func main() {
+	flag.Parse()
 	os.Exit(run())
 }
