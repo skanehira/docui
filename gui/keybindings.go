@@ -2,6 +2,7 @@ package gui
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -275,6 +276,45 @@ func (g *Gui) inspectImage() {
 	}
 
 	g.displayInspect(common.StructToJSON(inspect), "images")
+}
+
+func (g *Gui) renameContainerForm() {
+	form := tview.NewForm()
+	form.SetBorder(true)
+	form.SetTitleAlign(tview.AlignLeft)
+	form.SetTitle("Rename container")
+	form.AddInputField("NewName", "", inputWidth, nil, nil).
+		AddButton("Rename", func() {
+			image := form.GetFormItemByLabel("NewName").(*tview.InputField).GetText()
+			g.renameContainer(image, "form", "containers")
+		}).
+		AddButton("Cancel", func() {
+			g.closeAndSwitchPanel("form", "containers")
+		})
+
+	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 7), true).ShowPage("main")
+}
+
+func (g *Gui) renameContainer(newName, closePanel, switchPanel string) {
+	g.startTask("Renaming container "+newName, func(ctx context.Context) error {
+		g.closeAndSwitchPanel(closePanel, switchPanel)
+		oldContainer := g.selectedContainer()
+		if oldContainer == nil {
+			err := errors.New("specified container is nil")
+			common.Logger.Errorf("cannot rename container %s", err)
+			return err
+		}
+
+		err := docker.Client.RenameContainer(oldContainer.ID, newName)
+		if err != nil {
+			common.Logger.Errorf("cannot create container %s", err)
+			return err
+		}
+
+		g.containerPanel().updateEntries(g)
+
+		return nil
+	})
 }
 
 func (g *Gui) inspectContainer() {
