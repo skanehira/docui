@@ -10,6 +10,8 @@
 docui is a TUI Client for Docker.
 docui can do the following:
 
+![demo](https://github.com/skanehira/docui/blob/images/images/docui.v2-demo.gif?raw=true)
+
 - image
     - search/pull/remove
     - save/import/load
@@ -29,8 +31,6 @@ docui can do the following:
 - network
     - remove
     - inspect/filtering
-
-[![asciicast](https://asciinema.org/a/223035.svg)](https://asciinema.org/a/223035)
 
 ## Supported OSes
 - Mac
@@ -175,10 +175,3 @@ $ make docker-build
 
 ## How to use
 For details of the input panel please refer to [wiki](https://github.com/skanehira/docui/blob/master/wiki.md)
-
-## Screenshots
-
-![](https://github.com/skanehira/docui/blob/images/images/s1.png)
-![](https://github.com/skanehira/docui/blob/images/images/s2.png)
-![](https://github.com/skanehira/docui/blob/images/images/s3.png)
-![](https://github.com/skanehira/docui/blob/images/images/s4.png)
