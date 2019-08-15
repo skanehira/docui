@@ -261,6 +261,8 @@ Usage of docui:
         Docker endpoint (default "unix:///var/run/docker.sock")
   -key string
         key.pem file path
+  -log string
+        log level (default "info")
 ```
 
 Or set environment variables:
