@@ -165,6 +165,9 @@ workflows:
     jobs:
       - build-docker-image-not-push:
           docker-version: "18.09.3"
+          filters:
+            branches:
+              only: develop
 
   docker-image-build:
     jobs:
