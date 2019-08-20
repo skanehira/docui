@@ -77,12 +77,6 @@ $ brew tap skanehira/docui
 $ brew install docui
 ```
 
-### Snapd
-
-```sh
-$ snap install docui --classic
-```
-
 ### Nix
 
 docui is available on nixpkgs unstable channel:
