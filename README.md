@@ -173,5 +173,5 @@ $HOME/r details of the input panel please refer to [wiki](https://github.com/ska
 ## Alternatives
 - [lazydocker](https://github.com/jesseduffield/lazydocker)
 A simple terminal UI for both docker and docker-compose, written in Go with the gocui library.
-- [docker.vim](https://github.com/sknaehira/docker.vim)
+- [docker.vim](https://github.com/skanehira/docker.vim)
 Manage docker containers and images in Vim
