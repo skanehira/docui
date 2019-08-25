@@ -7,10 +7,10 @@
 ![GitHub commits](https://img.shields.io/github/commits-since/skanehira/docui/1.0.0.svg?style=flat-square)
 
 ## About docui
-docui is a TUI Client for Docker.
-docui can do the following:
-
 ![demo](https://github.com/skanehira/docui/blob/images/images/docui.v2-demo.gif?raw=true)
+
+docui is a TUI Client for Docker.
+It's can do the following:
 
 - image
     - search/pull/remove
@@ -96,7 +96,7 @@ $ GO111MODULE=on go install
 
 ## Log file
 ```sh
-~/docui.log
+$HOME/docui.log
 ```
 
 ## Use on Docker
@@ -168,4 +168,10 @@ $ make docker-build
 | create volume    | previous input box     | <kbd>Shift</kbd> +  <kbd>Tab</kbd>                 |
 
 ## How to use
-For details of the input panel please refer to [wiki](https://github.com/skanehira/docui/blob/master/wiki.md)
+$HOME/r details of the input panel please refer to [wiki](https://github.com/skanehira/docui/blob/master/wiki.md)
+
+## Alternatives
+- [lazydocker](https://github.com/jesseduffield/lazydocker)
+A simple terminal UI for both docker and docker-compose, written in Go with the gocui library.
+- [docker.vim](https://github.com/sknaehira/docker.vim)
+Manage docker containers and images in Vim
