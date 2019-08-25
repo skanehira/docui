@@ -168,7 +168,7 @@ $ make docker-build
 | create volume    | previous input box     | <kbd>Shift</kbd> +  <kbd>Tab</kbd>                 |
 
 ## How to use
-$HOME/r details of the input panel please refer to [wiki](https://github.com/skanehira/docui/blob/master/wiki.md)
+For details of the input panel please refer to [wiki](https://github.com/skanehira/docui/blob/master/wiki.md)
 
 ## Alternatives
 - [lazydocker](https://github.com/jesseduffield/lazydocker)
