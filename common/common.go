@@ -231,12 +231,3 @@ func IsValidPanelSize(x, y, w, h int) error {
 	}
 	return nil
 }
-
-// SetViewWithValidPanelSize run SetView with a valid panel size.
-func SetViewWithValidPanelSize(g *gocui.Gui, name string, x, y, w, h int) (*gocui.View, error) {
-	if err := IsValidPanelSize(x, y, w, h); err != nil {
-		panic(err)
-	}
-	v, err := g.SetView(name, x, y, w, h)
-	return v, err
-}
