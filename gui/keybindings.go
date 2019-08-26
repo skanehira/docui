@@ -718,6 +718,7 @@ func (g *Gui) tailContainerLog() {
 
 			_, err = stdcopy.StdCopy(os.Stdout, os.Stderr, reader)
 			if err != nil {
+				common.Logger.Error(err)
 				errCh <- err
 			}
 			return

@@ -24,7 +24,8 @@ func run() int {
 	gui := gui.New()
 
 	if err := gui.Start(); err != nil {
-		return 2
+		common.Logger.Errorf("cannot start docui: %s", err)
+		return 1
 	}
 
 	return 0
