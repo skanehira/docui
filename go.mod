@@ -16,6 +16,7 @@ require (
 	github.com/jroimartin/gocui v0.4.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/lucasb-eyer/go-colorful v1.0.1 // indirect
+	github.com/micmonay/keybd_event v0.0.0-20190804163414-202c5b2c8150
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/nsf/termbox-go v0.0.0-20190121233118-02980233997d // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
