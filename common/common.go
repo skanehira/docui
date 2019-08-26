@@ -16,6 +16,7 @@ import (
 
 	"github.com/docker/docker/api/types"
 	"github.com/jroimartin/gocui"
+	"github.com/micmonay/keybd_event"
 )
 
 var cutNewlineReplacer = strings.NewReplacer("\r", "", "\n", "")
@@ -230,4 +231,17 @@ func IsValidPanelSize(x, y, w, h int) error {
 		return ErrSmallTerminalWindowSize
 	}
 	return nil
+}
+
+// TODO remove this when tcell issue #194 is fixed
+// https://github.com/rivo/tview/issues/165
+// When use tivew suspend function, lost one keystroke
+func SendExtraEventFix() error {
+	kb, err := keybd_event.NewKeyBonding()
+	if err != nil {
+		return err
+	}
+
+	kb.SetKeys(keybd_event.VK_ENTER)
+	return kb.Launching()
 }
