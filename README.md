@@ -42,6 +42,13 @@ It's can do the following:
 - Git
 
 ## Installation
+### Environment variables
+The following environment variables must be set.
+
+```
+export LC_CTYPE=en_US.UTF-8
+export TERM=xterm-256color
+```
 
 ### From Source
 
