@@ -75,7 +75,6 @@ func (g *Gui) filter() {
 	})
 
 	searchInput.SetChangedFunc(func(text string) {
-		common.Logger.Info(text)
 		currentPanel.setFilterWord(text)
 		currentPanel.updateEntries(g)
 	})
