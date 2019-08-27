@@ -268,3 +268,59 @@ func (g *Gui) selectedNetwork() *network {
 
 	return g.state.resources.networks[row-1]
 }
+
+func (g *Gui) message(message, doneLabel, page string, doneFunc func()) {
+	modal := tview.NewModal().
+		SetText(message).
+		AddButtons([]string{doneLabel}).
+		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			g.closeAndSwitchPanel("modal", page)
+			if buttonLabel == doneLabel {
+				doneFunc()
+			}
+		})
+
+	g.pages.AddAndSwitchToPage("modal", g.modal(modal, 80, 29), true).ShowPage("main")
+}
+
+func (g *Gui) confirm(message, doneLabel, page string, doneFunc func()) {
+	modal := tview.NewModal().
+		SetText(message).
+		AddButtons([]string{doneLabel, "Cancel"}).
+		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			g.closeAndSwitchPanel("modal", page)
+			if buttonLabel == doneLabel {
+				doneFunc()
+			}
+		})
+
+	g.pages.AddAndSwitchToPage("modal", g.modal(modal, 80, 29), true).ShowPage("main")
+}
+
+func (g *Gui) switchPanel(panelName string) {
+	for i, panel := range g.state.panels.panel {
+		if panel.name() == panelName {
+			g.state.navigate.update(panelName)
+			panel.focus(g)
+			g.state.panels.currentPanel = i
+		} else {
+			panel.unfocus()
+		}
+	}
+}
+
+func (g *Gui) closeAndSwitchPanel(removePanel, switchPanel string) {
+	g.pages.RemovePage(removePanel).ShowPage("main")
+	g.switchPanel(switchPanel)
+}
+
+func (g *Gui) modal(p tview.Primitive, width, height int) tview.Primitive {
+	return tview.NewGrid().
+		SetColumns(0, width, 0).
+		SetRows(0, height, 0).
+		AddItem(p, 1, 1, 1, 1, 0, 0, true)
+}
+
+func (g *Gui) currentPanel() panel {
+	return g.state.panels.panel[g.state.panels.currentPanel]
+}

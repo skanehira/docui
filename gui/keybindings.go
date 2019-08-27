@@ -98,44 +98,6 @@ func (g *Gui) prevPanel() {
 	g.switchPanel(g.state.panels.panel[idx].name())
 }
 
-func (g *Gui) switchPanel(panelName string) {
-	for i, panel := range g.state.panels.panel {
-		if panel.name() == panelName {
-			g.state.navigate.update(panelName)
-			panel.focus(g)
-			g.state.panels.currentPanel = i
-		} else {
-			panel.unfocus()
-		}
-	}
-}
-
-func (g *Gui) closeAndSwitchPanel(removePanel, switchPanel string) {
-	g.pages.RemovePage(removePanel).ShowPage("main")
-	g.switchPanel(switchPanel)
-}
-
-func (g *Gui) modal(p tview.Primitive, width, height int) tview.Primitive {
-	return tview.NewGrid().
-		SetColumns(0, width, 0).
-		SetRows(0, height, 0).
-		AddItem(p, 1, 1, 1, 1, 0, 0, true)
-}
-
-func (g *Gui) message(message, doneLabel, page string, doneFunc func()) {
-	modal := tview.NewModal().
-		SetText(message).
-		AddButtons([]string{doneLabel, "Cancel"}).
-		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
-			g.closeAndSwitchPanel("modal", page)
-			if buttonLabel == doneLabel {
-				doneFunc()
-			}
-		})
-
-	g.pages.AddAndSwitchToPage("modal", g.modal(modal, 80, 29), true).ShowPage("main")
-}
-
 func (g *Gui) createContainerForm() {
 	selectedImage := g.selectedImage()
 	if selectedImage == nil {
@@ -355,7 +317,7 @@ func (g *Gui) inspectNetwork() {
 func (g *Gui) removeImage() {
 	image := g.selectedImage()
 
-	g.message("Do you want to remove the image?", "Done", "images", func() {
+	g.confirm("Do you want to remove the image?", "Done", "images", func() {
 		g.startTask(fmt.Sprintf("remove image %s:%s", image.Repo, image.Tag), func(ctx context.Context) error {
 			if err := docker.Client.RemoveImage(image.ID); err != nil {
 				common.Logger.Errorf("cannot remove the image %s", err)
@@ -370,7 +332,7 @@ func (g *Gui) removeImage() {
 func (g *Gui) removeContainer() {
 	container := g.selectedContainer()
 
-	g.message("Do you want to remove the container?", "Done", "containers", func() {
+	g.confirm("Do you want to remove the container?", "Done", "containers", func() {
 		g.startTask(fmt.Sprintf("remove container %s", container.Name), func(ctx context.Context) error {
 			if err := docker.Client.RemoveContainer(container.ID); err != nil {
 				common.Logger.Errorf("cannot remove the container %s", err)
@@ -385,7 +347,7 @@ func (g *Gui) removeContainer() {
 func (g *Gui) removeVolume() {
 	volume := g.selectedVolume()
 
-	g.message("Do you want to remove the volume?", "Done", "volumes", func() {
+	g.confirm("Do you want to remove the volume?", "Done", "volumes", func() {
 		g.startTask(fmt.Sprintf("remove volume %s", volume.Name), func(ctx context.Context) error {
 			if err := docker.Client.RemoveVolume(volume.Name); err != nil {
 				common.Logger.Errorf("cannot remove the volume %s", err)
@@ -400,7 +362,7 @@ func (g *Gui) removeVolume() {
 func (g *Gui) removeNetwork() {
 	network := g.selectedNetwork()
 
-	g.message("Do you want to remove the network?", "Done", "networks", func() {
+	g.confirm("Do you want to remove the network?", "Done", "networks", func() {
 		g.startTask(fmt.Sprintf("remove network %s", network.Name), func(ctx context.Context) error {
 			if err := docker.Client.RemoveNetwork(network.ID); err != nil {
 				common.Logger.Errorf("cannot remove the netowrk %s", err)

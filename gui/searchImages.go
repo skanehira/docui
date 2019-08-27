@@ -43,6 +43,10 @@ func newSearchInputField(g *Gui) {
 
 	searchInput.SetDoneFunc(func(key tcell.Key) {
 		if key == tcell.KeyEnter {
+			if searchInput.GetText() == "" {
+				g.message("please input some text", "OK", g.currentPanel().name(), func() {})
+				return
+			}
 			g.pages.AddAndSwitchToPage("searchImageResults", g.modal(newSearchImageResults(g, searchInput.GetText()), 100, 50), true).ShowPage("main")
 		}
 	})
@@ -55,11 +59,6 @@ func newSearchInputField(g *Gui) {
 	searchInput.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		switch event.Key() {
 		case tcell.KeyEsc:
-			closeSearchInput()
-		}
-
-		switch event.Rune() {
-		case 'q':
 			closeSearchInput()
 		}
 
