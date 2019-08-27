@@ -228,7 +228,7 @@ func (d *Docker) AttachExecContainer(id, cmd string) error {
 
 	// TODO remove this when tcell issue #194 is fixed
 	if err := common.SendExtraEventFix(); err != nil {
-		return err
+		common.Logger.Error(err)
 	}
 
 	if err := <-errCh; err != nil {
