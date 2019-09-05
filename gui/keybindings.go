@@ -603,11 +603,6 @@ func (g *Gui) attachContainer(container, cmd string) {
 			common.Logger.Errorf("cannot attach container %s", err)
 		}
 
-		// TODO remove this when tcell issue #194 is fixed
-		if err := common.SendExtraEventFix(); err != nil {
-			common.Logger.Errorf("cannot send extran key event: %s", err)
-		}
-
 		g.startMonitoring()
 	}) {
 		common.Logger.Error("cannot suspend tview")

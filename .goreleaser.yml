@@ -2,7 +2,7 @@ project_name: docui
 
 builds:
   - env:
-    - CGO_ENABLED=1
+    - CGO_ENABLED=0
     - GO111MODULE=on
 
 archives:
