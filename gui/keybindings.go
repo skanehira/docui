@@ -415,7 +415,7 @@ func (g *Gui) exportContainerForm() {
 		AddInputField("Container", container.Name, inputWidth, nil, nil).
 		AddButton("Create", func() {
 			path := form.GetFormItemByLabel("Path").(*tview.InputField).GetText()
-			container := form.GetFormItemByLabel("container").(*tview.InputField).GetText()
+			container := form.GetFormItemByLabel("Container").(*tview.InputField).GetText()
 
 			g.exportContainer(path, container)
 		}).
