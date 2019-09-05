@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"fmt"
 	"os"
 
 	"github.com/skanehira/docui/common"
@@ -19,8 +21,14 @@ var (
 )
 
 func run() int {
-	docker.NewDocker(docker.NewClientConfig(*endpoint, *cert, *key, *ca, *api))
 	common.NewLogger(*logLevel)
+
+	docker.NewDocker(docker.NewClientConfig(*endpoint, *cert, *key, *ca, *api))
+	if _, err := docker.Client.Info(context.TODO()); err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		return 1
+	}
+
 	gui := gui.New()
 
 	if err := gui.Start(); err != nil {
