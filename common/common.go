@@ -6,16 +6,13 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
-	"reflect"
 	"sort"
-	"strconv"
 	"strings"
 	"syscall"
 	"time"
 	"unsafe"
 
 	"github.com/docker/docker/api/types"
-	"github.com/jroimartin/gocui"
 )
 
 var cutNewlineReplacer = strings.NewReplacer("\r", "", "\n", "")
@@ -47,79 +44,6 @@ func GetOSenv(env string) string {
 	}
 
 	return env
-}
-
-// OutputFormattedLine print formatted panel info.
-func OutputFormattedLine(v *gocui.View, i interface{}) {
-
-	elem := reflect.ValueOf(i).Elem()
-	size := elem.NumField()
-
-	maxX, _ := v.Size()
-
-	// column width
-	cw := (maxX - 10)
-
-	// parse format string length
-	parseLength := func(cw int, str string) (int, int) {
-		minMax := strings.Split(str, " ")
-
-		if len(minMax) < 2 {
-			return -1, -1
-		}
-
-		min, _ := strconv.ParseFloat(strings.Split(minMax[0], ":")[1], 64)
-		max, _ := strconv.ParseFloat(strings.Split(minMax[1], ":")[1], 64)
-		return int(float64(cw) * min), int(float64(cw) * max)
-	}
-
-	for i := 0; i < size; i++ {
-		value, ok := elem.Field(i).Interface().(string)
-		if !ok {
-			continue
-		}
-		max, min := parseLength(cw, elem.Type().Field(i).Tag.Get("len"))
-
-		// skip if can not get the tag
-		if max == -1 && min == -1 {
-			continue
-		}
-
-		if max < min {
-			max = min
-		}
-
-		if len(value) > max {
-			if max-3 > 0 {
-				value = value[:max-3] + "..."
-			}
-			if max-3 < 1 {
-				value = value[:1]
-			}
-		}
-
-		fmt.Fprintf(v, "%-"+strconv.Itoa(max)+"s ", value)
-	}
-
-	fmt.Fprint(v, "\n")
-}
-
-// OutputFormattedHeader print formatted panel header.
-func OutputFormattedHeader(v *gocui.View, i interface{}) {
-	elem := reflect.ValueOf(i).Elem()
-	size := elem.NumField()
-
-	for i := 0; i < size; i++ {
-		field := elem.Type().Field(i)
-		tag := field.Tag.Get("tag")
-		name := field.Name
-
-		if field.Type.Kind() == reflect.String {
-			elem.FieldByName(name).SetString(tag)
-		}
-	}
-
-	OutputFormattedLine(v, i)
 }
 
 // ParseDateToString parse date to string.
@@ -222,12 +146,4 @@ func IsTerminalWindowSizeThanZero() bool {
 			}
 		}
 	}
-}
-
-// IsValidPanelSize checks if a panel size is valid.
-func IsValidPanelSize(x, y, w, h int) error {
-	if x >= w || y >= h {
-		return ErrSmallTerminalWindowSize
-	}
-	return nil
 }
