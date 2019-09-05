@@ -13,12 +13,9 @@ require (
 	github.com/gogo/protobuf v1.2.0 // indirect
 	github.com/google/go-cmp v0.2.0 // indirect
 	github.com/gorilla/mux v1.7.0 // indirect
-	github.com/jroimartin/gocui v0.4.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/lucasb-eyer/go-colorful v1.0.1 // indirect
-	github.com/micmonay/keybd_event v0.0.0-20190804163414-202c5b2c8150
 	github.com/mitchellh/go-homedir v1.1.0
-	github.com/nsf/termbox-go v0.0.0-20190121233118-02980233997d // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
 	github.com/pkg/errors v0.8.1 // indirect
@@ -34,3 +31,5 @@ require (
 	google.golang.org/grpc v1.18.0 // indirect
 	gotest.tools v2.2.0+incompatible // indirect
 )
+
+go 1.13
