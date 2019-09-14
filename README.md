@@ -102,9 +102,8 @@ $ GO111MODULE=on go install
 ```
 
 ## Log file
-```sh
-$HOME/docui.log
-```
+
+Check [wiki](https://github.com/skanehira/docui/blob/master/wiki.md).
 
 ## Use on Docker
 ```
