@@ -17,7 +17,7 @@ var (
 	key      = flag.String("key", "", "key.pem file path")
 	ca       = flag.String("ca", "", "ca.pem file path")
 	api      = flag.String("api", "1.39", "api version")
-	logFile = flag.String("log", "", "log file path")
+	logFile  = flag.String("log", "", "log file path")
 	logLevel = flag.String("log-level", "info", "log level")
 )
 
