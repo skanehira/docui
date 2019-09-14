@@ -17,11 +17,12 @@ var (
 	key      = flag.String("key", "", "key.pem file path")
 	ca       = flag.String("ca", "", "ca.pem file path")
 	api      = flag.String("api", "1.39", "api version")
-	logLevel = flag.String("log", "info", "log level")
+	logFile = flag.String("log", "", "log file path")
+	logLevel = flag.String("log-level", "info", "log level")
 )
 
 func run() int {
-	common.NewLogger(*logLevel)
+	common.NewLogger(*logLevel, *logFile)
 
 	docker.NewDocker(docker.NewClientConfig(*endpoint, *cert, *key, *ca, *api))
 	if _, err := docker.Client.Info(context.TODO()); err != nil {

@@ -1,11 +1,11 @@
 package common
 
 import (
-	"os"
-	"path/filepath"
+    "os"
+    "io"
+    "io/ioutil"
 
-	homedir "github.com/mitchellh/go-homedir"
-	log "github.com/sirupsen/logrus"
+    log "github.com/sirupsen/logrus"
 )
 
 // Logger logger
@@ -13,38 +13,38 @@ var Logger *logger
 
 // Logger logger.
 type logger struct {
-	*os.File
-	*log.Logger
+    io.Writer
+    *log.Logger
 }
 
 // NewLogger create new logger.
-func NewLogger(logLevel string) {
-	level, err := log.ParseLevel(logLevel)
-	if err != nil {
-		panic(err)
-	}
+func NewLogger(logLevel string, logFileName string) {
+    level, err := log.ParseLevel(logLevel)
+    if err != nil {
+        panic(err)
+    }
 
-	home, err := homedir.Dir()
-	if err != nil {
-		panic(err)
-	}
+    var logWriter io.Writer
 
-	logFile, err := os.OpenFile(filepath.Join(home, "docui.log"), os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+    if logFileName == "" {
+        logWriter = ioutil.Discard
+    } else {
+        logWriter, err = os.OpenFile(logFileName, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
+        if err != nil {
+            panic(err)
+        }
+    }
 
-	if err != nil {
-		panic(err)
-	}
+    log.SetFormatter(&log.TextFormatter{
+        DisableColors: true,
+        FullTimestamp: true,
+    })
+    log.SetLevel(level)
+    log.SetOutput(logWriter)
+    log.SetReportCaller(true)
 
-	log.SetFormatter(&log.TextFormatter{
-		DisableColors: true,
-		FullTimestamp: true,
-	})
-	log.SetOutput(logFile)
-	log.SetLevel(level)
-	log.SetReportCaller(true)
-
-	Logger = &logger{
-		File:   logFile,
-		Logger: log.StandardLogger(),
-	}
+    Logger = &logger{
+        Writer:   logWriter,
+        Logger: log.StandardLogger(),
+    }
 }

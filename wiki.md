@@ -262,6 +262,8 @@ Usage of docui:
   -key string
         key.pem file path
   -log string
+        log file path
+  -log-level string
         log level (default "info")
 ```
 
