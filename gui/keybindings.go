@@ -365,7 +365,7 @@ func (g *Gui) removeNetwork() {
 	g.confirm("Do you want to remove the network?", "Done", "networks", func() {
 		g.startTask(fmt.Sprintf("remove network %s", network.Name), func(ctx context.Context) error {
 			if err := docker.Client.RemoveNetwork(network.ID); err != nil {
-				common.Logger.Errorf("cannot remove the netowrk %s", err)
+				common.Logger.Errorf("cannot remove the network %s", err)
 				return err
 			}
 			g.networkPanel().updateEntries(g)
