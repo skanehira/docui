@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -670,8 +671,11 @@ func (g *Gui) tailContainerLog() {
 		signal.Notify(sigint, os.Interrupt)
 		errCh := make(chan error)
 
+		var reader io.ReadCloser
+		var err error
+
 		go func() {
-			reader, err := docker.Client.ContainerLogStream(container.ID)
+			reader, err = docker.Client.ContainerLogStream(container.ID)
 			if err != nil {
 				common.Logger.Error(err)
 				errCh <- err
@@ -689,8 +693,10 @@ func (g *Gui) tailContainerLog() {
 		select {
 		case err := <-errCh:
 			common.Logger.Error(err)
+			reader.Close()
 			return
 		case <-sigint:
+			reader.Close()
 			return
 		}
 	}) {
