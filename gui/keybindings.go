@@ -202,7 +202,7 @@ func (g *Gui) pullImage(image, closePanel, switchPanel string) {
 		g.closeAndSwitchPanel(closePanel, switchPanel)
 		err := docker.Client.PullImage(image)
 		if err != nil {
-			common.Logger.Errorf("cannot create container %s", err)
+			common.Logger.Errorf("cannot pull an image %s", err)
 			return err
 		}
 
