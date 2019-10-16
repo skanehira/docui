@@ -100,12 +100,14 @@ LOOP:
 	for {
 		select {
 		case task := <-g.taskPanel().tasks:
-			if err := task.Func(task.Ctx); err != nil {
-				task.Status = err.Error()
-			} else {
-				task.Status = success
-			}
-			g.updateTask(task)
+			go func() {
+				if err := task.Func(task.Ctx); err != nil {
+					task.Status = err.Error()
+				} else {
+					task.Status = success
+				}
+				g.updateTask()
+			}()
 		case <-g.state.stopChans["task"]:
 			common.Logger.Info("stop monitoring task")
 			break LOOP
@@ -126,7 +128,7 @@ func (g *Gui) startTask(taskName string, f func(ctx context.Context) error) {
 	}
 
 	g.state.resources.tasks = append(g.state.resources.tasks, task)
-	g.updateTask(task)
+	g.updateTask()
 	g.taskPanel().tasks <- task
 }
 
@@ -138,11 +140,11 @@ func (g *Gui) cancelTask() {
 	if task.Status == executing {
 		task.Cancel()
 		task.Status = cancel
-		g.updateTask(task)
+		g.updateTask()
 	}
 }
 
-func (g *Gui) updateTask(task *task) {
+func (g *Gui) updateTask() {
 	g.app.QueueUpdateDraw(func() {
 		g.taskPanel().setEntries(g)
 	})
@@ -216,6 +218,7 @@ func (g *Gui) Start() error {
 
 // Stop stop application
 func (g *Gui) Stop() error {
+	if g.taskPane
 	g.stopMonitoring()
 	g.app.Stop()
 	return nil
