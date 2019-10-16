@@ -218,7 +218,6 @@ func (g *Gui) Start() error {
 
 // Stop stop application
 func (g *Gui) Stop() error {
-	if g.taskPane
 	g.stopMonitoring()
 	g.app.Stop()
 	return nil
