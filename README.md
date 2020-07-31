@@ -10,7 +10,7 @@
 ![demo](https://github.com/skanehira/docui/blob/images/images/docui.v2-demo.gif?raw=true)
 
 docui is a TUI Client for Docker.
-It's can do the following:
+It can do the following:
 
 - image
     - search/pull/remove
