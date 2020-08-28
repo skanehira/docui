@@ -1,10 +1,10 @@
 package docker
 
 import (
-	"bufio"
 	"context"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 
 	"github.com/docker/docker/api/types"
@@ -31,12 +31,8 @@ func (d *Docker) PullImage(name string) error {
 		return err
 	}
 
-	// wait until pull is completed
-	scanner := bufio.NewScanner(resp)
-	for scanner.Scan() {
-	}
-
-	if err := scanner.Err(); err != nil {
+	_, err = io.Copy(ioutil.Discard, resp)
+	if err != nil {
 		return err
 	}
 
