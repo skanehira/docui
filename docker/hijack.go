@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"runtime"
 	"sync"
 
 	"github.com/docker/docker/api/types"
@@ -178,9 +177,5 @@ func setRawTerminal(streams Streams) error {
 func restoreTerminal(streams Streams, in io.Closer) error {
 	streams.In().RestoreTerminal()
 	streams.Out().RestoreTerminal()
-
-	if in != nil && runtime.GOOS != "darwin" && runtime.GOOS != "windows" {
-		return in.Close()
-	}
 	return nil
 }
