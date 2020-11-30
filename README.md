@@ -181,3 +181,4 @@ For details of the input panel please refer to [wiki](https://github.com/skanehi
 A simple terminal UI for both docker and docker-compose, written in Go with the gocui library.
 - [docker.vim](https://github.com/skanehira/docker.vim)
 Manage docker containers and images in Vim
+- See [Awesome Docker list](https://github.com/veggiemonk/awesome-docker/blob/master/README.md#terminal) for similar tools to work with Docker.
