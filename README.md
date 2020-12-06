@@ -80,7 +80,6 @@ export PATH=$PATH:$GOPATH/bin
 ### Homebrew
 
 ```sh
-$ brew tap skanehira/docui
 $ brew install docui
 ```
 
