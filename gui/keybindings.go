@@ -155,7 +155,7 @@ func (g *Gui) createContainer(form *tview.Form, image string) {
 
 		_, volumeType := form.GetFormItemByLabel("VolumeType").(*tview.DropDown).
 			GetCurrentOption()
-		data["VolymeType"] = volumeType
+		data["VolumeType"] = volumeType
 
 		isAttach := form.GetFormItemByLabel("Attach").(*tview.Checkbox).IsChecked()
 
