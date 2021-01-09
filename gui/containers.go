@@ -51,6 +51,8 @@ func (c *containers) setKeybinding(g *Gui) {
 			g.attachContainerForm()
 		case tcell.KeyCtrlL:
 			g.tailContainerLog()
+		case tcell.KeyCtrlK:
+			g.killContainer()
 		case tcell.KeyCtrlR:
 			c.setEntries(g)
 		}

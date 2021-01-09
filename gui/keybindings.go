@@ -703,3 +703,22 @@ func (g *Gui) tailContainerLog() {
 		common.Logger.Error("cannot suspend tview")
 	}
 }
+
+func (g *Gui) killContainer() {
+	container := g.selectedContainer()
+	if container == nil {
+		common.Logger.Errorf("cannot kill container: selected container is null")
+		return
+	}
+
+	g.confirm("Do you want to kill the container?", "Done", "containers", func() {
+		g.startTask(fmt.Sprintf("kill container %s", container.Name), func(ctx context.Context) error {
+			if err := docker.Client.KillContainer(container.ID); err != nil {
+				common.Logger.Errorf("cannot kill the container %s", err)
+				return err
+			}
+			g.containerPanel().updateEntries(g)
+			return nil
+		})
+	})
+}

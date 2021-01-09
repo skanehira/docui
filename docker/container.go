@@ -135,6 +135,11 @@ func (d *Docker) RemoveContainer(name string) error {
 	return d.ContainerRemove(context.TODO(), name, types.ContainerRemoveOptions{})
 }
 
+// KillContainer kill container
+func (d *Docker) KillContainer(name string) error {
+	return d.ContainerKill(context.TODO(), name, "KILL")
+}
+
 // RenameContainer rename container
 func (d *Docker) RenameContainer(id, newName string) error {
 	return d.ContainerRename(context.TODO(), id, newName)

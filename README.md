@@ -19,7 +19,7 @@ It can do the following:
 
 - container
     - create/remove
-    - start/stop
+    - start/stop/kill
     - export/commit
     - inspect/rename/filtering
     - exec cmd
@@ -139,6 +139,7 @@ $ make docker-build
 | container list   | remove container       | <kbd>d</kbd>                                       |
 | container list   | start container        | <kbd>u</kbd>                                       |
 | container list   | stop container         | <kbd>s</kbd>                                       |
+| container list   | kill container         | <kbd>Ctrl</kbd> + <kbd>k</kbd>                     |
 | container list   | export container       | <kbd>e</kbd>                                       |
 | container list   | commit container       | <kbd>c</kbd>                                       |
 | container list   | rename container       | <kbd>r</kbd>                                       |
