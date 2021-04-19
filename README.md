@@ -91,6 +91,16 @@ docui is available on nixpkgs unstable channel:
 $ nix-env -i docui
 ```
 
+### ArchLinux 
+docui is available on AUR(Arch User Repository):
+```sh
+$ paru -S docui-bin
+```
+or
+```sh
+$ paru -S docui-git
+```
+
 ## Update
 
 Use git pull:
