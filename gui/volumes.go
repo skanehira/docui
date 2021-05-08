@@ -4,7 +4,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 	"github.com/skanehira/docui/common"
 	"github.com/skanehira/docui/docker"

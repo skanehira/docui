@@ -145,7 +145,7 @@ func (g *Gui) cancelTask() {
 }
 
 func (g *Gui) updateTask() {
-	g.app.QueueUpdateDraw(func() {
+	go g.app.QueueUpdateDraw(func() {
 		g.taskPanel().setEntries(g)
 	})
 }
