@@ -4,19 +4,15 @@ import (
 	"context"
 	"io"
 	"os"
-	gosignal "os/signal"
-	"runtime"
 	"strings"
-	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/mount"
 	"github.com/docker/docker/api/types/network"
-	"github.com/docker/docker/pkg/signal"
 	"github.com/docker/go-connections/nat"
 	"github.com/skanehira/docui/common"
-	"github.com/skanehira/docui/docker/streams"
+	"github.com/skanehira/docui/docker/streamer"
 )
 
 // CreateContainerOptions create container options
@@ -203,92 +199,15 @@ func (d *Docker) AttachExecContainer(id, cmd string) error {
 		common.Logger.Error(err)
 		return err
 	}
-
 	defer resp.Close()
 
-	errCh := make(chan error)
-	std := streams.NewStd()
-
-	go func() {
-		defer close(errCh)
-		errCh <- func() error {
-			streamer := hijackedIOStreamer{
-				streams:      std,
-				inputStream:  std.In(),
-				outputStream: std.Out(),
-				errorStream:  std.Err(),
-				resp:         resp,
-				tty:          true,
-			}
-
-			return streamer.stream(ctx)
-		}()
-	}()
-
-	if std.In().IsTerminal() {
-		if err := monitorTtySize(ctx, d, std, exec.ID, true); err != nil {
-			return err
-		}
+	f := func(ctx context.Context, id string, options types.ResizeOptions) error {
+		return d.ContainerExecResize(ctx, id, options)
 	}
 
-	if err := <-errCh; err != nil {
+	s := streamer.New()
+	if err := s.Stream(ctx, exec.ID, resp, streamer.ResizeContainer(f)); err != nil {
 		return err
-	}
-	return nil
-}
-
-func resizeTtyTo(ctx context.Context, docker *Docker, id string, height, width uint, isExec bool) {
-	if height == 0 && width == 0 {
-		return
-	}
-
-	options := types.ResizeOptions{
-		Height: height,
-		Width:  width,
-	}
-
-	var err error
-	if isExec {
-		err = docker.ContainerExecResize(ctx, id, options)
-	} else {
-		err = docker.ContainerResize(ctx, id, options)
-	}
-
-	if err != nil {
-		// output error log
-	}
-}
-
-func monitorTtySize(ctx context.Context, docker *Docker, std *streams.Std, id string, isExec bool) error {
-	resizeTty := func() {
-		height, width := std.Out().GetTtySize()
-		resizeTtyTo(ctx, docker, id, height, width, isExec)
-	}
-
-	resizeTty()
-
-	if runtime.GOOS == "windows" {
-		go func() {
-			prevH, prevW := std.Out().GetTtySize()
-			for {
-				time.Sleep(time.Millisecond * 250)
-				h, w := std.Out().GetTtySize()
-
-				if prevW != w || prevH != h {
-					resizeTty()
-				}
-				prevH = h
-				prevW = w
-			}
-		}()
-	} else {
-		sigchan := make(chan os.Signal, 1)
-		gosignal.Notify(sigchan, signal.SIGWINCH)
-		go func() {
-			for range sigchan {
-				resizeTty()
-			}
-		}()
 	}
 	return nil
 }
