@@ -15,6 +15,7 @@ require (
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
+	github.com/pkg/browser v0.0.0-20201207095918-0426ae3fba23
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/rivo/tview v0.0.0-20210312174852-ae9464cc3598
 	github.com/sirupsen/logrus v1.4.1
