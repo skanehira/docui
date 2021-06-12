@@ -12,6 +12,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/pkg/stdcopy"
 	"github.com/gdamore/tcell/v2"
+	"github.com/pkg/browser"
 	"github.com/rivo/tview"
 	"github.com/skanehira/docui/common"
 	"github.com/skanehira/docui/docker"
@@ -562,6 +563,15 @@ func (g *Gui) commitContainerForm() {
 		})
 
 	g.pages.AddAndSwitchToPage("form", g.modal(form, 80, 11), true).ShowPage("main")
+}
+
+func (g *Gui) openBrowser() {
+	container := g.selectedContainer()
+	if container.WebPort == "" {
+		return
+	}
+	link := "http://" + container.WebPort
+	browser.OpenURL(link)
 }
 
 func (g *Gui) commitContainer(repo, tag, container string) {

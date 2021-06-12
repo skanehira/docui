@@ -71,6 +71,21 @@ func ParsePortToString(ports []types.Port) string {
 	return port
 }
 
+// WebPort : first published ip and port is assumed to be a http port that can be opened in browser
+func WebPort(ports []types.Port) string {
+	for _, p := range ports {
+		if p.PublicPort != 0  {
+			publishedIp := p.IP
+			if publishedIp == "0.0.0.0" {
+				publishedIp = "localhost"
+			}
+			publishedWebPort := fmt.Sprintf("%s:%d", publishedIp, p.PublicPort)
+			return publishedWebPort
+		}
+	}
+	return ""
+}
+
 // ParseRepoTag parse image repo and tag.
 func ParseRepoTag(repoTag string) (string, string) {
 	tmp := strings.Split(repoTag, ":")
