@@ -171,7 +171,7 @@ func (s *searchImageResults) setEntries(g *Gui) {
 }
 
 func (s *searchImageResults) updateEntries(g *Gui) {
-	g.app.QueueUpdateDraw(func() {
+	go g.app.QueueUpdateDraw(func() {
 		s.setEntries(g)
 	})
 }

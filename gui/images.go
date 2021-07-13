@@ -149,7 +149,7 @@ func (i *images) setEntries(g *Gui) {
 }
 
 func (i *images) updateEntries(g *Gui) {
-	g.app.QueueUpdateDraw(func() {
+	go g.app.QueueUpdateDraw(func() {
 		i.setEntries(g)
 	})
 }

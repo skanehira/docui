@@ -167,7 +167,7 @@ func (c *containers) unfocus() {
 }
 
 func (c *containers) updateEntries(g *Gui) {
-	g.app.QueueUpdateDraw(func() {
+	go g.app.QueueUpdateDraw(func() {
 		c.setEntries(g)
 	})
 }

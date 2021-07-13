@@ -172,7 +172,7 @@ func (g *Gui) createContainer(form *tview.Form, image string) {
 		}
 
 		g.closeAndSwitchPanel("form", "images")
-		g.app.QueueUpdateDraw(func() {
+		go g.app.QueueUpdateDraw(func() {
 			g.containerPanel().setEntries(g)
 		})
 
@@ -651,7 +651,7 @@ func (g *Gui) createVolume(form *tview.Form) {
 		}
 
 		g.closeAndSwitchPanel("form", "volumes")
-		g.app.QueueUpdateDraw(func() {
+		go g.app.QueueUpdateDraw(func() {
 			g.volumePanel().setEntries(g)
 		})
 

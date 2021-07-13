@@ -147,7 +147,7 @@ func (v *volumes) unfocus() {
 }
 
 func (v *volumes) updateEntries(g *Gui) {
-	g.app.QueueUpdateDraw(func() {
+	go g.app.QueueUpdateDraw(func() {
 		v.setEntries(g)
 	})
 }

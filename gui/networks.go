@@ -166,7 +166,7 @@ func (n *networks) unfocus() {
 }
 
 func (n *networks) updateEntries(g *Gui) {
-	g.app.QueueUpdateDraw(func() {
+	go g.app.QueueUpdateDraw(func() {
 		n.setEntries(g)
 	})
 }
