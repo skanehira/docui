@@ -7,10 +7,7 @@ import (
 	"log"
 	"os"
 	"sync"
-	"syscall"
 	"time"
-
-	"os/signal"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/pkg/term"
@@ -179,15 +176,4 @@ func (s *Streamer) initTtySize(ctx context.Context, resize ResizeContainer, id s
 			}
 		}()
 	}
-}
-
-func (s *Streamer) monitorTtySize(ctx context.Context, resize ResizeContainer, id string) {
-	s.initTtySize(ctx, resize, id)
-	sigchan := make(chan os.Signal, 1)
-	signal.Notify(sigchan, syscall.SIGWINCH)
-	go func() {
-		for range sigchan {
-			s.resizeTty(ctx, resize, id)
-		}
-	}()
 }
