@@ -18,6 +18,7 @@ type container struct {
 	Status  string
 	Created string
 	Port    string
+	WebPort string
 }
 
 type containers struct {
@@ -70,6 +71,8 @@ func (c *containers) setKeybinding(g *Gui) {
 			g.exportContainerForm()
 		case 'c':
 			g.commitContainerForm()
+		case 'w':
+			g.openBrowser()
 		}
 
 		return event
@@ -96,6 +99,7 @@ func (c *containers) entries(g *Gui) {
 			Status:  con.Status,
 			Created: common.ParseDateToString(con.Created),
 			Port:    common.ParsePortToString(con.Ports),
+			WebPort: common.WebPort(con.Ports),
 		})
 	}
 }

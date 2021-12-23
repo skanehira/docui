@@ -16,6 +16,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.13
 	github.com/opencontainers/go-digest v1.0.0-rc1 // indirect
 	github.com/opencontainers/image-spec v1.0.1 // indirect
+	github.com/pkg/browser v0.0.0-20201207095918-0426ae3fba23
 	github.com/pkg/errors v0.8.1 // indirect
 	github.com/rivo/tview v0.0.0-20211109175620-badfa0f0b301
 	github.com/sirupsen/logrus v1.4.1
