@@ -6,6 +6,8 @@
 ![GitHub All Releases](https://img.shields.io/github/downloads/skanehira/docui/total.svg?style=flat)
 ![GitHub commits](https://img.shields.io/github/commits-since/skanehira/docui/1.0.0.svg?style=flat-square)
 
+# This repository is no longer maintenance. Please use [lazydocker](https://github.com/jesseduffield/lazydocker) instead.
+
 ## About docui
 ![demo](https://github.com/skanehira/docui/blob/images/images/docui.v2-demo.gif?raw=true)
 
